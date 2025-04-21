@@ -9,5 +9,8 @@ wheels/
 # venv
 .venv
 
+# pycharm
+.idea/
+
 # misc space for stuff not in VCS
-/scratch/
+scratch/
