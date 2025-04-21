@@ -1,0 +1,29 @@
+{
+  "name": "spiced-ham",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write -- .",
+    "lint": "prettier --check -- .",
+    "typecheck": "tsc --noEmit",
+    "dev": "wrangler dev"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "printWidth": 119,
+    "bracketSpacing": true,
+    "plugins": [
+      "prettier-plugin-toml"
+    ]
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250204.0",
+    "prettier": "^3.5.1",
+    "prettier-plugin-toml": "^2.0.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^3.109.0"
+  }
+}

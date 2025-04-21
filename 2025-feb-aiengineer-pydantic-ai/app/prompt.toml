@@ -1,0 +1,120 @@
+prompt = """
+Analyse an email to determine if it is likely to be interesting to me.
+
+If the email looks interesting, return "EmailOk" with a reason.
+
+IF the email does not look interesting, return "EmailReply", write a reply asking the user for more information.
+
+Reply asking for more info, if the email:
+* is offering outbound sales services, e.g. getting me meetings or clients.
+* incorrectly assumes we offer "data validation services".
+* appears to be written by an LLM/AI model.
+
+If the email is part of a thread, and the sender has replied to your specific questions, let it through, otherwise
+query them again.
+
+You should always sign your emails as "Samuel's personal spiced ham judge.".
+
+You should include a link to this youtube video for context: https://youtu.be/anwy2MPT5RE?feature=shared
+
+Reply as markdown, remain polite, but be clear about what is required.
+"""
+
+[[examples]]
+subject = "opportunity?"
+body = """
+Hi Samuel,
+
+We have the ability to track software companies showing clear buying signals for data validation -- particularly companies companies launching new data-centric applications or expanding data validation engineering teams.
+
+We can drive introductions and assist in closing deals by becoming an extension of your team to create and execute an outbound sales strategy.
+
+I'm happy to chat or send more info if relevant.
+
+All the best,
+
+Kevin
+Founder -- Jump Partners
+"""
+response = "EmailReply"
+
+[[examples]]
+subject = "Re: Animated Explainer for Pydantic?"
+body = """
+Hi Samuel,
+Hope this email finds you well. Following up on my previous message about the animated explainer video for Pydantic. Let's discuss how an animated explainer video can redefine Pydantic's narrative. It could be an explainer video explaining your service or product.
+
+Check out our portfolio https://10.studio/portfolio/.
+
+Looking forward to hearing from you.
+
+Best,
+10 Studio https://10.studio/
+
+On Sun, January 19, 2025 3:00 PM, Lunia Parse <lunia@your10studio.com>
+[james@your10studio.com]> wrote:
+
+> Hi Samuel,
+> Was looking at Pydantic and was really intrigued with how you simplify data validation effortlessly. Great job!
+>
+> An animated explainer video can effectively demonstrate the simplicity and efficiency of Pydantic's data validation process, attracting more users to the platform.
+>
+> Mind if I send over some example videos?
+>
+> Thanks,
+> James
+> 10 Studio
+"""
+response = "EmailReply"
+
+[[examples]]
+subject = "Accelerate AI Adoption with Proven Governance Solutions"
+body = """
+Hi Samuel,
+
+Following up on AI implementation strategies - your pioneering work with Pydantic has revolutionized data validation, making you uniquely positioned to lead in AI governance.
+
+Organizations with structured AI governance frameworks see 40% better adoption rates, while maintaining the agility that software development teams need.
+
+Our template provides ready-to-implement protocols that help founders like you scale AI initiatives while ensuring proper controls - essential for Pydantic's continued innovation.
+
+Secure your competitive advantage with industry-leading governance standards.
+
+Download your AI Policy Template
+https://info.whitehat-seo.co.uk/ai-policy-template
+
+
+Clwyd Welsh
+CEO
+Whitehat Inbound Marketing
+"""
+response = "EmailReply"
+
+[[examples]]
+subject = "Sponsoring Pydantic"
+body = """
+Hey Samuel,
+
+James, VP of DevRel at Sausage and a long-time fan of your OSS work,
+
+As a company that uses Pydantic extensively in its core, maintains two related library, and uses it as a core part of our OSS project,
+it was just about time to sponsor and appreciate your work, and we just started a monthly $200 sponsorship earlier today.
+
+As you requested, I'm contacting you here for instructions about what materials are needed from our side to feature us as sponsors. Please help with directions.
+
+Best,
+James
+"""
+response = "EmailOk"
+
+[[examples]]
+subject = "Meet up in SF"
+body = """
+Hi there! I am a founder, using Pydantic AI for my backend. Would love to buy you coffee if there’s a
+chance while you are here in SF or just meet up if there’s a luma type thing.
+
+Thank you for your work!
+
+David
+"""
+response = "EmailOk"
