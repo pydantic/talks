@@ -1,0 +1,4 @@
+*.py[cod]
+/.venv
+/db.sqlite3
+/static/

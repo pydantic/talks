@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <h1>{{ image.prompt }}</h1>
+  <a href="javascript:history.back()">back</a>
+  <p>
+    Animal: <b>{{ image.animal }}</b>
+  </p>
+  <p>
+    Artist: <b>{{ image.artist }}</b>
+  </p>
+  <p>
+    {% if image.file_path %}
+      <img src="{% static image.file_path %}" alt="{{ image.prompt }}">
+    {% else %}
+      <img src="{{ image.url }}" alt="{{ image.prompt }}">
+    {% endif %}
+{% endblock %}
