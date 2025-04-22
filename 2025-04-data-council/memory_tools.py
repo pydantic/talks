@@ -18,7 +18,7 @@ else:
 
 import logfire
 
-logfire.configure(service_name='memory-tools')
+logfire.configure(service_name='mem-tool')
 logfire.instrument_pydantic_ai()
 logfire.instrument_asyncpg()
 
@@ -70,18 +70,18 @@ async def retrieve_memories(ctx: RunContext[Deps]) -> str:
     return '\n'.join(row[0] for row in rows)
 
 
-async def main():
-    with logfire.span('main'):
-        async with db() as conn:
-            deps = Deps(123, conn)
-            result = await agent.run('My name is Samuel.', deps=deps)
-            print(result.output)
+@logfire.instrument
+async def memory_tools():
+    async with db() as conn:
+        deps = Deps(123, conn)
+        result = await agent.run('My name is Samuel.', deps=deps)
+        print(result.output)
 
-        async with db() as conn:
-            deps = Deps(123, conn)
-            result = await agent.run('What is my name?', deps=deps)
-            print(result.output)
+    async with db() as conn:
+        deps = Deps(123, conn)
+        result = await agent.run('What is my name?', deps=deps)
+        print(result.output)
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(memory_tools())

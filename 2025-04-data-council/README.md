@@ -188,3 +188,21 @@ async def retrieve_memories(ctx: RunContext[Deps]) -> str:
     return '\n'.join(row[0] for row in rows)
 ...
 ```
+
+We can also achieve memory by persisting message history:
+
+```py
+async def run_agent(prompt: str, user_id: int):
+    async with db() as conn:
+        with logfire.span('retrieve messages'):
+            messages: list[ModelMessage] = []
+            for row in await conn.fetch('SELECT messages FROM messages WHERE user_id = $1 order by ts', user_id):
+                messages += ModelMessagesTypeAdapter.validate_json(row[0])
+
+        result = await agent.run(prompt, message_history=messages)
+        print(result.output)
+
+        with logfire.span('record messages'):
+            msgs = result.new_messages_json().decode()
+            await conn.execute('INSERT INTO messages(user_id, messages) VALUES($1, $2)', user_id, msgs)
+```
