@@ -145,3 +145,46 @@ agent = Agent(
 result = agent.run_sync('Samuel lives in London and was born on Jan 28th 87')
 print(repr(result.output))
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## But don't Agents need tools?
+
+Here we demonstrate tools, dependencies and type safety with a tool used to record memories.
+
+```py
+...
+agent = Agent(
+    'openai:gpt-4o',
+    deps_type=Deps,
+    instructions='You are a helpful assistant.',
+)
+
+
+@agent.tool
+async def record_memory(ctx: RunContext[Deps], value: str) -> str:
+    """Use this tool to store information in memory."""
+    await ctx.deps.conn.execute(
+        'insert into memory(user_id, value) values($1, $2) on conflict do nothing', ctx.deps.user_id, value
+    )
+    return 'Value added to memory.'
+
+
+@agent.tool
+async def retrieve_memories(ctx: RunContext[Deps]) -> str:
+    """Get all memories about the user."""
+    rows = await ctx.deps.conn.fetch('select value from memory where user_id = $1', ctx.deps.user_id)
+    return '\n'.join(row[0] for row in rows)
+...
+```
