@@ -119,7 +119,7 @@ print(repr(result.output))
 
 This doesn't look much like a loop, but what if validation fails...
 
-```py title="agent_might_fail.py"
+```py title="agent_retry.py"
 from datetime import date
 from pydantic_ai import Agent
 from pydantic import BaseModel, field_validator
