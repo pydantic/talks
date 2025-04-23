@@ -6,15 +6,13 @@ logfire.configure(scrubbing=False, service_name='browse')
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 
-browser_mcp = MCPServerStdio(
-    'npx',
-    args=['-Y', '@playwright/mcp@latest']
-)
+browser_mcp = MCPServerStdio('npx', args=['-Y', '@playwright/mcp@latest'])
 
 agent = Agent(
     'anthropic:claude-3-7-sonnet-latest',
     mcp_servers=[browser_mcp],
 )
+
 
 async def main():
     async with agent.run_mcp_servers():
@@ -28,4 +26,5 @@ async def main():
 
 if __name__ == '__main__':
     import asyncio
+
     asyncio.run(main())

@@ -283,14 +283,56 @@ async def main():
 ...
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Evals
+
+Let's switch to evals, time to dive into some code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## PydanticAI is unfinished, what's next?
 
 * Structured outputs without tools
 * Lots (!!) of documentation improvements
+* end an agent run from within a tool
 * MCP sampling — client support
 * MCP sampling — server support
+* allow more control of how MCP tools are registered with the model, and run
 * `mcp-run-python` — calling back to the client/host
 * Graph changes
-* We need stability — planning to release V1 in June
+
+Most importantly:
+
+* **We need stability — planning to release V1 in June**
