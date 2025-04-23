@@ -9,9 +9,8 @@ Slides at <https://github.com/pydantic/talks>
 Pydantic:
 * Python library for data validation
 * Created Pydantic in 2017 — long before Gen AI
-* Became a company, backed by Sequoia in 2023 — released Logfire earlier this year
-* Released Pydantic V2 last year, core rewritten in Rust
-* downloaded >300M per month
+* Became a company, backed by Sequoia in 2023 — released Logfire last year
+* downloaded ~350M per month
 * Used by all of FAANG
 * Used by virtually every GenAI Python library — both provider SDKs and Agent Frameworks
 
@@ -42,10 +41,11 @@ Boring   •   Ubiquitous
   reliable, scalable applications, and that's still hard.
 
 In this workshop, we'll use **PydanticAI** & **Pydantic Logfire** to demonstrate:
-* How to build typesafe agents
+* How to build typesafe agents — important for production,
+  even more important for development
 * The power of MCP for agents
-* The importance of tracing and observability for AI Applications
 * How evals fit into the picture
+* The importance of tracing and observability for AI Applications
 
 
 
@@ -64,7 +64,7 @@ In this workshop, we'll use **PydanticAI** & **Pydantic Logfire** to demonstrate
 
 This has been widely covered, but still seems to be a subject of dispute, so I'll explain what I mean.
 
-From [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+From [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents).
 
 ![Agent loop diagram](agent-loop.png)
 
@@ -163,7 +163,7 @@ print(repr(result.output))
 
 Here we demonstrate tools, dependencies and type safety with a tool used to record memories.
 
-```py
+```py {title="memory_tools.py"}
 ...
 agent = Agent(
     'openai:gpt-4o',
@@ -191,7 +191,7 @@ async def retrieve_memories(ctx: RunContext[Deps]) -> str:
 
 We can also achieve memory by persisting message history:
 
-```py
+```py {title="memory_messages.py"}
 async def run_agent(prompt: str, user_id: int):
     async with db() as conn:
         with logfire.span('retrieve messages'):

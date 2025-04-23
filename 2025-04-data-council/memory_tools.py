@@ -24,8 +24,10 @@ logfire.instrument_asyncpg()
 
 
 @asynccontextmanager
-async def db() -> AsyncIterator[DbConn]:
+async def db(reset: bool = False) -> AsyncIterator[DbConn]:
     conn = await asyncpg.connect('postgresql://postgres@localhost:5432')
+    if reset:
+        await conn.execute('drop table if exists memory')
     await conn.execute("""
         create table if not exists memory(
             id serial primary key,
@@ -64,18 +66,22 @@ async def record_memory(ctx: RunContext[Deps], value: str) -> str:
 
 
 @agent.tool
-async def retrieve_memories(ctx: RunContext[Deps]) -> str:
+async def retrieve_memories(ctx: RunContext[Deps], memory_contains: str) -> str:
     """Get all memories about the user."""
-    rows = await ctx.deps.conn.fetch('select value from memory where user_id = $1', ctx.deps.user_id)
+    rows = await ctx.deps.conn.fetch(
+        'select value from memory where user_id = $1 and value ilike $2', ctx.deps.user_id, f'%{memory_contains}%'
+    )
     return '\n'.join(row[0] for row in rows)
 
 
 @logfire.instrument
 async def memory_tools():
-    async with db() as conn:
+    async with db(True) as conn:
         deps = Deps(123, conn)
         result = await agent.run('My name is Samuel.', deps=deps)
         print(result.output)
+
+    # time goes by...
 
     async with db() as conn:
         deps = Deps(123, conn)
