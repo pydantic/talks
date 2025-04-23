@@ -42,12 +42,6 @@ async def db() -> AsyncIterator[DbConn]:
         await conn.close()
 
 
-@dataclass
-class Deps:
-    user_id: int
-    conn: DbConn
-
-
 agent = Agent(
     'openai:gpt-4o',
     instructions='You are a helpful assistant.',
@@ -62,8 +56,9 @@ async def run_agent(prompt: str, user_id: int):
             for row in await conn.fetch('SELECT messages FROM messages WHERE user_id = $1 order by ts', user_id):
                 messages += ModelMessagesTypeAdapter.validate_json(row[0])
 
-        result = await agent.run(prompt, message_history=messages)
-        print(result.output)
+        async with agent.run_stream(prompt, message_history=messages) as stream:
+            async for message in stream.stream_text(delta=True):
+                print(message, end='', flush=True)
 
         with logfire.span('record messages'):
             msgs = result.new_messages_json().decode()
@@ -72,9 +67,9 @@ async def run_agent(prompt: str, user_id: int):
 
 @logfire.instrument
 async def memory_messages():
-    await run_agent('My name is Samuel.', 123)
+    # await run_agent('My name is Samuel.', 123)
 
-    await run_agent('What is my name?', 123)
+    await run_agent('tell me a short story', 123)
 
 
 if __name__ == '__main__':

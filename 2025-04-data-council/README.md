@@ -124,6 +124,10 @@ from datetime import date
 from pydantic_ai import Agent
 from pydantic import BaseModel, field_validator
 
+import logfire
+logfire.configure()
+logfire.instrument_pydantic_ai()
+
 class Person(BaseModel):
     """Definition of an historic person"""
     name: str
@@ -226,6 +230,11 @@ import asyncio
 
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
+
+import logfire
+logfire.configure()
+logfire.instrument_pydantic_ai()
+logfire.instrument_mcp()
 
 server = MCPServerStdio(
     'deno',
