@@ -206,3 +206,91 @@ async def run_agent(prompt: str, user_id: int):
             msgs = result.new_messages_json().decode()
             await conn.execute('INSERT INTO messages(user_id, messages) VALUES($1, $2)', user_id, msgs)
 ```
+
+
+
+
+
+
+
+
+
+
+
+## MCP
+
+Tools, are great. Model Context Protocol gives us lots of tools and LOTS more.
+
+```py {title="mcp-run-python"}
+import asyncio
+
+from pydantic_ai import Agent
+from pydantic_ai.mcp import MCPServerStdio
+
+server = MCPServerStdio(
+    'deno',
+    args=[
+        'run',
+        '-N',
+        '-R=node_modules',
+        '-W=node_modules',
+        '--node-modules-dir=auto',
+        'jsr:@pydantic/mcp-run-python',
+        'stdio',
+    ]
+)
+agent = Agent('openai:gpt-4o', mcp_servers=[server])
+
+
+async def main():
+    async with agent.run_mcp_servers():
+        result = await agent.run('How many days between 2000-01-01 and 2025-03-18?')
+    print(result.output)
+
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
+But there are lots of powerful MCP servers, including browser control:
+
+```py {title="browser_mcp.py"}
+...
+
+async def main():
+    async with agent.run_mcp_servers():
+        result = await agent.run(
+            'get the most recent blog post from pydantic.dev '
+            'which should contain multiple announcements, '
+            'summaries those annoucements as a list.'
+        )
+    print(result.output)
+
+...
+```
+
+Or using a graph...
+
+```py {title="browser_mcp_graph.py"}
+...
+
+graph = Graph(nodes=[FindBlog, FindLatestPosts, SummariesContent])
+
+async def main():
+    async with browser_agent.run_mcp_servers():
+        result = await graph.run(FindBlog(url='pydantic.dev'))
+        print(result.output)
+
+...
+```
+
+## Evals
+
+## PydanticAI is unfinished, what's next?
+
+* Structured outputs without tools
+* Lots (!!) of documentation improvements
+* MCP sampling — client support
+* MCP sampling — server support
+* `mcp-run-python` — calling back to the client/host
+* Graph changes
+* We need stability — planning to release V1 in June
