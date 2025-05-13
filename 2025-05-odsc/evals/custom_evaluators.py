@@ -9,7 +9,9 @@ from agent import TimeRangeBuilderSuccess, TimeRangeInputs, TimeRangeResponse
 
 @dataclass
 class ValidateTimeRange(Evaluator[TimeRangeInputs, TimeRangeResponse]):
-    def evaluate(self, ctx: EvaluatorContext[TimeRangeInputs, TimeRangeResponse]) -> EvaluatorOutput:
+    def evaluate(
+        self, ctx: EvaluatorContext[TimeRangeInputs, TimeRangeResponse]
+    ) -> EvaluatorOutput:
         if isinstance(ctx.output, TimeRangeBuilderSuccess):
             window_end = ctx.output.max_timestamp_with_offset
             window_size = window_end - ctx.output.min_timestamp_with_offset
@@ -23,7 +25,9 @@ class ValidateTimeRange(Evaluator[TimeRangeInputs, TimeRangeResponse]):
 
 @dataclass
 class UserMessageIsConcise(Evaluator[TimeRangeInputs, TimeRangeResponse]):
-    async def evaluate(self, ctx: EvaluatorContext[TimeRangeInputs, TimeRangeResponse]) -> EvaluatorOutput:
+    async def evaluate(
+        self, ctx: EvaluatorContext[TimeRangeInputs, TimeRangeResponse]
+    ) -> EvaluatorOutput:
         if isinstance(ctx.output, TimeRangeBuilderSuccess):
             user_facing_message = ctx.output.explanation
         else:

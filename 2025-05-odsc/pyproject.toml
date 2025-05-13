@@ -13,17 +13,11 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 120
+line-length = 88
 target-version = "py313"
 
 [tool.ruff.lint]
-extend-select = [
-    "Q",
-    "RUF100",
-    "C90",
-    "UP",
-    "I",
-]
+extend-select = ["Q", "RUF100", "C90", "UP", "I"]
 flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
 isort = { combine-as-imports = true }
 mccabe = { max-complexity = 15 }
@@ -40,13 +34,8 @@ quote-style = "single"
 pythonVersion = "3.13"
 typeCheckingMode = "strict"
 reportUnnecessaryTypeIgnoreComment = true
-include = [
-    "**/*.py",
-]
+include = ["**/*.py"]
 venvPath = ".venv"
 
 [dependency-groups]
-dev = [
-    "asyncpg-stubs>=0.30.1",
-    "ruff>=0.11.6",
-]
+dev = ["asyncpg-stubs>=0.30.1", "ruff>=0.11.6"]

@@ -18,4 +18,6 @@ with logfire.span('Comparing different models for time_range_agent'):
     with time_range_agent.override(model='openai:gpt-4o'):
         dataset.evaluate_sync(infer_time_range, name='openai:gpt-4o')
     with time_range_agent.override(model='anthropic:claude-3-7-sonnet-latest'):
-        dataset.evaluate_sync(infer_time_range, name='anthropic:claude-3-7-sonnet-latest')
+        dataset.evaluate_sync(
+            infer_time_range, name='anthropic:claude-3-7-sonnet-latest'
+        )

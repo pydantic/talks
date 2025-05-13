@@ -3,6 +3,7 @@ from __future__ import annotations as _annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from devtools import debug
 from pydantic import AwareDatetime, BaseModel
 from pydantic_ai import Agent, RunContext
 from typing_extensions import TypedDict
@@ -78,3 +79,15 @@ async def infer_time_range(inputs: TimeRangeInputs) -> TimeRangeResponse:
     """Infer a time range from a user prompt."""
     deps = TimeRangeDeps(now=inputs['now'])
     return (await time_range_agent.run(inputs['prompt'], deps=deps)).output
+
+
+if __name__ == '__main__':
+    import asyncio
+
+    response = asyncio.run(
+        infer_time_range(
+            {'prompt': '2pm yesterday', 'now': datetime.now().astimezone()}
+        )
+    )
+
+    debug(response)

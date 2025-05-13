@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import asyncpg
@@ -53,23 +52,24 @@ async def run_agent(prompt: str, user_id: int):
     async with db() as conn:
         with logfire.span('retrieve messages'):
             messages: list[ModelMessage] = []
-            for row in await conn.fetch('SELECT messages FROM messages WHERE user_id = $1 order by ts', user_id):
+            for row in await conn.fetch(
+                'SELECT messages FROM messages WHERE user_id = $1 order by ts', user_id
+            ):
                 messages += ModelMessagesTypeAdapter.validate_json(row[0])
 
-        async with agent.run_stream(prompt, message_history=messages) as stream:
-            async for message in stream.stream_text(delta=True):
-                print(message, end='', flush=True)
+        result = await agent.run(prompt, message_history=messages)
 
         with logfire.span('record messages'):
             msgs = result.new_messages_json().decode()
-            await conn.execute('INSERT INTO messages(user_id, messages) VALUES($1, $2)', user_id, msgs)
+            await conn.execute(
+                'INSERT INTO messages(user_id, messages) VALUES($1, $2)', user_id, msgs
+            )
 
 
-@logfire.instrument
 async def memory_messages():
-    # await run_agent('My name is Samuel.', 123)
+    await run_agent('My name is Samuel.', 123)
 
-    await run_agent('tell me a short story', 123)
+    await run_agent('What is my name?', 123)
 
 
 if __name__ == '__main__':

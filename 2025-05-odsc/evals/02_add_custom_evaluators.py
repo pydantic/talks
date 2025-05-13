@@ -3,13 +3,20 @@ from types import NoneType
 
 from pydantic_evals import Dataset
 
-from custom_evaluators import CUSTOM_EVALUATOR_TYPES, AgentCalledTool, UserMessageIsConcise, ValidateTimeRange
+from custom_evaluators import (
+    CUSTOM_EVALUATOR_TYPES,
+    AgentCalledTool,
+    UserMessageIsConcise,
+    ValidateTimeRange,
+)
 from agent import TimeRangeInputs, TimeRangeResponse
 
 
 def main():
     dataset_path = Path(__file__).parent / 'datasets' / 'time_range_v1.yaml'
-    dataset = Dataset[TimeRangeInputs, TimeRangeResponse, NoneType].from_file(dataset_path)
+    dataset = Dataset[TimeRangeInputs, TimeRangeResponse, NoneType].from_file(
+        dataset_path
+    )
     dataset.add_evaluator(ValidateTimeRange())
     dataset.add_evaluator(UserMessageIsConcise())
     dataset.add_evaluator(

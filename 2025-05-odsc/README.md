@@ -113,7 +113,7 @@ agent = Agent(
     output_type=Person,
     instructions='Extract information about the person',
 )
-result = agent.run_sync('Samuel lives in London and was born on Jan 28th 87')
+result = agent.run_sync("Samuel lived in London and was born on Jan 28th '87")
 print(repr(result.output))
 ```
 
@@ -125,7 +125,7 @@ from pydantic_ai import Agent
 from pydantic import BaseModel, field_validator
 
 import logfire
-logfire.configure()
+logfire.configure(service_name='agent-retry')
 logfire.instrument_pydantic_ai()
 
 class Person(BaseModel):
@@ -146,7 +146,7 @@ agent = Agent(
     output_type=Person,
     instructions='Extract information about the person',
 )
-result = agent.run_sync('Samuel lives in London and was born on Jan 28th 87')
+result = agent.run_sync("Samuel lived in London and was born on Jan 28th '87")
 print(repr(result.output))
 ```
 
@@ -232,7 +232,7 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
 import logfire
-logfire.configure()
+logfire.configure(service_name='mcp-run-python')
 logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()
 

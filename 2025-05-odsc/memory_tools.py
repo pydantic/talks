@@ -60,7 +60,9 @@ agent = Agent(
 async def record_memory(ctx: RunContext[Deps], value: str) -> str:
     """Use this tool to store information in memory."""
     await ctx.deps.conn.execute(
-        'insert into memory(user_id, value) values($1, $2) on conflict do nothing', ctx.deps.user_id, value
+        'insert into memory(user_id, value) values($1, $2) on conflict do nothing',
+        ctx.deps.user_id,
+        value,
     )
     return 'Value added to memory.'
 
@@ -69,12 +71,13 @@ async def record_memory(ctx: RunContext[Deps], value: str) -> str:
 async def retrieve_memories(ctx: RunContext[Deps], memory_contains: str) -> str:
     """Get all memories about the user."""
     rows = await ctx.deps.conn.fetch(
-        'select value from memory where user_id = $1 and value ilike $2', ctx.deps.user_id, f'%{memory_contains}%'
+        'select value from memory where user_id = $1 and value ilike $2',
+        ctx.deps.user_id,
+        f'%{memory_contains}%',
     )
     return '\n'.join(row[0] for row in rows)
 
 
-@logfire.instrument
 async def memory_tools():
     async with db(True) as conn:
         deps = Deps(123, conn)

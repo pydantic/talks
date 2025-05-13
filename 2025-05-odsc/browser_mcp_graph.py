@@ -31,7 +31,9 @@ class FindBlog(BaseNode):
     url: str
 
     async def run(self, ctx: GraphRunContext) -> FindLatestPosts:
-        result = await browser_agent.run(f'Find the page with a list of blog posts at {self.url}.')
+        result = await browser_agent.run(
+            f'Find the page with a list of blog posts at {self.url}.'
+        )
         return FindLatestPosts(result.output)
 
 
@@ -45,7 +47,8 @@ class FindLatestPosts(BaseNode):
 
 
 summary_agent = Agent(
-    'anthropic:claude-3-7-sonnet-latest', system_prompt='Summarise the content of the blog post page as markdown'
+    'anthropic:claude-3-7-sonnet-latest',
+    system_prompt='Summarise the content of the blog post page as markdown',
 )
 
 
