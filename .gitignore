@@ -14,3 +14,4 @@ wheels/
 
 # misc space for stuff not in VCS
 scratch/
+**/.DS_Store
