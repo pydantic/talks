@@ -9,13 +9,14 @@ Slides at <https://github.com/pydantic/talks>
 Pydantic:
 * Python library for data validation
 * Created Pydantic in 2017 — long before Gen AI
-* Became a company, backed by Sequoia in 2023 — released Logfire last year
 * Now downloaded ~350M per month
 * Used by all of FAANG
 * Used by virtually every GenAI Python library — both provider SDKs and Agent Frameworks
 
+* Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
+  * Pydantic Logfire (developer observability)
+  * Pydantic AI (agent framework)
 
-Boring   •   Ubiquitous
 
 
 
@@ -34,17 +35,18 @@ Boring   •   Ubiquitous
 
 ## what
 
-"Building AI Applications the Pydantic Way"
+"Building AI Applications the Pydantic way"
 
 * Everything is changing
-* ...and nothing is changed — people still want to build
-  reliable, scalable applications, and that's still hard.
+* ...except when it's not: people still want to build
+reliable, scalable applications, and that's still hard.
 
 In this talk, we'll use **PydanticAI** & **Pydantic Logfire** to demonstrate:
 * How to build typesafe agents — important for production,
   even more important for development
 * The power of MCP for autonomous agents
 * How evals fit into the picture
+
 * The importance of tracing and observability for AI Applications
 
 

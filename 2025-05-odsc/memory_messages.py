@@ -58,6 +58,7 @@ async def run_agent(prompt: str, user_id: int):
                 messages += ModelMessagesTypeAdapter.validate_json(row[0])
 
         result = await agent.run(prompt, message_history=messages)
+        print(result.output)
 
         with logfire.span('record messages'):
             msgs = result.new_messages_json().decode()

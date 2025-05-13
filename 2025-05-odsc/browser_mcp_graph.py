@@ -71,7 +71,6 @@ async def main():
 
 
 if __name__ == '__main__':
-    with open('browser.mermaid', 'w') as f:
-        f.write(graph.mermaid_code())
+    graph.mermaid_save('browser.png')
     # import asyncio
     # asyncio.run(main())
