@@ -13,11 +13,11 @@ Pydantic:
 * Used by all of FAANG
 * Used by virtually every GenAI Python library — both provider SDKs and Agent Frameworks
 
-* Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
-  * Pydantic Logfire (developer observability)
-  * Pydantic AI (agent framework)
+Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
+* Pydantic Logfire (developer observability)
+* Pydantic AI (agent framework)
 
-**Come to our booth: Logfire demo, t-shirts, prize draw**
+**Come to our booth for Logfire demo, t-shirts, prize draw**
 
 
 
@@ -36,7 +36,7 @@ Pydantic:
 
 ## what
 
-"Building AI Applications the Pydantic way"
+**Building AI Applications the Pydantic way**
 
 * Everything is changing
 * ...except when it's not: people still want to build
