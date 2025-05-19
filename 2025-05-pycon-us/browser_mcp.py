@@ -2,7 +2,7 @@ import logfire
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
-logfire.configure(scrubbing=False, service_name='browse')
+logfire.configure(scrubbing=False, service_name='browser')
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 

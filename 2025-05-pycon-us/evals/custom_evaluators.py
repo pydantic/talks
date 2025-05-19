@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from datetime import timedelta
 
+from agent import TimeRangeBuilderSuccess, TimeRangeInputs, TimeRangeResponse
 from pydantic_evals.evaluators import Evaluator, EvaluatorContext, EvaluatorOutput
 from pydantic_evals.otel import SpanQuery
-
-from agent import TimeRangeBuilderSuccess, TimeRangeInputs, TimeRangeResponse
 
 
 @dataclass
