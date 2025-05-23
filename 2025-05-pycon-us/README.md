@@ -1,4 +1,4 @@
-# Pycon US, Pittsburg, May 2025
+# Pycon US, Pittsburgh, May 2025
 
 Slides at <https://github.com/pydantic/talks>
 
