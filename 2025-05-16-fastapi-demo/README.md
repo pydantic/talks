@@ -43,3 +43,8 @@ curl -X POST "http://localhost:8000/agent/query" \
      -H "Content-Type: application/json" \
      -d '{"question": "How do I use PydanticAI tools?"}'
 ```
+
+Run evals:
+```bash
+PYTHONPATH=. uv run python tests/evals.py
+```

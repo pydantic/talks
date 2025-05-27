@@ -12,6 +12,7 @@ from src.agent import build_agent, answer_question, BotResponse
 
 logfire.configure(
     service_name='api',
+    environment='staging'
 )
 
 # FastAPI application setup

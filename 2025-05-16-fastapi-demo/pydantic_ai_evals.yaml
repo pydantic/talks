@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=pydantic_ai_evals_schema.json
+cases:
+- name: basic_agent_creation
+  inputs:
+    question: How do I create a basic PydanticAI agent?
+  metadata:
+    difficulty: easy
+    topic: agent_creation
+    expected_keywords:
+    - Agent
+    - model
+    - system_prompt
+    - pydantic_ai
+  evaluators:
+  - ConfidenceEvaluator
+  - KeywordPresenceEvaluator
+  - LLMJudge:
+      rubric: Response should clearly explain how to create a PydanticAI agent with
+        code examples
+      include_input: true
+- name: user_prompt_modification
+  inputs:
+    question: How do I change the user prompt in PydanticAI?
+  metadata:
+    difficulty: medium
+    topic: prompt_handling
+    expected_keywords:
+    - run
+    - run_sync
+    - user_prompt
+    - agent
+  evaluators:
+  - ConfidenceEvaluator
+  - KeywordPresenceEvaluator
+  - LLMJudge:
+      rubric: Response should explain how to modify user prompts with practical examples
+      include_input: true
+- name: tools_integration
+  inputs:
+    question: How do I add tools to a PydanticAI agent?
+  metadata:
+    difficulty: medium
+    topic: tools
+    expected_keywords:
+    - tools
+    - function
+    - decorator
+    - '@tool'
+  evaluators:
+  - ConfidenceEvaluator
+  - KeywordPresenceEvaluator
+  - LLMJudge:
+      rubric: Response should explain tools integration with clear examples and best
+        practices
+      include_input: true
+evaluators:
+- LLMJudge:
+    rubric: Response should be helpful, accurate, and well-structured for PydanticAI
+      documentation questions
+    model: openai:gpt-4o-mini

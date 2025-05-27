@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-ai>=0.2.9",
     "pydantic-ai-slim[tavily]>=0.2.9",
     "python-dotenv>=1.1.0",
+    "pydantic-evals>=0.2.9",
 ]
 
 [tool.ruff]
