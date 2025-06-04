@@ -43,13 +43,11 @@
 
       .slide-controls {
         position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
+        top: 20px;
+        right: 20px;
         z-index: 1000;
         display: flex;
         gap: 10px;
-        align-items: center;
       }
 
       .control-btn {
@@ -201,7 +199,6 @@
         text-align: center;
         background: white;
         border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         padding: 20px;
       }
 
@@ -241,6 +238,8 @@
 
     <script src="./static/marked.min.js"></script>
     <script>
+      const defaultFontSize = 24;
+      let currentFontSize = defaultFontSize;
       let currentSlide = 0;
       let slides = [];
 
@@ -323,15 +322,24 @@
         }
       }
 
-      // Fullscreen functionality
-      function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch((err) => {
-            console.log("Error attempting to enable fullscreen:", err);
-          });
-        } else {
-          document.exitFullscreen();
-        }
+      function increaseFontSize() {
+        currentFontSize = Math.min(currentFontSize + 2, 72);
+        updateFontSize();
+      }
+
+      function decreaseFontSize() {
+        currentFontSize = Math.max(currentFontSize - 2, 12);
+        updateFontSize();
+      }
+
+      function resetFontSize() {
+        currentFontSize = defaultFontSize;
+        updateFontSize();
+      }
+
+      function updateFontSize() {
+        const content = document.getElementById("content");
+        content.style.fontSize = currentFontSize + "px";
       }
 
       // Hide controls after 3 seconds of inactivity
@@ -350,9 +358,6 @@
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           document.exitFullscreen();
-        } else if (e.key === "F11") {
-          e.preventDefault();
-          toggleFullscreen();
         } else if (e.key === "ArrowRight" || e.key === " ") {
           e.preventDefault();
           nextSlide();
@@ -365,6 +370,17 @@
         } else if (e.key === "End") {
           e.preventDefault();
           goToSlide(slides.length - 1);
+        } else if (e.ctrlKey || e.metaKey) {
+          if (e.key === "=" || e.key === "+") {
+            e.preventDefault();
+            increaseFontSize();
+          } else if (e.key === "-") {
+            e.preventDefault();
+            decreaseFontSize();
+          } else if (e.key === "0") {
+            e.preventDefault();
+            resetFontSize();
+          }
         }
       });
 

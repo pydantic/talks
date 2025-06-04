@@ -1,6 +1,144 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340.4078895349303 179.0005859436951" width="680.8157790698606" height="358.0011718873902"><!-- svg-source:excalidraw --><metadata></metadata><defs><style class="style-fonts">
-      @font-face { font-family: Comic Shanns; src: url(data:font/woff2;base64,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); }</style></defs>
-<rect x="0" y="0" width="340.4078895349303" height="179.0005859436951" fill="white"/>
-<g stroke-linecap="round" transform="translate(10 59.496758623905635) rotate(0 58.48120902199662 29.393960449845167)"><path d="M14.7 0 C32.56 1.4, 51 -0.19, 102.27 0 M14.7 0 C39.95 0.29, 64.96 0.63, 102.27 0 M102.27 0 C110.07 -1.54, 117.01 3.82, 116.96 14.7 M102.27 0 C110.11 1.55, 114.92 2.6, 116.96 14.7 M116.96 14.7 C117.68 22.9, 118.72 26.62, 116.96 44.09 M116.96 14.7 C116.67 20.71, 117.5 27.6, 116.96 44.09 M116.96 44.09 C116.32 55.71, 112.16 57.42, 102.27 58.79 M116.96 44.09 C117.37 54.38, 110.29 58.82, 102.27 58.79 M102.27 58.79 C83.71 59.07, 67.06 58.43, 14.7 58.79 M102.27 58.79 C72.18 58.28, 41.77 59.58, 14.7 58.79 M14.7 58.79 C6.25 58.13, 1.72 52.14, 0 44.09 M14.7 58.79 C6.47 57.09, 1.02 51.79, 0 44.09 M0 44.09 C0.35 37.13, -0.09 32.7, 0 14.7 M0 44.09 C-0.58 35.05, -0.14 25.86, 0 14.7 M0 14.7 C-1.76 4.95, 4.72 0.12, 14.7 0 M0 14.7 C0.04 2.77, 3.84 2.28, 14.7 0" stroke="#1e1e1e" stroke-width="1" fill="none"></path></g><g transform="translate(40.3533777642333 76.38229391244943) rotate(0 28.84746551513672 13.117999514736255)"><text x="0" y="18.36519932063079" font-family="Comic Shanns, Segoe UI Emoji" font-size="20.98879922357805px" fill="#1e1e1e" text-anchor="start" style="white-space: pre;" direction="ltr" dominant-baseline="alphabetic">Agent</text></g><g stroke-linecap="round" transform="translate(238.4051216456428 10) rotate(0 46.00138394464375 21.86008797184752)"><path d="M10.93 0 C31.05 -1.13, 51.08 1.73, 81.07 0 M10.93 0 C39.03 0.55, 66.57 -0.22, 81.07 0 M81.07 0 C88.72 -0.9, 90.96 3.7, 92 10.93 M81.07 0 C89.49 1.32, 92.14 5.37, 92 10.93 M92 10.93 C90.73 19.33, 93.1 25.38, 92 32.79 M92 10.93 C92.67 15.8, 91.48 20.9, 92 32.79 M92 32.79 C91.08 41.41, 87.4 42.88, 81.07 43.72 M92 32.79 C92.88 41.6, 89.34 43.21, 81.07 43.72 M81.07 43.72 C57.61 42.33, 39.79 42.37, 10.93 43.72 M81.07 43.72 C56.12 44.79, 31.2 44.68, 10.93 43.72 M10.93 43.72 C4.33 43.16, -1.29 39.12, 0 32.79 M10.93 43.72 C3.99 44.71, 1.88 38.53, 0 32.79 M0 32.79 C0.66 23.88, 0.79 16.2, 0 10.93 M0 32.79 C0.21 23.78, -0.06 15.99, 0 10.93 M0 10.93 C-0.62 3.65, 4.48 0.66, 10.93 0 M0 10.93 C-2.29 1.67, 2.8 2.26, 10.93 0" stroke="#1e1e1e" stroke-width="1" fill="none"></path></g><g transform="translate(264.93650449779307 20.873159547627836) rotate(0 19.470001220703125 11.065186050561493)"><text x="19.470001220703125" y="15.491260470786095" font-family="Comic Shanns, Segoe UI Emoji" font-size="17.704297680898392px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="alphabetic">tool</text></g><g transform="translate(264.93650449779125 80.96687154762787) rotate(0 19.470001220703125 11.065186050561522)"><text x="19.470001220703125" y="15.491260470786095" font-family="Comic Shanns, Segoe UI Emoji" font-size="17.704297680898392px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="alphabetic">tool</text></g><g transform="translate(264.93650449779125 135.99705354762784) rotate(0 19.470001220703125 11.065186050561522)"><text x="19.470001220703125" y="15.491260470786095" font-family="Comic Shanns, Segoe UI Emoji" font-size="17.704297680898392px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="alphabetic">tool</text></g><g stroke-linecap="round" transform="translate(238.4051216456428 67.64020500000004) rotate(0 46.00138394464375 21.86008797184752)"><path d="M10.93 0 C37.67 -0.65, 61.86 -0.36, 81.07 0 M10.93 0 C34.02 0.33, 56.96 -0.91, 81.07 0 M81.07 0 C86.68 -1.42, 90.15 2.19, 92 10.93 M81.07 0 C89.07 -0.26, 94.28 3.31, 92 10.93 M92 10.93 C93.58 15.82, 91.04 22.79, 92 32.79 M92 10.93 C90.91 18.36, 90.85 27.66, 92 32.79 M92 32.79 C90.85 38.95, 88.92 45.54, 81.07 43.72 M92 32.79 C90.44 40.03, 89.04 42.44, 81.07 43.72 M81.07 43.72 C65.06 44.18, 52.7 45.47, 10.93 43.72 M81.07 43.72 C61.58 43.43, 43.22 44.6, 10.93 43.72 M10.93 43.72 C3.96 43.08, -1.86 38.28, 0 32.79 M10.93 43.72 C4.41 42.99, -0.01 41.54, 0 32.79 M0 32.79 C-0.18 27.01, 0.98 18.78, 0 10.93 M0 32.79 C0.15 26.95, 0.42 22.01, 0 10.93 M0 10.93 C0.24 4.32, 4.1 0.2, 10.93 0 M0 10.93 C-0.7 5.12, 2.66 -0.21, 10.93 0" stroke="#1e1e1e" stroke-width="1" fill="none"></path></g><g stroke-linecap="round" transform="translate(238.4051216456428 125.28041000000007) rotate(0 46.00138394464375 21.86008797184752)"><path d="M10.93 0 C37.73 1.41, 61.83 -1.79, 81.07 0 M10.93 0 C26.92 -0.13, 42.44 0.53, 81.07 0 M81.07 0 C89.3 -1.06, 93.89 3.55, 92 10.93 M81.07 0 C88.19 -0.57, 92.25 2.44, 92 10.93 M92 10.93 C91.68 16.17, 93.8 24.82, 92 32.79 M92 10.93 C92.27 16.1, 91.84 20.28, 92 32.79 M92 32.79 C93.88 39.9, 88.7 43.69, 81.07 43.72 M92 32.79 C90.32 40.62, 88.26 41.47, 81.07 43.72 M81.07 43.72 C56.03 42.49, 27.89 42.9, 10.93 43.72 M81.07 43.72 C58.12 42.16, 36.22 43.21, 10.93 43.72 M10.93 43.72 C4.6 44.46, 1.92 40.05, 0 32.79 M10.93 43.72 C2.72 42.12, -1.22 38.07, 0 32.79 M0 32.79 C1.31 27.35, -0.21 22.45, 0 10.93 M0 32.79 C-0.28 24.96, -0.7 15.53, 0 10.93 M0 10.93 C-1.69 4.4, 5.2 1.25, 10.93 0 M0 10.93 C-1.8 4.41, 1.8 -1.32, 10.93 0" stroke="#1e1e1e" stroke-width="1" fill="none"></path></g><g stroke-linecap="round"><g transform="translate(127.71431873252004 75.50200645690427) rotate(0 27.562354877424696 -11.007542220403707)"><path d="M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02 M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02" stroke="#1971c2" stroke-width="1" fill="none"></path></g></g><mask></mask><g stroke-linecap="round"><g transform="translate(182.4635176101492 53.9534298972568) rotate(180 27.562354877424696 -11.007542220403707)"><path d="M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02 M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02" stroke="#1971c2" stroke-width="1" fill="none"></path></g></g><mask></mask><g stroke-linecap="round"><g transform="translate(182.51039638419206 124.64582075882072) rotate(180 27.562354877424696 11.007542220403707)"><path d="M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02 M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02" stroke="#1971c2" stroke-width="1" fill="none"></path></g></g><mask></mask><g stroke-linecap="round"><g transform="translate(127.76119750655926 103.09724419917097) rotate(0 27.562354877424696 11.007542220403707)"><path d="M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02 M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02" stroke="#1971c2" stroke-width="1" fill="none"></path></g></g><mask></mask><g stroke-linecap="round"><g transform="translate(128.4927512905124 89.39910840856078) rotate(0 54.455413250178026 0)"><path d="M0 0 C18.15 0, 90.76 0, 108.91 0 M0 0 C18.15 0, 90.76 0, 108.91 0" stroke="#1971c2" stroke-width="1" fill="none"></path></g></g><mask></mask><g transform="translate(169.74818365061947 17.542810135638547) rotate(0 13.199981689453125 10)"><text x="0" y="14" font-family="Comic Shanns, Segoe UI Emoji" font-size="16px" fill="#1971c2" text-anchor="start" style="white-space: pre;" direction="ltr" dominant-baseline="alphabetic">MCP</text></g></svg>
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 360.4740028424476 179.0005859436951"
+    width="1081.4220085273428"
+    height="537.0017578310853"
+>
+<defs>
+<style>
+.plex {
+    font-family: "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+}
+</style>
+</defs><g
+        stroke-linecap="round"
+        transform="translate(10 59.496758623905635) rotate(0 58.48120902199662 29.393960449845167)"
+    ><path
+            d="M14.7 0 C32.56 1.4, 51 -0.19, 102.27 0 M14.7 0 C39.95 0.29, 64.96 0.63, 102.27 0 M102.27 0 C110.07 -1.54, 117.01 3.82, 116.96 14.7 M102.27 0 C110.11 1.55, 114.92 2.6, 116.96 14.7 M116.96 14.7 C117.68 22.9, 118.72 26.62, 116.96 44.09 M116.96 14.7 C116.67 20.71, 117.5 27.6, 116.96 44.09 M116.96 44.09 C116.32 55.71, 112.16 57.42, 102.27 58.79 M116.96 44.09 C117.37 54.38, 110.29 58.82, 102.27 58.79 M102.27 58.79 C83.71 59.07, 67.06 58.43, 14.7 58.79 M102.27 58.79 C72.18 58.28, 41.77 59.58, 14.7 58.79 M14.7 58.79 C6.25 58.13, 1.72 52.14, 0 44.09 M14.7 58.79 C6.47 57.09, 1.02 51.79, 0 44.09 M0 44.09 C0.35 37.13, -0.09 32.7, 0 14.7 M0 44.09 C-0.58 35.05, -0.14 25.86, 0 14.7 M0 14.7 C-1.76 4.95, 4.72 0.12, 14.7 0 M0 14.7 C0.04 2.77, 3.84 2.28, 14.7 0"
+            stroke="#1e1e1e"
+            stroke-width="1"
+            fill="none"
+        /></g><g
+        transform="translate(40.3533777642333 76.38229391244943) rotate(0 28.84746551513672 13.117999514736255)"
+    ><text
+            x="0"
+            y="18.36519932063079"
+            class="plex"
+            font-size="20.98879922357805px"
+            fill="#1e1e1e"
+            text-anchor="start"
+            style="white-space: pre;"
+            direction="ltr"
+            dominant-baseline="alphabetic"
+        >Agent</text></g><g
+        stroke-linecap="round"
+        transform="translate(238.4051216456428 10) rotate(0 55.77004593460879 21.86008797184752)"
+    ><path
+            d="M10.93 0 C36.46 -1.01, 61.9 1.84, 100.61 0 M10.93 0 C46.76 0.6, 82.03 -0.16, 100.61 0 M100.61 0 C108.26 -0.9, 110.5 3.7, 111.54 10.93 M100.61 0 C109.03 1.32, 111.67 5.37, 111.54 10.93 M111.54 10.93 C110.27 19.33, 112.63 25.38, 111.54 32.79 M111.54 10.93 C112.21 15.8, 111.01 20.9, 111.54 32.79 M111.54 32.79 C110.62 41.41, 106.94 42.88, 100.61 43.72 M111.54 32.79 C112.42 41.6, 108.88 43.21, 100.61 43.72 M100.61 43.72 C71.16 42.45, 47.36 42.49, 10.93 43.72 M100.61 43.72 C68.82 44.98, 37.05 44.87, 10.93 43.72 M10.93 43.72 C4.33 43.16, -1.29 39.12, 0 32.79 M10.93 43.72 C3.99 44.71, 1.88 38.53, 0 32.79 M0 32.79 C0.66 23.88, 0.79 16.2, 0 10.93 M0 32.79 C0.21 23.78, -0.06 15.99, 0 10.93 M0 10.93 C-0.62 3.65, 4.48 0.66, 10.93 0 M0 10.93 C-2.29 1.67, 2.8 2.26, 10.93 0"
+            stroke="#1e1e1e"
+            stroke-width="1"
+            fill="none"
+        /></g><g
+        transform="translate(238.40512184244653 135.99705354762784) rotate(0 55.77004600000055 11.065186050561522)"
+    ><text
+            x="55.77004600000058"
+            y="15.491260470786095"
+            class="plex"
+            font-size="17.704297680898392px"
+            fill="#1e1e1e"
+            text-anchor="middle"
+            style="white-space: pre;"
+            direction="ltr"
+            dominant-baseline="alphabetic"
+        >tool</text></g><g
+        transform="translate(238.9339108424465 78.43510654762781) rotate(0 55.77004600000055 11.065186050561522)"
+    ><text
+            x="55.77004600000058"
+            y="15.491260470786095"
+            class="plex"
+            font-size="17.704297680898392px"
+            fill="#1e1e1e"
+            text-anchor="middle"
+            style="white-space: pre;"
+            direction="ltr"
+            dominant-baseline="alphabetic"
+        >tool</text></g><g
+        transform="translate(238.9339108424465 20.794901547627774) rotate(0 55.77004600000055 11.065186050561493)"
+    ><text
+            x="55.77004600000058"
+            y="15.491260470786095"
+            class="plex"
+            font-size="17.704297680898392px"
+            fill="#1e1e1e"
+            text-anchor="middle"
+            style="white-space: pre;"
+            direction="ltr"
+            dominant-baseline="alphabetic"
+        >tool</text></g><g
+        stroke-linecap="round"
+        transform="translate(238.4051216456428 67.64020500000004) rotate(0 55.77004609840242 21.86008797184752)"
+    ><path
+            d="M10.93 0 C44.72 -0.68, 75.95 -0.39, 100.61 0 M10.93 0 C40.38 0.22, 69.68 -1.01, 100.61 0 M100.61 0 C106.22 -1.42, 109.69 2.19, 111.54 10.93 M100.61 0 C108.61 -0.26, 113.82 3.31, 111.54 10.93 M111.54 10.93 C113.12 15.82, 110.58 22.79, 111.54 32.79 M111.54 10.93 C110.45 18.36, 110.39 27.66, 111.54 32.79 M111.54 32.79 C110.39 38.95, 108.45 45.54, 100.61 43.72 M111.54 32.79 C109.98 40.03, 108.58 42.44, 100.61 43.72 M100.61 43.72 C80.41 44.21, 63.87 45.5, 10.93 43.72 M100.61 43.72 C75.9 43.59, 52.33 44.76, 10.93 43.72 M10.93 43.72 C3.96 43.08, -1.86 38.28, 0 32.79 M10.93 43.72 C4.41 42.99, -0.01 41.54, 0 32.79 M0 32.79 C-0.18 27.01, 0.98 18.78, 0 10.93 M0 32.79 C0.15 26.95, 0.42 22.01, 0 10.93 M0 10.93 C0.24 4.32, 4.1 0.2, 10.93 0 M0 10.93 C-0.7 5.12, 2.66 -0.21, 10.93 0"
+            stroke="#1e1e1e"
+            stroke-width="1"
+            fill="none"
+        /></g><g
+        stroke-linecap="round"
+        transform="translate(238.4051216456428 125.28041000000007) rotate(0 55.77004609840242 21.86008797184752)"
+    ><path
+            d="M10.93 0 C44.75 1.41, 75.88 -1.8, 100.61 0 M10.93 0 C31.19 0.02, 50.98 0.68, 100.61 0 M100.61 0 C108.84 -1.06, 113.43 3.55, 111.54 10.93 M100.61 0 C107.73 -0.57, 111.78 2.44, 111.54 10.93 M111.54 10.93 C111.22 16.17, 113.34 24.82, 111.54 32.79 M111.54 10.93 C111.81 16.1, 111.38 20.28, 111.54 32.79 M111.54 32.79 C113.42 39.9, 108.24 43.69, 100.61 43.72 M111.54 32.79 C109.86 40.62, 107.8 41.47, 100.61 43.72 M100.61 43.72 C68.25 42.44, 32.78 42.85, 10.93 43.72 M100.61 43.72 C71.41 41.99, 43.26 43.05, 10.93 43.72 M10.93 43.72 C4.6 44.46, 1.92 40.05, 0 32.79 M10.93 43.72 C2.72 42.12, -1.22 38.07, 0 32.79 M0 32.79 C1.31 27.35, -0.21 22.45, 0 10.93 M0 32.79 C-0.28 24.96, -0.7 15.53, 0 10.93 M0 10.93 C-1.69 4.4, 5.2 1.25, 10.93 0 M0 10.93 C-1.8 4.41, 1.8 -1.32, 10.93 0"
+            stroke="#1e1e1e"
+            stroke-width="1"
+            fill="none"
+        /></g><g stroke-linecap="round"><g
+            transform="translate(127.71431873252004 75.50200645690427) rotate(0 27.562354877424696 -11.007542220403707)"
+        ><path
+                d="M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02 M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02"
+                stroke="#1971c2"
+                stroke-width="1"
+                fill="none"
+            /></g></g><mask /><g stroke-linecap="round"><g
+            transform="translate(182.4635176101492 53.9534298972568) rotate(180 27.562354877424696 -11.007542220403707)"
+        ><path
+                d="M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02 M0 0 C7.61 -0.42, 36.47 1.13, 45.65 -2.54 C54.84 -6.21, 53.55 -18.77, 55.12 -22.02"
+                stroke="#1971c2"
+                stroke-width="1"
+                fill="none"
+            /></g></g><mask /><g stroke-linecap="round"><g
+            transform="translate(182.51039638419206 124.64582075882072) rotate(180 27.562354877424696 11.007542220403707)"
+        ><path
+                d="M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02 M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02"
+                stroke="#1971c2"
+                stroke-width="1"
+                fill="none"
+            /></g></g><mask /><g stroke-linecap="round"><g
+            transform="translate(127.76119750655926 103.09724419917097) rotate(0 27.562354877424696 11.007542220403707)"
+        ><path
+                d="M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02 M0 0 C7.61 0.42, 36.47 -1.13, 45.65 2.54 C54.84 6.21, 53.55 18.77, 55.12 22.02"
+                stroke="#1971c2"
+                stroke-width="1"
+                fill="none"
+            /></g></g><mask /><g stroke-linecap="round"><g
+            transform="translate(128.4927512905124 89.39910840856078) rotate(0 54.455413250178026 0)"
+        ><path
+                d="M0 0 C18.15 0, 90.76 0, 108.91 0 M0 0 C18.15 0, 90.76 0, 108.91 0"
+                stroke="#1971c2"
+                stroke-width="1"
+                fill="none"
+            /></g></g><mask /><g
+        transform="translate(169.74818365061947 17.542810135638547) rotate(0 13.199981689453125 10)"
+    ><text
+            x="0"
+            y="14"
+            class="plex"
+            font-size="16px"
+            fill="#1971c2"
+            text-anchor="start"
+            style="white-space: pre;"
+            direction="ltr"
+            dominant-baseline="alphabetic"
+        >MCP</text></g></svg>

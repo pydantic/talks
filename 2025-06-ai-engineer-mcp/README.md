@@ -23,6 +23,8 @@ Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
 
 **Come to our booth for Logfire demo, t-shirts, etc.**
 
+_(I'm also a co-maintainer of the MCP python SDK)_
+
 ---
 
 # what
@@ -35,7 +37,7 @@ Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
 
 What I am saying is:
 
-**MCP can do a lot of multi-agent communication.**
+**MCP can do a lot of multi-agent communications.**
 
 ---
 
@@ -63,9 +65,19 @@ The way most people describe it:
 
 ---
 
+# MCP for multi-agent communication
+
+But what if servers can be clients:
+
+![Agents with MCP and Recursive](images/agents-with-mcp-recursive.svg)
+
+... but there's a problem.
+
+---
+
 # sampling
 
-Give servers the ability to make requests to LLMs via the client.
+Give MCP servers the ability to make requests to LLMs via the client.
 
 (Powerful feature of MCP, but not widely supported*)
 
@@ -76,8 +88,8 @@ sequenceDiagram
     participant MCP_Client as MCP client
     participant MCP_Server as MCP server
 
-    LLM->>MCP_Client: LLM call
-    MCP_Client->>LLM: LLM tool response
+    MCP_Client->>LLM: LLM call
+    LLM->>MCP_Client: LLM text response
 
     MCP_Client->>MCP_Server: tool call
     MCP_Server->>MCP_Client: sampling "create message"
@@ -93,12 +105,16 @@ sequenceDiagram
 
 # Example
 
-TODO Library research tool.
+Library research tool.
 * connects to pypi MCP server with natural language query
 * MCP server uses sampling to convert query into SQL, runs sql.
 
 ```py
+from pydantic_ai import Agent
+from pydantic_ai.mcp import MCPServerStdio
+
 ...
+
 server = MCPServerStdio(command='uv', args=['run', 'pypi_mcp_server.py'])
 libs_agent = Agent(
     'openai:gpt-4o',
@@ -106,14 +122,16 @@ libs_agent = Agent(
     instructions='your job is to help the user research software libraries and packages using the tools provided',
 )
 
-
-@libs_agent.system_prompt
-def add_date():
-    return f'Today is {date.today():%Y-%m-%d}'
-
-
 async def main():
     async with libs_agent.run_mcp_servers():
         result = await libs_agent.run('How many times has pydantic been downloaded this year')
     print(result.output)
 ```
+
+---
+
+# Thank you
+
+Slides at [github.com/pydantic/talks](https://github.com/pydantic/talks).
+
+I'm at the Pydantic booth, if you have any questions, com and say hi.
