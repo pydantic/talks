@@ -25,7 +25,7 @@ class MCPBotResponse(BaseModel):
 
 SYSTEM_PROMPT = dedent(
     """
-    You're a helpful AI assistant with access to browser automation and Linear project management capabilities.
+    You're a helpful AI assistant with access to browser automation and Logfire telemetry analysis capabilities.
     
     Browser capabilities (via Playwright):
     - Navigate to websites, interact with web pages, take screenshots, and extract information
@@ -33,49 +33,51 @@ SYSTEM_PROMPT = dedent(
     - Take screenshots when helpful for verification
     - Extract relevant information clearly and accurately
     
-    Linear capabilities:
-    - Find, create, and update Linear issues, projects, and comments
-    - Access Linear workspace data and project management information
-    - Help with issue tracking and project organization
+    Logfire capabilities:
+    - Find and analyze exceptions in OpenTelemetry traces grouped by file
+    - Get detailed trace information about exceptions in specific files
+    - Run custom SQL queries on traces and metrics data
+    - Access OpenTelemetry schema information for query building
+    - Analyze application performance and error patterns
     
     When working with these services:
     - Explain what you're doing clearly
     - Be mindful of website terms of service and respectful browsing practices
-    - Follow best practices for project management workflows
+    - Use appropriate time ranges for telemetry queries (max 7 days)
+    - Help identify patterns in application behavior and errors
     
     Give a confidence percentage for your answer, from 0 to 100.
-    List any services you used (e.g., "playwright", "linear") in the services_used field.
+    List any services you used (e.g., "playwright", "logfire") in the services_used field.
     """
 )
 
-# Set up MCP servers
-browser_mcp = MCPServerStdio('npx', args=['-Y', '@playwright/mcp@latest'], tool_prefix='browser')
-linear_mcp = MCPServerStdio('npx', args=['-y', 'mcp-remote', 'https://mcp.linear.app/sse'], tool_prefix='linear')
+# Set up MCP servers with correct command syntax
+browser_mcp = MCPServerStdio('npx', args=['--yes', '@playwright/mcp@latest'], tool_prefix='browser')
+logfire_mcp = MCPServerStdio('uvx', args=['logfire-mcp'], tool_prefix='logfire')
 
 # Create the agent with both MCP servers
 agent = Agent(
     'openai:gpt-4o',
     output_type=MCPBotResponse,
     system_prompt=SYSTEM_PROMPT,
-    mcp_servers=[browser_mcp, linear_mcp],
+    mcp_servers=[browser_mcp, logfire_mcp],
     instrument=True,
 )
 
 async def answer_mcp_question(question: str) -> MCPBotResponse:
-    """Run a question through the MCP-enabled browser agent."""
+    """Run a question through the MCP-enabled agent."""
     async with agent.run_mcp_servers():
         result = await agent.run(user_prompt=question)
         return result.output
 
 async def main():
-    """Example usage of the browser and Linear agent."""
-    async with agent.run_mcp_servers():
-        result = await agent.run(
-            'Help me with project management: First, check what Linear workspaces and projects are available. '
-            'Then navigate to pydantic.dev to get information about their latest announcement and '
-            'create a Linear issue to track following up on any interesting developments you find.'
-        )
-    print(result.output)
+    """Example usage of the browser and Logfire telemetry agent."""
+    question = ('Help me analyze my application: First, check for any exceptions in traces from the last hour using Logfire. '
+               'Then navigate to the Logfire documentation to get information about best practices for error monitoring. '
+               'Finally, provide recommendations based on what you find.')
+    
+    result = await answer_mcp_question(question)
+    print(result)
 
 if __name__ == '__main__':
     asyncio.run(main()) 
