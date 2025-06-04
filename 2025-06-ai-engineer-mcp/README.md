@@ -136,5 +136,22 @@ TODO Library research tool.
 * MCP server uses sampling to convert query into SQL, runs sql.
 
 ```py
-TODO
+...
+server = MCPServerStdio(command='uv', args=['run', 'pypi_mcp_server.py'])
+libs_agent = Agent(
+    'openai:gpt-4o',
+    mcp_servers=[server],
+    instructions='your job is to help the user research software libraries and packages using the tools provided',
+)
+
+
+@libs_agent.system_prompt
+def add_date():
+    return f'Today is {date.today():%Y-%m-%d}'
+
+
+async def main():
+    async with libs_agent.run_mcp_servers():
+        result = await libs_agent.run('How many times has pydantic been downloaded this year')
+    print(result.output)
 ```

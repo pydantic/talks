@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "google-cloud-bigquery>=3.34.0",
     "logfire[httpx]>=3.17.0",
-    "pydantic-ai-slim[anthropic,mcp,openai]>=0.2.14",
+    "pydantic-ai",
 ]
 
 [dependency-groups]
@@ -30,3 +30,6 @@ convention = 'google'
 # don't format python in docstrings, pytest-examples takes care of it
 docstring-code-format = false
 quote-style = 'single'
+
+[tool.uv.sources]
+pydantic-ai = { path = "../../pydantic-ai", editable = true }
