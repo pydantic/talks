@@ -49,7 +49,7 @@ So two of its primatives (prompts and resources) probably aren't necessary.
 
 But tool calling, (the third primative) absolutely is!
 
-And tools are lot more complex you might at first assume:
+And tools are lot more complex than you might at first assume:
 * dynamic tools
 * logging
 * sampling
