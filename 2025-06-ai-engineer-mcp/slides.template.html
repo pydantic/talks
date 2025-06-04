@@ -6,10 +6,46 @@
     <title>{{ title }}</title>
     <link rel="icon" href="./static/favicon.ico" />
     <link rel="stylesheet" href="./static/google_fonts_ibm_plex.css" />
-    <link rel="stylesheet" href="./static/highlight.min.css" />
+    <link
+      rel="stylesheet"
+      href="./static/highlight.min.css"
+      id="highlight-theme"
+    />
     <script src="./static/highlight.min.js"></script>
     <script src="./static/mermaid.min.js"></script>
     <style>
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #333;
+        --heading-primary: #2c3e50;
+        --heading-secondary: #34495e;
+        --text-muted: #7f8c8d;
+        --code-bg: #f8f9fa;
+        --border-color: #e9ecef;
+        --border-light: #ddd;
+        --control-bg: rgba(0, 0, 0, 0.1);
+        --control-hover: rgba(0, 0, 0, 0.2);
+        --blockquote-border: #3498db;
+        --table-header-bg: #f8f9fa;
+        --mermaid-bg: white;
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --heading-primary: #4a9eff;
+        --heading-secondary: #6bb6ff;
+        --text-muted: #888;
+        --code-bg: #2d2d2d;
+        --border-color: #404040;
+        --border-light: #555;
+        --control-bg: rgba(255, 255, 255, 0.1);
+        --control-hover: rgba(255, 255, 255, 0.2);
+        --blockquote-border: #4a9eff;
+        --table-header-bg: #2d2d2d;
+        --mermaid-bg: #2d2d2d;
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -20,9 +56,13 @@
       body {
         height: 100%;
         overflow: hidden;
-        background: #ffffff;
+        background: var(--bg-color);
+        color: var(--text-color);
         font-family:
           "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
       }
 
       #container {
@@ -35,11 +75,11 @@
       #content {
         flex: 1;
         width: 100%;
-        padding: 20px 20px;
+        padding: 40px 20px;
         overflow-y: auto;
         font-size: 24px;
         line-height: 1.6;
-        color: #333;
+        color: var(--text-color);
       }
 
       .slide-controls {
@@ -52,18 +92,20 @@
       }
 
       .control-btn {
-        background: rgba(0, 0, 0, 0.1);
+        background: var(--control-bg);
         border: none;
-        color: #333;
+        color: var(--text-color);
         padding: 8px 16px;
         border-radius: 4px;
         cursor: pointer;
         backdrop-filter: blur(10px);
-        transition: background 0.3s;
+        transition:
+          background 0.3s,
+          color 0.3s;
       }
 
       .control-btn:hover {
-        background: rgba(0, 0, 0, 0.2);
+        background: var(--control-hover);
       }
 
       .control-btn:disabled {
@@ -72,12 +114,15 @@
       }
 
       .slide-indicator {
-        background: rgba(0, 0, 0, 0.1);
-        color: #333;
+        background: var(--control-bg);
+        color: var(--text-color);
         padding: 8px 16px;
         border-radius: 4px;
         backdrop-filter: blur(10px);
         font-size: 14px;
+        transition:
+          background 0.3s,
+          color 0.3s;
       }
 
       .hidden {
@@ -87,35 +132,38 @@
       /* Markdown Styling */
       #content h1:before {
         content: "# ";
-        color: #7f8c8d;
+        color: var(--text-muted);
       }
 
       #content h2:before {
         content: "## ";
-        color: #7f8c8d;
+        color: var(--text-muted);
       }
 
       #content h3:before {
         content: "### ";
-        color: #7f8c8d;
+        color: var(--text-muted);
       }
 
       #content h1 {
         font-size: 2.5em;
         margin-bottom: 0.5em;
-        color: #2c3e50;
+        color: var(--heading-primary);
+        transition: color 0.3s ease;
       }
 
       #content h2 {
         font-size: 2em;
         margin-bottom: 0.5em;
-        color: #34495e;
+        color: var(--heading-secondary);
+        transition: color 0.3s ease;
       }
 
       #content h3 {
         font-size: 1.5em;
         margin-bottom: 0.5em;
-        color: #34495e;
+        color: var(--heading-secondary);
+        transition: color 0.3s ease;
       }
 
       #content p {
@@ -136,37 +184,45 @@
 
       #content ul li:before {
         content: "* ";
-        color: #7f8c8d;
+        color: var(--text-muted);
         position: absolute;
         left: -1.5em;
       }
 
       #content strong {
-        color: #2c3e50;
+        color: var(--heading-primary);
         font-weight: 600;
+        transition: color 0.3s ease;
       }
 
       #content em {
-        color: #7f8c8d;
+        color: var(--text-muted);
+        transition: color 0.3s ease;
       }
 
       #content code {
-        background: #f8f9fa;
+        background: var(--code-bg);
         padding: 0.2em 0.4em;
         border-radius: 3px;
         font-family:
           "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
         font-size: 0.9em;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--border-color);
+        transition:
+          background 0.3s ease,
+          border-color 0.3s ease;
       }
 
       #content pre {
-        background: #f8f9fa;
+        background: var(--code-bg);
         padding: 1em;
         border-radius: 5px;
         overflow-x: auto;
         margin: 1em 0;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--border-color);
+        transition:
+          background 0.3s ease,
+          border-color 0.3s ease;
       }
 
       #content pre code {
@@ -178,11 +234,14 @@
       }
 
       #content blockquote {
-        border-left: 4px solid #3498db;
+        border-left: 4px solid var(--blockquote-border);
         padding-left: 1em;
         margin: 1em 0;
-        color: #7f8c8d;
+        color: var(--text-muted);
         font-style: italic;
+        transition:
+          border-color 0.3s ease,
+          color 0.3s ease;
       }
 
       #content img {
@@ -198,9 +257,10 @@
         display: block;
         margin: 2em auto;
         text-align: center;
-        background: white;
+        background: var(--mermaid-bg);
         border-radius: 8px;
         padding: 20px;
+        transition: background 0.3s ease;
       }
 
       #content table {
@@ -211,14 +271,65 @@
 
       #content th,
       #content td {
-        border: 1px solid #ddd;
+        border: 1px solid var(--border-light);
         padding: 0.5em;
         text-align: left;
+        transition: border-color 0.3s ease;
       }
 
       #content th {
-        background-color: #f8f9fa;
+        background-color: var(--table-header-bg);
         font-weight: 600;
+        transition: background-color 0.3s ease;
+      }
+
+      /* Dark mode highlight.js overrides */
+      [data-theme="dark"] .hljs {
+        background: var(--code-bg) !important;
+        color: #e0e0e0 !important;
+      }
+
+      [data-theme="dark"] .hljs-keyword,
+      [data-theme="dark"] .hljs-selector-tag,
+      [data-theme="dark"] .hljs-built_in {
+        color: #569cd6 !important;
+      }
+
+      [data-theme="dark"] .hljs-string,
+      [data-theme="dark"] .hljs-attr {
+        color: #ce9178 !important;
+      }
+
+      [data-theme="dark"] .hljs-number,
+      [data-theme="dark"] .hljs-literal {
+        color: #b5cea8 !important;
+      }
+
+      [data-theme="dark"] .hljs-comment {
+        color: #6a9955 !important;
+      }
+
+      [data-theme="dark"] .hljs-function,
+      [data-theme="dark"] .hljs-title {
+        color: #dcdcaa !important;
+      }
+
+      [data-theme="dark"] .hljs-variable,
+      [data-theme="dark"] .hljs-name {
+        color: #9cdcfe !important;
+      }
+
+      [data-theme="dark"] .hljs-type {
+        color: #4ec9b0 !important;
+      }
+
+      [data-theme="dark"] .hljs-tag {
+        color: #569cd6 !important;
+      }
+
+      [data-theme="dark"] .hljs-doctag,
+      [data-theme="dark"] .hljs-meta {
+        color: #c586c0 !important;
       }
     </style>
   </head>
@@ -231,6 +342,9 @@
         <div class="slide-indicator" id="slideIndicator">1 / 1</div>
         <button class="control-btn" onclick="nextSlide()" id="nextBtn">
           Next →
+        </button>
+        <button class="control-btn" onclick="toggleTheme()" id="themeBtn">
+          🌙
         </button>
       </div>
       <div id="content"></div>
@@ -267,6 +381,7 @@
         updateSlideIndicator();
         renderCurrentSlide();
         updateNavigationButtons();
+        initializeTheme();
       }
 
       // Render current slide
@@ -392,6 +507,42 @@
         updateSlideIndicator();
         updateNavigationButtons();
       });
+
+      // Theme management
+      function initializeTheme() {
+        const savedTheme = localStorage.getItem("slideTheme") || "light";
+        setTheme(savedTheme);
+      }
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        setTheme(newTheme);
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("slideTheme", theme);
+
+        const themeBtn = document.getElementById("themeBtn");
+        themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+
+        // Re-highlight all code blocks for theme consistency
+        hljs.highlightAll();
+
+        // Update Mermaid theme
+        const mermaidTheme = theme === "dark" ? "dark" : "default";
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: mermaidTheme,
+          fontFamily: "IBM Plex Mono",
+          fontSize: 16,
+        });
+
+        // Re-render Mermaid diagrams with new theme
+        renderMermaidDiagrams();
+      }
 
       // Initialize Mermaid
       function initializeMermaid() {
