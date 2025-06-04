@@ -1,0 +1,32 @@
+[project]
+name = "2025-06-ai-engineer-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "google-cloud-bigquery>=3.34.0",
+    "logfire[httpx]>=3.17.0",
+    "pydantic-ai-slim[anthropic,mcp,openai]>=0.2.14",
+]
+
+[dependency-groups]
+dev = ["devtools>=0.12.2", "ruff>=0.11.12"]
+
+[tool.ruff]
+line-length = 120
+target-version = 'py313'
+
+[tool.ruff.lint]
+extend-select = ['Q', 'RUF100', 'C90', 'UP', 'I']
+flake8-quotes = { inline-quotes = 'single', multiline-quotes = 'double' }
+isort = { combine-as-imports = true }
+mccabe = { max-complexity = 15 }
+
+[tool.ruff.lint.pydocstyle]
+convention = 'google'
+
+[tool.ruff.format]
+# don't format python in docstrings, pytest-examples takes care of it
+docstring-code-format = false
+quote-style = 'single'

@@ -60,7 +60,6 @@ What I am saying is:
 
 
 
-
 # how
 
 MCP was not (primarily) designed for multi-agent communication.
@@ -135,3 +134,7 @@ sequenceDiagram
 TODO Library research tool.
 * connects to pypi MCP server with natural language query
 * MCP server uses sampling to convert query into SQL, runs sql.
+
+```py
+TODO
+```
