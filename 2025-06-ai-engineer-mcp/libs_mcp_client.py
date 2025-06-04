@@ -1,15 +1,21 @@
 from datetime import date
 
 import logfire
+from mcp.types import LoggingMessageNotificationParams
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
-logfire.configure(service_name='mcp-client')
+logfire.configure(service_name='mcp-client', console=False)
 
 logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()
 
-server = MCPServerStdio(command='uv', args=['run', 'pypi_mcp_server.py'])
+
+async def log_handler(params: LoggingMessageNotificationParams):
+    print(f'{params.level}: {params.data}')
+
+
+server = MCPServerStdio(command='uv', args=['run', 'pypi_mcp_server.py'], log_handler=log_handler)
 libs_agent = Agent(
     'openai:gpt-4o',
     mcp_servers=[server],

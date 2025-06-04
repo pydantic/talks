@@ -32,4 +32,4 @@ docstring-code-format = false
 quote-style = 'single'
 
 [tool.uv.sources]
-pydantic-ai = { path = "../../pydantic-ai", editable = true }
+pydantic-ai = { git = "https://github.com/pydantic/pydantic-ai.git", rev = "mcp-sampling" }
