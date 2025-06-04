@@ -22,7 +22,7 @@ dev = [
 requires-dist = [
     { name = "google-cloud-bigquery", specifier = ">=3.34.0" },
     { name = "logfire", extras = ["httpx"], specifier = ">=3.17.0" },
-    { name = "pydantic-ai", git = "https://github.com/pydantic/pydantic-ai.git?rev=mcp-sampling" },
+    { name = "pydantic-ai", git = "https://github.com/pydantic/pydantic-ai.git?rev=edbd3c689df49487858e0dbe13508936333b805c" },
 ]
 
 [package.metadata.requires-dev]
@@ -256,8 +256,8 @@ wheels = [
 
 [[package]]
 name = "fasta2a"
-version = "0.2.15.dev2+f916e0b"
-source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=fasta2a&rev=mcp-sampling#f916e0b6061d3074e6c88363487782a406411bbc" }
+version = "0.2.15.dev3+edbd3c6"
+source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=fasta2a&rev=edbd3c689df49487858e0dbe13508936333b805c#edbd3c689df49487858e0dbe13508936333b805c" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "pydantic" },
@@ -947,16 +947,16 @@ wheels = [
 
 [[package]]
 name = "pydantic-ai"
-version = "0.2.15.dev2+f916e0b"
-source = { git = "https://github.com/pydantic/pydantic-ai.git?rev=mcp-sampling#f916e0b6061d3074e6c88363487782a406411bbc" }
+version = "0.2.15.dev3+edbd3c6"
+source = { git = "https://github.com/pydantic/pydantic-ai.git?rev=edbd3c689df49487858e0dbe13508936333b805c#edbd3c689df49487858e0dbe13508936333b805c" }
 dependencies = [
     { name = "pydantic-ai-slim", extra = ["a2a", "anthropic", "bedrock", "cli", "cohere", "evals", "google", "groq", "mcp", "mistral", "openai", "vertexai"] },
 ]
 
 [[package]]
 name = "pydantic-ai-slim"
-version = "0.2.15.dev2+f916e0b"
-source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_ai_slim&rev=mcp-sampling#f916e0b6061d3074e6c88363487782a406411bbc" }
+version = "0.2.15.dev3+edbd3c6"
+source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_ai_slim&rev=edbd3c689df49487858e0dbe13508936333b805c#edbd3c689df49487858e0dbe13508936333b805c" }
 dependencies = [
     { name = "eval-type-backport" },
     { name = "griffe" },
@@ -1038,8 +1038,8 @@ wheels = [
 
 [[package]]
 name = "pydantic-evals"
-version = "0.2.15.dev2+f916e0b"
-source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_evals&rev=mcp-sampling#f916e0b6061d3074e6c88363487782a406411bbc" }
+version = "0.2.15.dev3+edbd3c6"
+source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_evals&rev=edbd3c689df49487858e0dbe13508936333b805c#edbd3c689df49487858e0dbe13508936333b805c" }
 dependencies = [
     { name = "anyio" },
     { name = "logfire-api" },
@@ -1051,8 +1051,8 @@ dependencies = [
 
 [[package]]
 name = "pydantic-graph"
-version = "0.2.15.dev2+f916e0b"
-source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_graph&rev=mcp-sampling#f916e0b6061d3074e6c88363487782a406411bbc" }
+version = "0.2.15.dev3+edbd3c6"
+source = { git = "https://github.com/pydantic/pydantic-ai.git?subdirectory=pydantic_graph&rev=edbd3c689df49487858e0dbe13508936333b805c#edbd3c689df49487858e0dbe13508936333b805c" }
 dependencies = [
     { name = "httpx" },
     { name = "logfire-api" },

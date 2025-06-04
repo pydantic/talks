@@ -5,7 +5,7 @@ from mcp.types import LoggingMessageNotificationParams
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
-logfire.configure(service_name='mcp-client', console=False)
+logfire.configure(service_name='mcp-client')
 
 logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()

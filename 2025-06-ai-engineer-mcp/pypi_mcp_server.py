@@ -2,7 +2,6 @@
 
 import re
 from dataclasses import dataclass
-from typing import Callable, Literal
 
 import logfire
 from google.api_core.exceptions import BadRequest
