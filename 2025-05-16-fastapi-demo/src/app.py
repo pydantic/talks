@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.agent import build_agent, answer_question, BotResponse
+from src.mcp_agent import answer_mcp_question, MCPBotResponse
 
 logfire.configure(
     service_name='api',
@@ -26,6 +27,7 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 logfire.instrument_sqlalchemy(engine)
+logfire.instrument_mcp()
 
 
 # Database model
@@ -55,6 +57,10 @@ class ItemResponse(BaseModel):
 
 
 class AgentQuery(BaseModel):
+    question: str
+
+
+class MCPQuery(BaseModel):
     question: str
 
 
@@ -144,6 +150,17 @@ async def query_agent(query: AgentQuery, agent: Agent[None, BotResponse] = Depen
     logfire.info(f"Querying agent with question: {query.question}")
     response = await answer_question(agent, query.question)
     return response
+
+
+@app.post("/mcp/query", response_model=MCPBotResponse)
+async def query_mcp_agent(query: MCPQuery):
+    """
+    Queries the MCP-enabled PydanticAI agent with browser automation capabilities.
+    """
+    logfire.info(f"Querying MCP agent with question: {query.question}")
+    response = await answer_mcp_question(query.question)
+    return response
+
 
 
 if __name__ == '__main__':  # Fixed double asterisks
