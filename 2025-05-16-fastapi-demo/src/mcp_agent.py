@@ -13,15 +13,14 @@ ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(dotenv_path=ROOT_DIR / ".env")
 
 # Configure logfire instrumentation
-logfire.configure(scrubbing=False, service_name='playwright-browser')
 logfire.instrument_mcp()
-logfire.instrument_pydantic_ai()
 
 class MCPBotResponse(BaseModel):
     answer: str
     reasoning: str
     services_used: list[str] = []
     confidence_percentage: Annotated[int, Field(ge=0, le=100)]
+
 
 SYSTEM_PROMPT = dedent(
     """
@@ -52,17 +51,26 @@ SYSTEM_PROMPT = dedent(
 )
 
 # Set up MCP servers with correct command syntax
-browser_mcp = MCPServerStdio('npx', args=['--yes', '@playwright/mcp@latest'], tool_prefix='browser')
-logfire_mcp = MCPServerStdio('uvx', args=['logfire-mcp'], tool_prefix='logfire')
+browser_mcp = MCPServerStdio(
+    "npx", args=["--yes", "@playwright/mcp@latest"], tool_prefix="browser"
+)
+logfire_mcp = MCPServerStdio(
+    "uvx",
+    args=[
+        "logfire-mcp",
+        "--read-token=pylf_v1_us_b6y8tzWmXxQ9rwR9t7FSPwWXhkwpWc6NyPh9ZnZL9Z8V",
+    ],
+    tool_prefix="logfire",
+)
 
 # Create the agent with both MCP servers
 agent = Agent(
-    'openai:gpt-4o',
+    "openai:gpt-4o",
     output_type=MCPBotResponse,
     system_prompt=SYSTEM_PROMPT,
-    mcp_servers=[browser_mcp, logfire_mcp],
-    instrument=True,
+    mcp_servers=[logfire_mcp, browser_mcp],
 )
+
 
 async def answer_mcp_question(question: str) -> MCPBotResponse:
     """Run a question through the MCP-enabled agent."""
@@ -70,14 +78,18 @@ async def answer_mcp_question(question: str) -> MCPBotResponse:
         result = await agent.run(user_prompt=question)
         return result.output
 
+
 async def main():
     """Example usage of the browser and Logfire telemetry agent."""
-    question = ('Help me analyze my application: First, check for any exceptions in traces from the last hour using Logfire. '
-               'Then navigate to the Logfire documentation to get information about best practices for error monitoring. '
-               'Finally, provide recommendations based on what you find.')
-    
+    question = (
+        "Help me analyze my application: First, check for any exceptions in traces from the last hour using Logfire. "
+        "Then navigate to the Logfire documentation to get information about best practices for error monitoring. "
+        "Finally, provide recommendations based on what you find."
+    )
+
     result = await answer_mcp_question(question)
     print(result)
 
-if __name__ == '__main__':
-    asyncio.run(main()) 
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -11,10 +11,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from src.agent import build_agent, answer_question, BotResponse
 from src.mcp_agent import answer_mcp_question, MCPBotResponse
 
-logfire.configure(
-    service_name='api',
-    environment='staging'
-)
+logfire.configure(service_name="api", environment="staging", scrubbing=False)
 
 # FastAPI application setup
 app = FastAPI(title="Math, Database and PydanticAI API")
@@ -27,6 +24,7 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 logfire.instrument_sqlalchemy(engine)
+logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()
 
 
@@ -96,7 +94,9 @@ async def fibonacci(n: int):
     Raises an HTTPException if n is negative.
     """
     if n < 0:
-        raise HTTPException(status_code=400, detail="Input must be a non-negative integer")
+        raise HTTPException(
+            status_code=400, detail="Input must be a non-negative integer"
+        )
 
     if n <= 1:
         return {"result": n}
@@ -143,7 +143,9 @@ async def read_item(item_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/agent/query", response_model=BotResponse)
-async def query_agent(query: AgentQuery, agent: Agent[None, BotResponse] = Depends(get_agent)):
+async def query_agent(
+    query: AgentQuery, agent: Agent[None, BotResponse] = Depends(get_agent)
+):
     """
     Queries the PydanticAI agent with a user question and returns the response.
     """
@@ -162,7 +164,9 @@ async def query_mcp_agent(query: MCPQuery):
     return response
 
 
-
-if __name__ == '__main__':  # Fixed double asterisks
+if __name__ == "__main__":  # Fixed double asterisks
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)  # Added this line to complete the if block
+
+    uvicorn.run(
+        app, host="0.0.0.0", port=8000
+    )  # Added this line to complete the if block
