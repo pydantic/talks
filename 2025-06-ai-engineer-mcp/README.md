@@ -1,6 +1,10 @@
-# AI Engineer, San Fransico, June 2025
+# MCP is all you need
 
-Slides at <https://github.com/pydantic/talks>
+### AI Engineer, San Fransico, June 2025
+
+Slides at [github.com/pydantic/talks](https://github.com/pydantic/talks).
+
+---
 
 ## whoami
 
@@ -19,46 +23,21 @@ Became a company (Pydantic Labs), backed by Sequoia in 2023, released:
 
 **Come to our booth for Logfire demo, t-shirts, etc.**
 
+---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## what
+# what
 
 **MCP is all you need**
 
-* Inspired by Jason Liu's talk "Pydantic is all you need"
-* Same idea that lots of people are over complicating things
+* Inspired by Jason Liu's talk "Pydantic is all you need" and "Pydantic is still all you need"
+* Same idea: that lots of people are over complicating things
 * Same unrealistic title — no one is seriously claiming MCP can do everything
 
 What I am saying is:
 
-**MCP can do a lot of fancy multi-agent communication.**
+**MCP can do a lot of multi-agent communication.**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 # how
 
@@ -74,17 +53,15 @@ And tools are lot more complex you might at first assume:
 * sampling
 * tracing
 
-![multi-agent system](mcp.svg) TODO!
+---
 
+# MCP for multi-agent communication
 
+The way most people describe it:
 
+![Agents with MCP](images/agents-with-mcp.svg)
 
-
-
-
-
-
-
+---
 
 # sampling
 
@@ -112,22 +89,7 @@ sequenceDiagram
     MCP_Server->>MCP_Client: tool call response
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 # Example
 

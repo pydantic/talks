@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="./static/google_fonts_ibm_plex.css" />
+    <link rel="stylesheet" href="./static/highlight.min.css" />
+    <script src="./static/highlight.min.js"></script>
+    <script src="./static/mermaid.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: #ffffff;
+        font-family:
+          "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+      }
+
+      #container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #content {
+        flex: 1;
+        width: 100%;
+        padding: 20px 20px;
+        overflow-y: auto;
+        font-size: 24px;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .slide-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .control-btn {
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: background 0.3s;
+      }
+
+      .control-btn:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .control-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .slide-indicator {
+        background: rgba(0, 0, 0, 0.1);
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 4px;
+        backdrop-filter: blur(10px);
+        font-size: 14px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Markdown Styling */
+      #content h1:before {
+        content: "# ";
+        color: #7f8c8d;
+      }
+
+      #content h2:before {
+        content: "## ";
+        color: #7f8c8d;
+      }
+
+      #content h3:before {
+        content: "### ";
+        color: #7f8c8d;
+      }
+
+      #content h1 {
+        font-size: 2.5em;
+        margin-bottom: 0.5em;
+        color: #2c3e50;
+      }
+
+      #content h2 {
+        font-size: 2em;
+        margin-bottom: 0.5em;
+        color: #34495e;
+      }
+
+      #content h3 {
+        font-size: 1.5em;
+        margin-bottom: 0.5em;
+        color: #34495e;
+      }
+
+      #content p {
+        margin-bottom: 1em;
+      }
+
+      #content ul,
+      #content ol {
+        margin-left: 2em;
+        margin-bottom: 1em;
+      }
+
+      #content li {
+        margin-bottom: 0.5em;
+        list-style: none;
+        position: relative;
+      }
+
+      #content ul li:before {
+        content: "* ";
+        color: #7f8c8d;
+        position: absolute;
+        left: -1.5em;
+      }
+
+      #content strong {
+        color: #2c3e50;
+        font-weight: 600;
+      }
+
+      #content em {
+        color: #7f8c8d;
+      }
+
+      #content code {
+        background: #f8f9fa;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family:
+          "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+        font-size: 0.9em;
+        border: 1px solid #e9ecef;
+      }
+
+      #content pre {
+        background: #f8f9fa;
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin: 1em 0;
+        border: 1px solid #e9ecef;
+      }
+
+      #content pre code {
+        background: none;
+        padding: 0;
+        border: none;
+        font-size: 0.9em;
+        display: block;
+      }
+
+      #content blockquote {
+        border-left: 4px solid #3498db;
+        padding-left: 1em;
+        margin: 1em 0;
+        color: #7f8c8d;
+        font-style: italic;
+      }
+
+      #content img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 2em auto;
+        border-radius: 8px;
+      }
+
+      /* Mermaid diagram styling */
+      .mermaid {
+        display: block;
+        margin: 2em auto;
+        text-align: center;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      #content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+      }
+
+      #content th,
+      #content td {
+        border: 1px solid #ddd;
+        padding: 0.5em;
+        text-align: left;
+      }
+
+      #content th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="slide-controls">
+        <button class="control-btn" onclick="previousSlide()" id="prevBtn">
+          ← Previous
+        </button>
+        <div class="slide-indicator" id="slideIndicator">1 / 1</div>
+        <button class="control-btn" onclick="nextSlide()" id="nextBtn">
+          Next →
+        </button>
+      </div>
+      <div id="content"></div>
+    </div>
+    <pre id="slides" style="display: hidden">{{ slides }}</pre>
+
+    <script src="./static/marked.min.js"></script>
+    <script>
+      let currentSlide = 0;
+      let slides = [];
+
+      // Load slides from URL hash or use defaults
+      function loadSlidesFromHash() {
+        const hash = window.location.hash;
+        if (hash.startsWith("#slide=")) {
+          const slideNum = parseInt(hash.replace("#slide=", "")) - 1;
+          if (slideNum >= 0 && slideNum < slides.length) {
+            currentSlide = slideNum;
+          }
+        }
+      }
+
+      // Update URL hash
+      function updateHash() {
+        window.location.hash = `slide=${currentSlide + 1}`;
+      }
+
+      // Initialize slides
+      function initSlides() {
+        slides = JSON.parse(document.getElementById("slides").textContent);
+        loadSlidesFromHash();
+        updateSlideIndicator();
+        renderCurrentSlide();
+        updateNavigationButtons();
+      }
+
+      // Render current slide
+      function renderCurrentSlide() {
+        const content = document.getElementById("content");
+        if (slides.length > 0 && currentSlide < slides.length) {
+          content.innerHTML = marked.parse(slides[currentSlide]);
+          hljs.highlightAll();
+          renderMermaidDiagrams();
+          updateHash();
+        }
+      }
+
+      // Update slide indicator
+      function updateSlideIndicator() {
+        const indicator = document.getElementById("slideIndicator");
+        indicator.textContent = `${currentSlide + 1} / ${slides.length}`;
+      }
+
+      // Update navigation buttons
+      function updateNavigationButtons() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === slides.length - 1;
+      }
+
+      // Navigation functions
+      function nextSlide() {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      function previousSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      function goToSlide(slideNumber) {
+        if (slideNumber >= 0 && slideNumber < slides.length) {
+          currentSlide = slideNumber;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      // Fullscreen functionality
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((err) => {
+            console.log("Error attempting to enable fullscreen:", err);
+          });
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      // Hide controls after 3 seconds of inactivity
+      let controlsTimeout;
+      document.addEventListener("mousemove", () => {
+        const slideControls = document.querySelector(".slide-controls");
+        slideControls.style.opacity = "1";
+
+        clearTimeout(controlsTimeout);
+        controlsTimeout = setTimeout(() => {
+          slideControls.style.opacity = "0.3";
+        }, 3000);
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.exitFullscreen();
+        } else if (e.key === "F11") {
+          e.preventDefault();
+          toggleFullscreen();
+        } else if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          previousSlide();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          goToSlide(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          goToSlide(slides.length - 1);
+        }
+      });
+
+      // Handle hash changes (back/forward navigation)
+      window.addEventListener("hashchange", () => {
+        loadSlidesFromHash();
+        renderCurrentSlide();
+        updateSlideIndicator();
+        updateNavigationButtons();
+      });
+
+      // Initialize Mermaid
+      function initializeMermaid() {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "default",
+          fontFamily: "IBM Plex Mono",
+          fontSize: 16,
+        });
+      }
+
+      // Render Mermaid diagrams
+      function renderMermaidDiagrams() {
+        const mermaidElements = document.querySelectorAll(
+          "code.language-mermaid",
+        );
+        mermaidElements.forEach((element, index) => {
+          const graphDefinition = element.textContent;
+          const graphId = "mermaid-" + Date.now() + "-" + index;
+          const graphDiv = document.createElement("div");
+          graphDiv.className = "mermaid";
+          graphDiv.id = graphId;
+          graphDiv.textContent = graphDefinition;
+          element.parentNode.replaceWith(graphDiv);
+        });
+        mermaid.run();
+      }
+
+      // Initialize when page loads
+      window.addEventListener("load", () => {
+        initializeMermaid();
+        initSlides();
+      });
+    </script>
+  </body>
+</html>

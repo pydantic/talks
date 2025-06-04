@@ -1,7 +1,6 @@
 """MCP server to get information about python package downloads."""
 
 import re
-from typing import Any
 
 import logfire
 from google.api_core.exceptions import BadRequest
@@ -125,7 +124,7 @@ def run_query(sql: str) -> str:
         rows = query_job.result()
     except BadRequest as e:
         raise ModelRetry(f'Invalid query: {e}') from e
-    data = [dict(row) for row in rows]
+    data = [dict(row) for row in rows]  # type: ignore
     return format_as_xml(data, item_tag='row', include_root_tag=False)
 
 
