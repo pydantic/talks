@@ -37,7 +37,7 @@ _(I'm also a co-maintainer of the MCP python SDK)_
 
 What I am saying is:
 
-**MCP can do a lot of multi-agent communications.**
+**MCP can do a lot of multi-agent communications - specifically autonomous agents.**
 
 ---
 
@@ -89,7 +89,7 @@ sequenceDiagram
     participant MCP_Server as MCP server
 
     MCP_Client->>LLM: LLM call
-    LLM->>MCP_Client: LLM text response
+    LLM->>MCP_Client: LLM tool call response
 
     MCP_Client->>MCP_Server: tool call
     MCP_Server->>MCP_Client: sampling "create message"
