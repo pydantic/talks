@@ -13,6 +13,7 @@ from pydantic_evals.evaluators import Evaluator, EvaluatorContext, LLMJudge
 
 from src.agent import build_agent, answer_question, BotResponse
 
+logfire.instrument_pydantic_ai()
 
 class AgentQuery(BaseModel):
     """Input model for agent queries."""

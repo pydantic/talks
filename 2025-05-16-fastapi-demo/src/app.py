@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-from src.agent import build_agent, answer_question, BotResponse
+from src.agent import answer_question, BotResponse, improve_answer, build_docs_agent, build_grammar_agent
 from src.mcp_agent import answer_mcp_question, MCPBotResponse
 
 logfire.configure(service_name="api", environment="staging", scrubbing=False)
@@ -72,8 +72,12 @@ def get_db():
 
 
 # Dependency to get agent instance
-def get_agent() -> Agent[None, BotResponse]:
-    return build_agent()
+def get_docs_agent() -> Agent[None, BotResponse]:
+    return build_docs_agent()
+
+# Dependency to get agent instance
+def get_grammar_agent() -> Agent[None, BotResponse]:
+    return build_grammar_agent()
 
 
 # Endpoint 1: Division
@@ -144,14 +148,18 @@ async def read_item(item_id: int, db: Session = Depends(get_db)):
 
 @app.post("/agent/query", response_model=BotResponse)
 async def query_agent(
-    query: AgentQuery, agent: Agent[None, BotResponse] = Depends(get_agent)
+    query: AgentQuery,
+    docs_agent: Agent[None, BotResponse] = Depends(get_docs_agent),
+    grammar_agent: Agent[None, BotResponse] = Depends(get_grammar_agent)
 ):
     """
     Queries the PydanticAI agent with a user question and returns the response.
     """
     logfire.info(f"Querying agent with question: {query.question}")
-    response = await answer_question(agent, query.question)
-    return response
+    initial_response = await answer_question(docs_agent, query.question)
+    improved_response = await improve_answer(grammar_agent, initial_response.answer)
+
+    return improved_response
 
 
 @app.post("/mcp/query", response_model=MCPBotResponse)

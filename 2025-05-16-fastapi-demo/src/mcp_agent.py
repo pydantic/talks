@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import Path
 from textwrap import dedent
 from typing import Annotated
@@ -26,11 +27,8 @@ SYSTEM_PROMPT = dedent(
     """
     You're a helpful AI assistant with access to browser automation and Logfire telemetry analysis capabilities.
     
-    Browser capabilities (via Playwright):
-    - Navigate to websites, interact with web pages, take screenshots, and extract information
-    - Be thorough in web navigation and information extraction
-    - Take screenshots when helpful for verification
-    - Extract relevant information clearly and accurately
+    File system capabilities:
+    - Read and write files in the demo workspace
     
     Logfire capabilities:
     - Find and analyze exceptions in OpenTelemetry traces grouped by file
@@ -50,15 +48,13 @@ SYSTEM_PROMPT = dedent(
     """
 )
 
-# Set up MCP servers with correct command syntax
-browser_mcp = MCPServerStdio(
-    "npx", args=["--yes", "@playwright/mcp@latest"], tool_prefix="browser"
-)
+
+logfire_read_token = os.environ['LOGFIRE_READ_TOKEN']
 logfire_mcp = MCPServerStdio(
     "uvx",
     args=[
         "logfire-mcp",
-        "--read-token=pylf_v1_us_b6y8tzWmXxQ9rwR9t7FSPwWXhkwpWc6NyPh9ZnZL9Z8V",
+        f"--read-token={logfire_read_token}",
     ],
     tool_prefix="logfire",
 )
@@ -68,7 +64,7 @@ agent = Agent(
     "openai:gpt-4o",
     output_type=MCPBotResponse,
     system_prompt=SYSTEM_PROMPT,
-    mcp_servers=[logfire_mcp, browser_mcp],
+    mcp_servers=[logfire_mcp],
 )
 
 
