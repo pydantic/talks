@@ -12,11 +12,13 @@ from pydantic_ai.common_tools.tavily import tavily_search_tool
 ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(dotenv_path=ROOT_DIR / ".env")
 
+
 class BotResponse(BaseModel):
     answer: str
     reasoning: str
     reference: str | None = None
     confidence_percentage: Annotated[int, Field(ge=0, le=100)]
+
 
 SYSTEM_PROMPT = dedent(
     """
@@ -31,7 +33,8 @@ SYSTEM_PROMPT = dedent(
     """
 )
 
-def build_agent() -> Agent[None, BotResponse]:
+
+def build_docs_agent() -> Agent[None, BotResponse]:
     api_key = os.getenv("TAVILY_API_KEY")
     assert api_key is not None
 
@@ -40,9 +43,26 @@ def build_agent() -> Agent[None, BotResponse]:
         tools=[tavily_search_tool(api_key)],
         output_type=BotResponse,
         system_prompt=SYSTEM_PROMPT,
-        instrument=True,
     )
 
-async def answer_question(agent: Agent[None, BotResponse], question: str) -> BotResponse:
+
+def build_grammar_agent() -> Agent[None, BotResponse]:
+    return Agent(
+        "openai:gpt-4o-mini",
+        output_type=BotResponse,
+        system_prompt="Fix the punctuation in the BotResponse object fields.",
+    )
+
+
+async def answer_question(
+    agent: Agent[None, BotResponse], question: str
+) -> BotResponse:
     result = await agent.run(user_prompt=question)
+    return result.output
+
+
+async def improve_answer(
+    agent: Agent[None, BotResponse], initial_answer: str
+) -> BotResponse:
+    result = await agent.run(user_prompt=initial_answer)
     return result.output
