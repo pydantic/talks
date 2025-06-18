@@ -172,7 +172,8 @@ async def query_mcp_agent(query: MCPQuery):
     return response
 
 
-if __name__ == "__main__":  # Fixed double asterisks
+
+if __name__ == '__main__':  # Fixed double asterisks
     import uvicorn
 
     uvicorn.run(

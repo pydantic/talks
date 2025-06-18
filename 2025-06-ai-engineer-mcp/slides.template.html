@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link rel="icon" href="./static/favicon.ico" />
+    <link rel="stylesheet" href="./static/google_fonts_ibm_plex.css" />
+    <link
+      rel="stylesheet"
+      href="./static/highlight.min.css"
+      id="highlight-theme"
+    />
+    <script src="./static/highlight.min.js"></script>
+    <script src="./static/mermaid.min.js"></script>
+    <style>
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #333;
+        --heading-primary: #2c3e50;
+        --heading-secondary: #34495e;
+        --text-muted: #7f8c8d;
+        --code-bg: #f8f9fa;
+        --border-color: #e9ecef;
+        --border-light: #ddd;
+        --control-bg: rgba(0, 0, 0, 0.1);
+        --control-hover: rgba(0, 0, 0, 0.2);
+        --blockquote-border: #3498db;
+        --table-header-bg: #f8f9fa;
+        --mermaid-bg: white;
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --heading-primary: #4a9eff;
+        --heading-secondary: #6bb6ff;
+        --text-muted: #888;
+        --code-bg: #2d2d2d;
+        --border-color: #404040;
+        --border-light: #555;
+        --control-bg: rgba(255, 255, 255, 0.1);
+        --control-hover: rgba(255, 255, 255, 0.2);
+        --blockquote-border: #4a9eff;
+        --table-header-bg: #2d2d2d;
+        --mermaid-bg: #2d2d2d;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family:
+          "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      #container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #content {
+        flex: 1;
+        width: 100%;
+        padding: 40px 20px;
+        overflow-y: auto;
+        font-size: 24px;
+        line-height: 1.6;
+        color: var(--text-color);
+      }
+
+      .slide-controls {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+      }
+
+      .control-btn {
+        background: var(--control-bg);
+        border: none;
+        color: var(--text-color);
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .control-btn:hover {
+        background: var(--control-hover);
+      }
+
+      .control-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .slide-indicator {
+        background: var(--control-bg);
+        color: var(--text-color);
+        padding: 8px 16px;
+        border-radius: 4px;
+        backdrop-filter: blur(10px);
+        font-size: 14px;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Markdown Styling */
+      #content h1:before {
+        content: "# ";
+        color: var(--text-muted);
+      }
+
+      #content h2:before {
+        content: "## ";
+        color: var(--text-muted);
+      }
+
+      #content h3:before {
+        content: "### ";
+        color: var(--text-muted);
+      }
+
+      #content h1 {
+        font-size: 2.5em;
+        margin-bottom: 0.5em;
+        color: var(--heading-primary);
+        transition: color 0.3s ease;
+      }
+
+      #content h2 {
+        font-size: 2em;
+        margin-bottom: 0.5em;
+        color: var(--heading-secondary);
+        transition: color 0.3s ease;
+      }
+
+      #content h3 {
+        font-size: 1.5em;
+        margin-bottom: 0.5em;
+        color: var(--heading-secondary);
+        transition: color 0.3s ease;
+      }
+
+      #content p {
+        margin-bottom: 1em;
+      }
+
+      #content ul,
+      #content ol {
+        margin-left: 2em;
+        margin-bottom: 1em;
+      }
+
+      #content li {
+        margin-bottom: 0.5em;
+        list-style: none;
+        position: relative;
+      }
+
+      #content ul li:before {
+        content: "* ";
+        color: var(--text-muted);
+        position: absolute;
+        left: -1.5em;
+      }
+
+      #content strong {
+        color: var(--heading-primary);
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      #content em {
+        color: var(--text-muted);
+        transition: color 0.3s ease;
+      }
+
+      #content code {
+        background: var(--code-bg);
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family:
+          "IBM Plex Mono", "Consolas", "Monaco", "Courier New", monospace;
+        font-size: 0.9em;
+        border: 1px solid var(--border-color);
+        transition:
+          background 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      #content pre {
+        background: var(--code-bg);
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin: 1em 0;
+        border: 1px solid var(--border-color);
+        transition:
+          background 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      #content pre code {
+        background: none;
+        padding: 0;
+        border: none;
+        font-size: 0.9em;
+        display: block;
+      }
+
+      #content blockquote {
+        border-left: 4px solid var(--blockquote-border);
+        padding-left: 1em;
+        margin: 1em 0;
+        color: var(--text-muted);
+        font-style: italic;
+        transition:
+          border-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      #content img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 2em auto;
+        border-radius: 8px;
+      }
+
+      /* Mermaid diagram styling */
+      .mermaid {
+        display: block;
+        margin: 2em auto;
+        text-align: center;
+        background: var(--mermaid-bg);
+        border-radius: 8px;
+        padding: 20px;
+        transition: background 0.3s ease;
+      }
+
+      #content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+      }
+
+      #content th,
+      #content td {
+        border: 1px solid var(--border-light);
+        padding: 0.5em;
+        text-align: left;
+        transition: border-color 0.3s ease;
+      }
+
+      #content th {
+        background-color: var(--table-header-bg);
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+      }
+
+      /* Dark mode highlight.js overrides */
+      [data-theme="dark"] .hljs {
+        background: var(--code-bg) !important;
+        color: #e0e0e0 !important;
+      }
+
+      [data-theme="dark"] .hljs-keyword,
+      [data-theme="dark"] .hljs-selector-tag,
+      [data-theme="dark"] .hljs-built_in {
+        color: #569cd6 !important;
+      }
+
+      [data-theme="dark"] .hljs-string,
+      [data-theme="dark"] .hljs-attr {
+        color: #ce9178 !important;
+      }
+
+      [data-theme="dark"] .hljs-number,
+      [data-theme="dark"] .hljs-literal {
+        color: #b5cea8 !important;
+      }
+
+      [data-theme="dark"] .hljs-comment {
+        color: #6a9955 !important;
+      }
+
+      [data-theme="dark"] .hljs-function,
+      [data-theme="dark"] .hljs-title {
+        color: #dcdcaa !important;
+      }
+
+      [data-theme="dark"] .hljs-variable,
+      [data-theme="dark"] .hljs-name {
+        color: #9cdcfe !important;
+      }
+
+      [data-theme="dark"] .hljs-type {
+        color: #4ec9b0 !important;
+      }
+
+      [data-theme="dark"] .hljs-tag {
+        color: #569cd6 !important;
+      }
+
+      [data-theme="dark"] .hljs-doctag,
+      [data-theme="dark"] .hljs-meta {
+        color: #c586c0 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="slide-controls">
+        <button class="control-btn" onclick="previousSlide()" id="prevBtn">
+          ← Previous
+        </button>
+        <div class="slide-indicator" id="slideIndicator">1 / 1</div>
+        <button class="control-btn" onclick="nextSlide()" id="nextBtn">
+          Next →
+        </button>
+        <button class="control-btn" onclick="toggleTheme()" id="themeBtn">
+          🌙
+        </button>
+      </div>
+      <div id="content"></div>
+    </div>
+    <pre id="slides" style="display: hidden">{{ slides }}</pre>
+
+    <script src="./static/marked.min.js"></script>
+    <script>
+      const defaultFontSize = 24;
+      let currentFontSize = defaultFontSize;
+      let currentSlide = 0;
+      let slides = [];
+
+      // Load slides from URL hash or use defaults
+      function loadSlidesFromHash() {
+        const hash = window.location.hash;
+        if (hash.startsWith("#slide=")) {
+          const slideNum = parseInt(hash.replace("#slide=", "")) - 1;
+          if (slideNum >= 0 && slideNum < slides.length) {
+            currentSlide = slideNum;
+          }
+        }
+      }
+
+      // Update URL hash
+      function updateHash() {
+        window.location.hash = `slide=${currentSlide + 1}`;
+      }
+
+      // Initialize slides
+      function initSlides() {
+        slides = JSON.parse(document.getElementById("slides").textContent);
+        loadSlidesFromHash();
+        updateSlideIndicator();
+        renderCurrentSlide();
+        updateNavigationButtons();
+        initializeTheme();
+      }
+
+      // Render current slide
+      function renderCurrentSlide() {
+        const content = document.getElementById("content");
+        if (slides.length > 0 && currentSlide < slides.length) {
+          content.innerHTML = marked.parse(slides[currentSlide]);
+          hljs.highlightAll();
+          renderMermaidDiagrams();
+          updateHash();
+        }
+      }
+
+      // Update slide indicator
+      function updateSlideIndicator() {
+        const indicator = document.getElementById("slideIndicator");
+        indicator.textContent = `${currentSlide + 1} / ${slides.length}`;
+      }
+
+      // Update navigation buttons
+      function updateNavigationButtons() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === slides.length - 1;
+      }
+
+      // Navigation functions
+      function nextSlide() {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      function previousSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      function goToSlide(slideNumber) {
+        if (slideNumber >= 0 && slideNumber < slides.length) {
+          currentSlide = slideNumber;
+          renderCurrentSlide();
+          updateSlideIndicator();
+          updateNavigationButtons();
+        }
+      }
+
+      function increaseFontSize() {
+        currentFontSize = Math.min(currentFontSize + 2, 72);
+        updateFontSize();
+      }
+
+      function decreaseFontSize() {
+        currentFontSize = Math.max(currentFontSize - 2, 12);
+        updateFontSize();
+      }
+
+      function resetFontSize() {
+        currentFontSize = defaultFontSize;
+        updateFontSize();
+      }
+
+      function updateFontSize() {
+        const content = document.getElementById("content");
+        content.style.fontSize = currentFontSize + "px";
+      }
+
+      // Hide controls after 3 seconds of inactivity
+      let controlsTimeout;
+      document.addEventListener("mousemove", () => {
+        const slideControls = document.querySelector(".slide-controls");
+        slideControls.style.opacity = "1";
+
+        clearTimeout(controlsTimeout);
+        controlsTimeout = setTimeout(() => {
+          slideControls.style.opacity = "0.3";
+        }, 3000);
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.exitFullscreen();
+        } else if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          previousSlide();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          goToSlide(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          goToSlide(slides.length - 1);
+        } else if (e.ctrlKey || e.metaKey) {
+          if (e.key === "=" || e.key === "+") {
+            e.preventDefault();
+            increaseFontSize();
+          } else if (e.key === "-") {
+            e.preventDefault();
+            decreaseFontSize();
+          } else if (e.key === "0") {
+            e.preventDefault();
+            resetFontSize();
+          }
+        }
+      });
+
+      // Handle hash changes (back/forward navigation)
+      window.addEventListener("hashchange", () => {
+        loadSlidesFromHash();
+        renderCurrentSlide();
+        updateSlideIndicator();
+        updateNavigationButtons();
+      });
+
+      // Theme management
+      function initializeTheme() {
+        const savedTheme = localStorage.getItem("slideTheme") || "light";
+        setTheme(savedTheme);
+      }
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        setTheme(newTheme);
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("slideTheme", theme);
+
+        const themeBtn = document.getElementById("themeBtn");
+        themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+
+        // Re-highlight all code blocks for theme consistency
+        hljs.highlightAll();
+
+        // Update Mermaid theme
+        const mermaidTheme = theme === "dark" ? "dark" : "default";
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: mermaidTheme,
+          fontFamily: "IBM Plex Mono",
+          fontSize: 16,
+        });
+
+        // Re-render Mermaid diagrams with new theme
+        renderMermaidDiagrams();
+      }
+
+      // Initialize Mermaid
+      function initializeMermaid() {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "default",
+          fontFamily: "IBM Plex Mono",
+          fontSize: 16,
+        });
+      }
+
+      // Render Mermaid diagrams
+      function renderMermaidDiagrams() {
+        const mermaidElements = document.querySelectorAll(
+          "code.language-mermaid",
+        );
+        mermaidElements.forEach((element, index) => {
+          const graphDefinition = element.textContent;
+          const graphId = "mermaid-" + Date.now() + "-" + index;
+          const graphDiv = document.createElement("div");
+          graphDiv.className = "mermaid";
+          graphDiv.id = graphId;
+          graphDiv.textContent = graphDefinition;
+          element.parentNode.replaceWith(graphDiv);
+        });
+        mermaid.run();
+      }
+
+      // Initialize when page loads
+      window.addEventListener("load", () => {
+        initializeMermaid();
+        initSlides();
+      });
+    </script>
+  </body>
+</html>
