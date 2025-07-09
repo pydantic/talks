@@ -10,7 +10,6 @@ A multi-agent MCP demo project
 uv add pydantic-ai
 uv add logfire  
 uv add mcp 
-uv add fastmcp 
 ```
 
 ### Set API keys in your CLI
