@@ -1,7 +1,7 @@
 [project]
 name = "pydantic-ghost-writer"
 version = "0.1.0"
-description = "Add your description here"
+description = "An MCP server for generating Pydantic-style content"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
