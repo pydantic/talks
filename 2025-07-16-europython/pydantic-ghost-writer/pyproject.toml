@@ -1,0 +1,11 @@
+[project]
+name = "pydantic-ghost-writer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "logfire>=3.23.0",
+    "mcp>=1.10.1",
+    "pydantic-ai>=0.4.0",
+]
