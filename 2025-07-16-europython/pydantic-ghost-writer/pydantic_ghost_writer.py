@@ -5,21 +5,23 @@ from typing_extensions import TypedDict
 from pydantic_ai import Agent
 
 # Configure Logfire for observability
-logfire.configure()
+logfire.configure(scrubbing=False)
+logfire.instrument_mcp() 
 logfire.instrument_pydantic_ai()
 
 # Writer agent for generating blog content
 writer_agent = Agent(
     'anthropic:claude-3-5-sonnet-latest',
     instructions="""
-You are a documentation writer for Pydantic, a Python data validation library.
+You are a documentation writer for Pydantic.
 
-Your writing should embody the Pydantic voice:
-- By developers, for developers - speak their language
-- Ruthlessly focused on developer experience (DX)
-- Authentic and genuine, not corporate marketing speak
+Before writing, use the get_brand_guidelines tool to understand Pydantic's authentic voice and positioning.
+Key principles to follow:
+- Write by developers, for developers
+- Focus on developer experience (DX)
+- Be authentic, not corporate
 - Technical but accessible
-- Focus on practical value and real-world usage
+- Practical value and real-world usage
 
 You need to write content that would score 8+ on quality.
 Use the review_page_content tool to check your work and iterate if needed.
@@ -54,6 +56,26 @@ async def review_page_content(content: str) -> Score:
     """Review the content and return a score with feedback."""
     result = await reviewer_agent.run(f"Review this content:\n\n{content}")
     return result.output
+
+# Tool to get brand guidelines
+@writer_agent.tool_plain
+async def get_brand_guidelines(query: str = "") -> str:
+    """
+    Get Pydantic brand guidelines and voice examples.
+    
+    Args:
+        query: Optional - specific aspect you need guidance on
+    """
+    try:
+        with open('brand_guidelines.txt', 'r') as f:
+            guidelines = f.read()
+        
+        if query:
+            return f"Brand guidelines for '{query}':\n\n{guidelines}"
+        else:
+            return guidelines
+    except FileNotFoundError:
+        return "Brand guidelines file not found. Please ensure brand_guidelines.txt is in the project directory."
 
 # Main function to generate blog content
 async def generate_blog_post(topic: str, user_prompt: str = None, reference_links: list[str] = None) -> str:

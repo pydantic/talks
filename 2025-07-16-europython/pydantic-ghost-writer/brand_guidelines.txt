@@ -1,0 +1,192 @@
+# Positioning Pydantic 
+Positioning, Narrative and Tone
+June 12, 2025
+
+# Brand Story 
+
+## "I'm with the brand"
+
+The Pydantic name has earned what marketers call ‘positive brand equity’. 
+
+But not in the conventional way most brands get there.
+
+Coming from open source, the business has been defined, in many ways, more like a ‘band’ (through audience love and participation) than ‘brand’ (mostly created and crafted in-house).
+
+And if Pydantic is the ‘band of brands’ in the AI/Observability space, then Samuel Colvin is the Morrisey/Kurt Cobain/Lana Del Rey/David Lee Roth (add/delete as applicable).
+
+A slightly more creative, slightly more ambitious soul who, inspired by others before him, thought there must be a better way to get shit done.
+
+A way of less frustration when turning imagination into reality. A way of motivating people to make more stuff, faster. A way to energize developers, earn a little recognition, appreciation (and even cash) along the way…
+
+## An accidental hero emerges 
+
+Turns out Samuel was right. Pydantic (validation and type checking) wasn’t a new idea. But developers could feel where it was coming from - the same place they were.
+
+The importance of this can’t be overstated.
+
+This feeling is what marketers lose sleep over and spend millions on every year trying to manufacture. They call it ‘authenticity’ and talk about it like it’s a goal.
+
+Spoiler alert: It isn’t. It’s a mindset. A consequence of being yourself. And when being yourself means something to other people, well, that’s when heroes are made.
+
+It’s also why many heroes, are reluctant. They never set out to become one. That all said, what this story established, was something rare and valuable that's worth nurturing:
+
+A brand rooted in truth, that’s quietly been building itself, with the community (Rebel Pydantics) and for the community, then, now and always.
+
+## A heroic escape 
+
+Fortunately, ‘first album’ indie-success attracted hoodies with enough loot to lighten any personal burden, placing rock star status where it should be - firmly atop the Pydantic pyramid (business).
+
+And now, 8 years and a bunch of products later, the Pydantic name matters. 
+
+And whatever it’s attached to is instantly enriched and imbued with all that meaning, that the community (fans) feel a part of.
+
+## What is the community part of? 
+
+A non-stop learning experience.  24/7 access to knowledge, insight, foresight, visibility, tools and support all focused on constantly improving DX - for better outcomes.
+
+Or, paraphrased for amateur clarity:
+
+The reassurance of knowing that when shit (inevitably) goes wrong from time to time, you can find it, understand it and fix it.
+
+Understanding is everything.
+
+Better knowledge, deeper knowledge, broader knowledge, specific knowledge, real-time knowledge - leads to informed development.
+
+This is where confidence comes from, and positive flow and focus are both implicit, consequences. When you're in the know, you're in full flow… (so to speak).
+
+This led to an expression and expanded positioning idea that we think dovetails neatly with the 'Pydantic Way' system of communicating product.
+
+
+# Pydantic brand tagline 
+
+## Know More. Build Faster.
+
+The Pydantic Stack gives devs visibility to stay in flow, from local to prod, from AI to API.
+
+Ship robust apps faster, in Python, Typescript, Rust and others.
+
+Breaking it down:
+
+A neat two-hander for what Pydantic offer and the benefit it delivers:
+
+- Know More: visibility, understanding, confidence, reassurance, trust orientation, control, power, potential…
+​- ​Build Faster: speed, agility, anticipation, adaptability, energy, advantage, leadership, innovation, efficiency…
+
+# Pydantic Stack
+
+Our three key products are related, integrated, but distinct. It's important that we talk about them with clarity and precision.
+
+## Pydantic Validation - Maps the way 
+Schema (open source library)
+
+Data validation for Python:
+- Most widely used data validation library for Python
+- Enforces standard type annotation
+- Plays nicely with type checkers, IDEs and your brain
+- Fast and extensible
+
+## Pydantic AI - Speeds the way 
+Agents (open source library) 
+
+Agent framework / LLM library for Python:
+- Type safe and ready to build production grade applications
+- Model agnostic: Support for all popular LLM providers
+- OpenTelemetry integration
+
+## Pydantic Logfire - Lights the way 
+Observability (Saas + open source library) 
+
+OpenTelemetry traces, logs and metrics:
+- Developer tool and production monitoring
+- General purpose O11y with first-class support for AI
+- Custom SDK for Python, JS and Rust, standard OTel for other languages
+
+
+# Brand principles 
+
+Combining all of this into a story means we can create a few guiding principles - handy for when you've doubled in size and need to get people on board quickly. 
+
+- We're by developers for developers: We could develop a catchy 'brand archetype' but that's generally where the lies begin. We know who we are and who we're working for. Hasn't changed since day one.
+- We're DX DX DX obsessed:  Where it all began. And where it's going next. We improve corporate experience too for those inside large companies (i.e. no more steel seats!).
+- We're ruthlessly Pydantic: Okay, so we do have a 'character trait'. Pedantry is underrated and (since our last raise) clearly undervalued. People who believe in unimportant detail fuck up twice as much. (If there is data to prove this, we'll find it.)
+
+
+# Tone of voice 
+
+Brand tone of voice, no matter how well conceived and crafted is at heart, no more than commercial rhetoric. At best, skillfully persuasive, at worst, a sales pitch. Shtick. 
+
+Of course, there’s nothing wrong with creating a commercial voice. There’s plenty of room in the world for another soda, so long as it tastes, feels and sounds different.
+
+But Pydantic isn’t sugar and water. It wasn’t born as a business idea (only), but from experience, culture and community. 
+
+This is why the task here is slightly different. The task here is not to create, but to capture.
+
+Like the Dadaists, Beats, Jazz freaks, Punks, Rastafarians, Surfers, Skaters and Sci-Fi geeks before them, Developers know when someone is really speaking their language.
+
+
+## How we sound 
+
+“Come watch my code fail live on stage” 
+
+This isn’t a contrived headline written for attention or competitive advantage. It’s a truth that resonates with anyone who builds (and also gets attention and drives competitive advantage). See how this works?
+
+Capturing, rather than creating a TOV begins with:
+
+A voice. No more or less valuable than any other voice within the community we live in and make tools to serve. 
+
+Some simple rules for the Pydantic tone of voice: 
+
+- The first rule of speaking, is listening.
+- Other people speaking for us, is better than us speaking for us.
+- When we do speak, it's from among, never over.
+- We don't sell. We tell (occasionally explain) and trust people to figure it out. 
+- Singing your own praises will bore people to death. Let there be no blood on our hands.
+- People are only ever really funny when they're not trying to be.
+- In 2025 clear, honest language might just be the most valuable it's ever been.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
