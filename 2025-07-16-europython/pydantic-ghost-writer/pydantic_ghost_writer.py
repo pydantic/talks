@@ -9,23 +9,38 @@ logfire.configure(scrubbing=False)
 logfire.instrument_mcp() 
 logfire.instrument_pydantic_ai()
 
+def load_prompt(content_type: str, role: str) -> str:
+    """Load and combine prompts for specific content type and role."""
+    prompt_parts = []
+    
+    # Load shared/global rules
+    try:
+        with open('prompts/shared/global_styleguide.txt', 'r') as f:
+            prompt_parts.append(f.read())
+    except FileNotFoundError:
+        pass
+    
+    # Load brand voice (if writer)
+    if role == 'writer':
+        try:
+            with open('prompts/shared/brand_guidelines.txt', 'r') as f:
+                prompt_parts.append(f.read())
+        except FileNotFoundError:
+            pass
+    
+    # Load content-specific prompt
+    try:
+        with open(f'prompts/{role}/{content_type}.txt', 'r') as f:
+            prompt_parts.append(f.read())
+    except FileNotFoundError:
+        prompt_parts.append(f"No specific prompt found for {role}/{content_type}")
+    
+    return "\n\n".join(prompt_parts)
+
 # Writer agent for generating blog content
 writer_agent = Agent(
     'anthropic:claude-3-5-sonnet-latest',
-    instructions="""
-You are a documentation writer for Pydantic.
-
-Before writing, use the get_brand_guidelines tool to understand Pydantic's authentic voice and positioning.
-Key principles to follow:
-- Write by developers, for developers
-- Focus on developer experience (DX)
-- Be authentic, not corporate
-- Technical but accessible
-- Practical value and real-world usage
-
-You need to write content that would score 8+ on quality.
-Use the review_page_content tool to check your work and iterate if needed.
-""",
+    instructions=load_prompt('blog_post', 'writer'),
 )
 
 # Reviewer agent for quality control
@@ -36,19 +51,40 @@ class Score(TypedDict):
 reviewer_agent = Agent(
     'anthropic:claude-3-5-sonnet-latest',
     output_type=Score,
-    instructions="""
-You are a technical content reviewer for Pydantic.
-
-Evaluate content on:
-- Technical accuracy
-- Clarity for developers
-- Authentic Pydantic voice (not corporate, genuine)
-- Practical value
-- Code examples quality (if present)
-
-Score out of 10 and provide specific feedback.
-""",
+    instructions=load_prompt('blog_post', 'reviewer'),
 )
+
+# Tools for reviewer agent to access guidelines
+@reviewer_agent.tool_plain
+async def get_shared_guidelines() -> str:
+    """Get all shared guidelines from the prompts/shared directory."""
+    import os
+    guidelines = []
+    
+    try:
+        shared_dir = 'prompts/shared'
+        if os.path.exists(shared_dir):
+            for filename in os.listdir(shared_dir):
+                if filename.endswith('.txt'):
+                    filepath = os.path.join(shared_dir, filename)
+                    with open(filepath, 'r') as f:
+                        content = f.read()
+                        guidelines.append(f"=== {filename} ===\n{content}")
+            
+            return "\n\n".join(guidelines)
+        else:
+            return "Shared guidelines directory not found."
+    except Exception as e:
+        return f"Error reading shared guidelines: {e}"
+
+@reviewer_agent.tool_plain
+async def get_writer_instructions() -> str:
+    """Get the blog post writing instructions that the writer should follow."""
+    try:
+        with open('prompts/writer/blog_post.txt', 'r') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Writer instructions not found."
 
 # Tool to allow writer to get feedback from reviewer
 @writer_agent.tool_plain
@@ -141,12 +177,27 @@ async def extract_technical_content(url: str) -> str:
         return f"Could not extract technical content from {url}: {e}"
 
 # Main function to generate blog content
-async def generate_blog_post(topic: str, user_prompt: str = None, reference_links: list[str] = None) -> str:
+async def generate_blog_post(
+    topic: str,
+    author: str = None,
+    author_role: str = None, 
+    user_prompt: str = None,
+    opinions: str = None,
+    examples: str = None,
+    reference_links: list[str] = None
+) -> str:
     """Generate a blog post about the given topic."""
     
     # Build the prompt with user input and references
     prompt_parts = [f"Write a blog post about {topic}."]
-    
+    if author:
+        prompt_parts.append(f"\nAuthor: {author}")
+    if author_role:
+        prompt_parts.append(f"\nAuthor Role: {author_role}")
+    if opinions:
+        prompt_parts.append(f"\nOpinions: {opinions}")
+    if examples:
+        prompt_parts.append(f"\nExamples: {examples}")
     if user_prompt:
         prompt_parts.append(f"\nUser requirements: {user_prompt}")
     
@@ -168,13 +219,6 @@ async def generate_blog_post(topic: str, user_prompt: str = None, reference_link
                 prompt_parts.append(f"\nCould not fetch {link}: {e}")
     
     prompt_parts.append("""
-The post should:
-- Be engaging and informative for Python developers
-- Include practical examples where relevant
-- Reflect Pydantic's authentic voice
-- Be well-structured with clear sections
-- Aim for 500-800 words
-
 Use the review_page_content tool to check your work and iterate if needed.
 """)
     
@@ -184,12 +228,19 @@ Use the review_page_content tool to check your work and iterate if needed.
 
 # Test function for direct execution
 async def main():
+
     print("Pydantic Ghost Writer - Blog Post Generator")
     print("=" * 50)
     
-    # Get user input
-    topic = input("Enter the blog post topic: ")
-    user_prompt = input("Enter additional requirements (optional): ").strip()
+    # Enhanced blog-specific inputs
+    topic = input("Blog post topic/headline: ")
+    author = input("Author name (or press Enter for 'Pydantic Team'): ").strip() or "Pydantic Team"
+    author_role = input("Author role (e.g., 'Founder', 'Core Developer'): ").strip()
+    
+    print("\nContent guidance:")
+    user_prompt = input("Additional requirements/direction: ").strip()
+    opinions = input("Specific opinions or takes to include: ").strip()
+    examples = input("Specific examples or case studies to mention: ").strip()
     
     # Get reference links
     reference_links = []
@@ -202,7 +253,11 @@ async def main():
     print("\nGenerating blog post...")
     response = await generate_blog_post(
         topic=topic,
+        author=author if author else None,
+        author_role=author_role if author_role else None,
         user_prompt=user_prompt if user_prompt else None,
+        opinions=opinions if opinions else None,
+        examples=examples if examples else None,
         reference_links=reference_links if reference_links else None
     )
     
