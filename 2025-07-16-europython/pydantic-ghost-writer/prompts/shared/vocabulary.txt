@@ -1,16 +1,16 @@
 # Vocabulary
 A reference of key concepts we use throughout our libraries and products.
 
-## Product names 
+## Product names
 
 - Pydantic, Pydantic Validation - the original library for typing in Python
-- Pydantic AI (Previously Pydantic AI) - Agent orchestrator, uses Pydantic to structure LLM outputs 
-- Pydantic Logfire, Logfire - Observability tool built on OpenTelemetry 
+- Pydantic AI (Previously Pydantic AI) - Agent orchestrator, uses Pydantic to structure LLM outputs
+- Pydantic Logfire, Logfire - Observability tool built on OpenTelemetry
 
 
-## Observability 
+## Observability
 
-- OpenTelemetry - open source data standard for application telemetry 
+- OpenTelemetry - open source data standard for application telemetry
 - Span - Atomic unit of telemetry data
 - Trace - Contains spans, tree structure shows parent/child relationships
 - Metric - Values calculated using telemetry data
