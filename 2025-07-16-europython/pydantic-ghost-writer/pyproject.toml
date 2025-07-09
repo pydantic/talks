@@ -5,7 +5,10 @@ description = "An MCP server for generating Pydantic-style content"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "logfire>=3.23.0",
+    "markdownify>=1.1.0",
     "mcp>=1.10.1",
     "pydantic-ai>=0.4.0",
+    "trafilatura>=2.0.0",
 ]

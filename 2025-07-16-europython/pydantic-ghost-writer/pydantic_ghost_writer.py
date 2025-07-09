@@ -77,6 +77,69 @@ async def get_brand_guidelines(query: str = "") -> str:
     except FileNotFoundError:
         return "Brand guidelines file not found. Please ensure brand_guidelines.txt is in the project directory."
 
+# Tool to fetch web content
+@writer_agent.tool_plain
+async def fetch_web_content(url: str) -> str:
+    """
+    Fetch and return the content from a web URL.
+    
+    Args:
+        url: The URL to fetch content from
+    """
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=10.0)
+            response.raise_for_status()
+            # Limit content length to avoid overwhelming the context
+            content = response.text[:8000]
+            return f"Content from {url}:\n\n{content}"
+    except Exception as e:
+        return f"Could not fetch {url}: {e}"
+
+@writer_agent.tool_plain
+async def debug_web_content(url: str) -> str:
+    """Debug: Show what content we're actually getting from a URL."""
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=10.0)
+            response.raise_for_status()
+            content = response.text[:2000]  # Show first 2000 chars
+            return f"Raw content from {url}:\n\n{content}"
+    except Exception as e:
+        return f"Error: {e}"
+
+async def extract_technical_content(url: str) -> str:
+    """Extract technical content optimized for code snippets and documentation."""
+    try:
+        import trafilatura
+        from markdownify import markdownify as md
+        
+        # Fetch and extract with technical optimizations
+        downloaded = trafilatura.fetch_url(url)
+        
+        # Try HTML output first (better for code)
+        html_content = trafilatura.extract(
+            downloaded,
+            output_format='html',
+            favor_precision=True,
+            include_formatting=True,
+            include_tables=True
+        )
+        
+        if html_content:
+            # Convert to Markdown for better code preservation
+            markdown_content = md(html_content, heading_style="ATX")
+            return f"Technical content from {url}:\n\n{markdown_content[:8000]}"
+        else:
+            # Fallback to plain text
+            text_content = trafilatura.extract(downloaded)
+            return f"Content from {url}:\n\n{text_content[:8000]}"
+            
+    except Exception as e:
+        return f"Could not extract technical content from {url}: {e}"
+
 # Main function to generate blog content
 async def generate_blog_post(topic: str, user_prompt: str = None, reference_links: list[str] = None) -> str:
     """Generate a blog post about the given topic."""
@@ -88,9 +151,21 @@ async def generate_blog_post(topic: str, user_prompt: str = None, reference_link
         prompt_parts.append(f"\nUser requirements: {user_prompt}")
     
     if reference_links:
-        prompt_parts.append("\nReference links to consider:")
+        prompt_parts.append("\nReference content from the provided links:")
         for link in reference_links:
-            prompt_parts.append(f"- {link}")
+            # Use the new technical content extraction
+            try:
+                content = await extract_technical_content(link)
+                
+                # DEBUG: Print first 500 chars to see improvement
+                print(f"\nDEBUG - First 500 chars from {link} (cleaned):")
+                print(content[:500])
+                print("=" * 50)
+                
+                prompt_parts.append(f"\n{content}")
+            except Exception as e:
+                print(f"Could not fetch {link}: {e}")
+                prompt_parts.append(f"\nCould not fetch {link}: {e}")
     
     prompt_parts.append("""
 The post should:
@@ -100,7 +175,7 @@ The post should:
 - Be well-structured with clear sections
 - Aim for 500-800 words
 
-Use the review_page_content tool to check your work and iterate if the score is below 8.
+Use the review_page_content tool to check your work and iterate if needed.
 """)
     
     full_prompt = "\n".join(prompt_parts)

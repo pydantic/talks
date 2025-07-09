@@ -8,8 +8,10 @@ A multi-agent MCP demo project
 
 ```bash
 uv add pydantic-ai
-uv add logfire  
-uv add mcp 
+uv add logfire 
+uv add mcp
+uv add httpx
+uv add trafilatura markdownify
 ```
 
 ### Set API keys in your CLI
