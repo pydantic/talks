@@ -14,14 +14,14 @@ server = FastMCP("Pydantic Ghost Writer")
 
 @server.tool()
 async def generate_blog_post(
-    topic: str, user_prompt: str = "", reference_links: list[str] = None
+    topic: str, user_instructions: str = "", reference_links: list[str] = []
 ) -> str:
     """
     Generate a blog post about the given topic using Pydantic's voice and style.
 
     Args:
         topic: The topic to write about
-        user_prompt: Additional requirements or context from the user
+        user_instructions: Additional requirements or context from the user
         reference_links: Optional list of reference URLs to consider
 
     Returns:
@@ -29,7 +29,7 @@ async def generate_blog_post(
     """
     return await generate_blog_post(
         topic=topic,
-        user_prompt=user_prompt if user_prompt else None,
+        user_instructions=user_instructions if user_instructions else None,
         reference_links=reference_links,
     )
 

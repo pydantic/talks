@@ -12,7 +12,7 @@ writer_http_client = httpx.AsyncClient()
 """An HTTP client for the writer agent."""
 
 # Configure Logfire for observability
-# logfire.configure(scrubbing=False)
+logfire.configure(scrubbing=False)
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 logfire.instrument_httpx(writer_http_client, capture_response_body=True)
@@ -45,6 +45,12 @@ def load_prompt(
 @dataclass
 class WriterAgentDeps:
     http_client: httpx.AsyncClient
+    author: str
+    author_role: str
+    user_requirements: str
+    opinions: str
+    examples: str
+    reference_links: list[str]
 
 
 # Writer agent for generating blog content
@@ -53,6 +59,27 @@ writer_agent = Agent(
     deps_type=WriterAgentDeps,
     instructions=load_prompt(role="writer", content_type="blog_post"),
 )
+
+
+@writer_agent.instructions
+def add_user_info(ctx: RunContext[WriterAgentDeps]) -> str:
+    """Add user information and instructions to the prompt."""
+    instructions = ""
+    deps = ctx.deps
+    if deps.author:
+        instructions += f"Author: {deps.author}\n"
+    if deps.author_role:
+        instructions += f"Author role: {deps.author_role}\n"
+    if deps.user_requirements:
+        instructions += f"User requirements: {deps.user_requirements}\n"
+    if deps.opinions:
+        instructions += f"Opinions: {deps.opinions}\n"
+    if deps.examples:
+        instructions += f"Examples: {deps.examples}\n"
+    if deps.reference_links:
+        instructions += f"Reference links that you may query using the 'extract_technical_content' tool: {', '.join(deps.reference_links)}"
+
+    return instructions
 
 
 # Reviewer agent for quality control
@@ -132,39 +159,27 @@ async def generate_blog_post(
     topic: str,
     author: str = "",
     author_role: str = "",
-    user_prompt: str = "",
+    user_requirements: str = "",
     opinions: str = "",
     examples: str = "",
     reference_links: list[str] = [],
 ) -> str:
     """Generate a blog post about the given topic."""
 
-    # Build the prompt with user input and references
-    prompt_parts = [f"Write a blog post about {topic}."]
-    if author:
-        prompt_parts.append(f"\nAuthor: {author}")
-    if author_role:
-        prompt_parts.append(f"\nAuthor Role: {author_role}")
-    if opinions:
-        prompt_parts.append(f"\nOpinions: {opinions}")
-    if examples:
-        prompt_parts.append(f"\nExamples: {examples}")
-    if user_prompt:
-        prompt_parts.append(f"\nUser requirements: {user_prompt}")
-
-    if reference_links:
-        prompt_parts.append("\nReference links:")
-        prompt_parts.extend("\n".join(reference_links))
-
-    prompt_parts.append(
-        "Use the review_page_content tool to check your work and iterate if needed. "
-        "Use the extract_technical_content tool to fetch the content of the reference links if needed."
+    deps = WriterAgentDeps(
+        http_client=writer_http_client,
+        author=author,
+        author_role=author_role,
+        user_requirements=user_requirements,
+        opinions=opinions,
+        examples=examples,
+        reference_links=reference_links,
     )
 
-    full_prompt = "\n".join(prompt_parts)
     async with writer_http_client:
         response = await writer_agent.run(
-            full_prompt, deps=WriterAgentDeps(http_client=writer_http_client)
+            f"Write a blog post about {topic}. Use the 'review_page_content' tool to check your work and iterate if needed.",
+            deps=deps,
         )
     return response.output
 
@@ -183,7 +198,7 @@ async def main():
     author_role = input("Author role (e.g., 'Founder', 'Core Developer'): ").strip()
 
     print("\nContent guidance:")
-    user_prompt = input("  Additional requirements/direction: ").strip()
+    user_requirements = input("  Additional requirements/direction: ").strip()
     opinions = input("  Specific opinions or takes to include: ").strip()
     examples = input("  Specific examples or case studies to mention: ").strip()
 
@@ -200,7 +215,7 @@ async def main():
         topic=topic,
         author=author,
         author_role=author_role,
-        user_prompt=user_prompt,
+        user_requirements=user_requirements,
         opinions=opinions,
         examples=examples,
         reference_links=reference_links,
