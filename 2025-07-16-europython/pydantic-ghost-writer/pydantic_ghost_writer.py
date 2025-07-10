@@ -1,12 +1,15 @@
 import asyncio
+from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
+import httpx
 import logfire
-from pydantic_ai import Agent
-from typing_extensions import TypedDict
+import trafilatura
+from pydantic_ai import Agent, RunContext
 
 # Configure Logfire for observability
-logfire.configure(scrubbing=False)
+# logfire.configure(scrubbing=False)
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 
@@ -21,33 +24,29 @@ def load_prompt(
     prompt_parts = []
 
     # Load shared/global rules
-    try:
-        with open("prompts/shared/global_styleguide.txt", "r") as f:
-            prompt_parts.append(f.read())
-    except FileNotFoundError:
-        pass
+    prompt_parts.append((PROMPTS_DIR / "shared" / "global_styleguide.txt").read_text())
 
     # Load brand voice (if writer)
     if role == "writer":
-        try:
-            with open("prompts/shared/brand_guidelines.txt", "r") as f:
-                prompt_parts.append(f.read())
-        except FileNotFoundError:
-            pass
+        prompt_parts.append(
+            (PROMPTS_DIR / "shared" / "brand_guidelines.txt").read_text()
+        )
 
     # Load content-specific prompt
-    try:
-        with open(f"prompts/{role}/{content_type}.txt", "r") as f:
-            prompt_parts.append(f.read())
-    except FileNotFoundError:
-        prompt_parts.append(f"No specific prompt found for {role}/{content_type}")
+    prompt_parts.append((PROMPTS_DIR / role / f"{content_type}.txt").read_text())
 
     return "\n\n".join(prompt_parts)
+
+
+@dataclass
+class WriterAgentDeps:
+    http_client: httpx.AsyncClient
 
 
 # Writer agent for generating blog content
 writer_agent = Agent(
     "anthropic:claude-3-5-sonnet-latest",
+    deps_type=WriterAgentDeps,
     instructions=load_prompt(role="writer", content_type="blog_post"),
 )
 
@@ -107,72 +106,21 @@ async def get_brand_guidelines(query: str = "") -> str:
     return f"Brand guidelines for {query!r}:\n\n{guidelines}"
 
 
-# Tool to fetch web content
-@writer_agent.tool_plain
-async def fetch_web_content(url: str) -> str:
-    """
-    Fetch and return the content from a web URL.
-
-    Args:
-        url: The URL to fetch content from
-    """
-    try:
-        import httpx
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10.0)
-            response.raise_for_status()
-            # Limit content length to avoid overwhelming the context
-            content = response.text[:8000]
-            return f"Content from {url}:\n\n{content}"
-    except Exception as e:
-        return f"Could not fetch {url}: {e}"
-
-
-@writer_agent.tool_plain
-async def debug_web_content(url: str) -> str:
-    """Debug: Show what content we're actually getting from a URL."""
-    try:
-        import httpx
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10.0)
-            response.raise_for_status()
-            content = response.text[:2000]  # Show first 2000 chars
-            return f"Raw content from {url}:\n\n{content}"
-    except Exception as e:
-        return f"Error: {e}"
-
-
-async def extract_technical_content(url: str) -> str:
+@writer_agent.tool
+async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: str) -> str:
     """Extract technical content optimized for code snippets and documentation."""
-    try:
-        import trafilatura
-        from markdownify import markdownify as md
 
-        # Fetch and extract with technical optimizations
-        downloaded = trafilatura.fetch_url(url)
+    response = await ctx.deps.http_client.get(url)
 
-        # Try HTML output first (better for code)
-        html_content = trafilatura.extract(
-            downloaded,
-            output_format="html",
-            favor_precision=True,
-            include_formatting=True,
-            include_tables=True,
-        )
+    extracted_content = trafilatura.extract(
+        response.text,
+        output_format="html",
+        favor_precision=True,
+        include_formatting=True,
+        include_tables=True,
+    )
 
-        if html_content:
-            # Convert to Markdown for better code preservation
-            markdown_content = md(html_content, heading_style="ATX")
-            return f"Technical content from {url}:\n\n{markdown_content[:8000]}"
-        else:
-            # Fallback to plain text
-            text_content = trafilatura.extract(downloaded)
-            return f"Content from {url}:\n\n{text_content[:8000]}"
-
-    except Exception as e:
-        return f"Could not extract technical content from {url}: {e}"
+    return extracted_content or "no content available"
 
 
 # Main function to generate blog content
@@ -201,28 +149,19 @@ async def generate_blog_post(
         prompt_parts.append(f"\nUser requirements: {user_prompt}")
 
     if reference_links:
-        prompt_parts.append("\nReference content from the provided links:")
-        for link in reference_links:
-            # Use the new technical content extraction
-            try:
-                content = await extract_technical_content(link)
-
-                # DEBUG: Print first 500 chars to see improvement
-                print(f"\nDEBUG - First 500 chars from {link} (cleaned):")
-                print(content[:500])
-                print("=" * 50)
-
-                prompt_parts.append(f"\n{content}")
-            except Exception as e:
-                print(f"Could not fetch {link}: {e}")
-                prompt_parts.append(f"\nCould not fetch {link}: {e}")
+        prompt_parts.append("\nReference links:")
+        prompt_parts.extend("\n".join(reference_links))
 
     prompt_parts.append(
-        "Use the review_page_content tool to check your work and iterate if needed."
+        "Use the review_page_content tool to check your work and iterate if needed. "
+        "Use the extract_technical_content tool to fetch the content of the reference links if needed."
     )
 
     full_prompt = "\n".join(prompt_parts)
-    response = await writer_agent.run(full_prompt)
+    async with httpx.AsyncClient() as client:
+        response = await writer_agent.run(
+            full_prompt, deps=WriterAgentDeps(http_client=client)
+        )
     return response.output
 
 
@@ -240,14 +179,14 @@ async def main():
     author_role = input("Author role (e.g., 'Founder', 'Core Developer'): ").strip()
 
     print("\nContent guidance:")
-    user_prompt = input("Additional requirements/direction: ").strip()
-    opinions = input("Specific opinions or takes to include: ").strip()
-    examples = input("Specific examples or case studies to mention: ").strip()
+    user_prompt = input("  Additional requirements/direction: ").strip()
+    opinions = input("  Specific opinions or takes to include: ").strip()
+    examples = input("  Specific examples or case studies to mention: ").strip()
 
     # Get reference links
     reference_links: list[str] = []
     while True:
-        link = input("Enter a reference link (or press Enter to finish): ").strip()
+        link = input("  Enter a reference link (or press Enter to finish): ").strip()
         if not link:
             break
         reference_links.append(link)
