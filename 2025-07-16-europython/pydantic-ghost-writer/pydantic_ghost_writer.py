@@ -8,10 +8,14 @@ import logfire
 import trafilatura
 from pydantic_ai import Agent, RunContext
 
+writer_http_client = httpx.AsyncClient()
+"""An HTTP client for the writer agent."""
+
 # Configure Logfire for observability
 # logfire.configure(scrubbing=False)
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
+logfire.instrument_httpx(writer_http_client, capture_response_body=True)
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
@@ -158,9 +162,9 @@ async def generate_blog_post(
     )
 
     full_prompt = "\n".join(prompt_parts)
-    async with httpx.AsyncClient() as client:
+    async with writer_http_client:
         response = await writer_agent.run(
-            full_prompt, deps=WriterAgentDeps(http_client=client)
+            full_prompt, deps=WriterAgentDeps(http_client=writer_http_client)
         )
     return response.output
 
