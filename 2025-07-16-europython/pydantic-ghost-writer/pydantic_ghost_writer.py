@@ -6,6 +6,7 @@ from typing import TypedDict
 import httpx
 import logfire
 import trafilatura
+from pydantic import HttpUrl
 from pydantic_ai import Agent, RunContext
 
 writer_http_client = httpx.AsyncClient()
@@ -138,10 +139,10 @@ async def get_brand_guidelines(query: str = "") -> str:
 
 
 @writer_agent.tool
-async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: str) -> str:
+async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: HttpUrl) -> str:
     """Extract technical content optimized for code snippets and documentation."""
 
-    response = await ctx.deps.http_client.get(url)
+    response = await ctx.deps.http_client.get(str(url))
 
     extracted_content = trafilatura.extract(
         response.text,
