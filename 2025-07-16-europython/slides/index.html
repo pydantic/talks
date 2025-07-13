@@ -84,15 +84,129 @@
             </div>
           </div>
         </section>
-        <section>
-          <h2>Implementing the ghost writer</h2>
-            <pre>
-              <code data-trim class="language-python" data-line-numbers>
+        <section data-auto-animate>
+            <h2>Implementing the ghost writer</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-5|3|1-5">
                 writer_agent = Agent(
                     'anthropic:claude-3-7-sonnet-latest',
                     output_type=str,
                     instructions='You are writing a blog post for the Pydantic blog.',
                 )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+            <h2>Implementing the ghost writer</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-5">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-3-7-sonnet-latest',
+                    output_type=str,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+            <h2>Implementing the ghost writer</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="10|1-11">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-3-7-sonnet-latest',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+            <h2>Implementing the ghost writer</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="13-17">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-3-7-sonnet-latest',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+
+                await writer_agent.run(
+                  'Write a blog post about...',
+                  deps=AgentDeps(blog_author='Victorien', ...),
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+            <h2>Implementing the ghost writer</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers>
+                @writer_agent.instructions
+                def add_author_info(ctx: RunContext[AgentDeps]) -> str:
+                    return f"""
+                    Author: {ctx.deps.blog_author}
+                    Links you may query: {', '.join(ctx.deps.reference_links)}
+                    """"
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+            <h2>Introducing tools</h2>
+        </section>
+        <section data-auto-animate>
+            <h2>Introducing tools</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-12|2">
+                @agent.tool_plain
+                def extract_technical_content(url: HttpUrl) -> str:
+                    """Extract technical content from one of the reference links."""
+
+                    response = requests.get(str(url))
+
+                    return trafilatura.extract(
+                        response.text,
+                        output_format="html",
+                        favor_precision=True,
+                        include_tables=True,
+                    )
+              </code>
+            </pre>
+        </section>
+        <section>
+            <h2>Quick recap</h2>
+            <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers>
+                writer_agent = Agent(
+                    'anthropic:claude-3-7-sonnet-latest',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+
+                @writer_agent.instructions
+                def add_author_info(ctx: RunContext[AgentDeps]) -> str:
+                    ...
+
+                @agent.tool_plain
+                def extract_technical_content(url: HttpUrl) -> str:
+                    ...
               </code>
             </pre>
         </section>
