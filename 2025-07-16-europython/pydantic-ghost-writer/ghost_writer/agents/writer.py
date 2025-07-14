@@ -1,15 +1,17 @@
 """The main agent, writing the content."""
 
+import os
 from dataclasses import dataclass
 
 import httpx
 import trafilatura
 from pydantic import HttpUrl
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.tools import ToolFuncEither
 
-from ghost_writer.agents.reviewer import Score, reviewer_agent
+from ghost_writer.agents.github import ask_user_approval, create_blog_pr
+from ghost_writer.agents.reviewer import Review, reviewer_agent
 from ghost_writer.agents.shared import get_guidelines, load_prompt
-from ghost_writer.agents.github import create_blog_pr, ask_user_approval
 
 
 @dataclass
@@ -23,10 +25,15 @@ class WriterAgentDeps:
     reference_links: list[str]
 
 
+writer_tools: list[ToolFuncEither[WriterAgentDeps]] = [get_guidelines]
+if 'GITHUB_TOKEN' in os.environ:
+    # These tools are meant for the Github PR creation:
+    writer_tools.extend([create_blog_pr, ask_user_approval])
+
 writer_agent = Agent(
     'anthropic:claude-3-7-sonnet-latest',
     deps_type=WriterAgentDeps,
-    tools=[get_guidelines, create_blog_pr, ask_user_approval],
+    tools=writer_tools,
     instructions=load_prompt(role='writer', content_type='blog_post'),
 )
 
@@ -54,6 +61,7 @@ def add_user_info(ctx: RunContext[WriterAgentDeps]) -> str:
 
 # Writer agent-specific tools:
 
+
 @writer_agent.tool
 async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: HttpUrl) -> str:
     """Extract technical content optimized for code snippets and documentation."""
@@ -72,7 +80,7 @@ async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: HttpU
 
 
 @writer_agent.tool_plain
-async def review_page_content(content: str) -> Score:
+async def review_page_content(content: str) -> Review:
     """Review the content and return a score with feedback."""
     result = await reviewer_agent.run(f'Review this content:\n\n{content}')
     return result.output

@@ -21,7 +21,7 @@
     />
 
     <!-- Theme used for syntax highlighted code -->
-    <link rel="stylesheet" href="plugin/highlight/agate.css" />
+    <link rel="stylesheet" href="plugin/highlight/github-dark.css" />
     <style>
       .twocolumn {
         display: flex;
@@ -205,7 +205,7 @@
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="1-5|3|1-5">
                 writer_agent = Agent(
-                    'anthropic:claude-3-7-sonnet-latest',
+                    'anthropic:claude-sonnet-4-0',
                     output_type=str,
                     instructions='You are writing a blog post for the Pydantic blog.',
                 )
@@ -222,7 +222,7 @@
                     reference_links: list[str]
 
                 writer_agent = Agent(
-                    'anthropic:claude-3-7-sonnet-latest',
+                    'anthropic:claude-sonnet-4-0',
                     output_type=str,
                     instructions='You are writing a blog post for the Pydantic blog.',
                 )
@@ -239,7 +239,7 @@
                     reference_links: list[str]
 
                 writer_agent = Agent(
-                    'anthropic:claude-3-7-sonnet-latest',
+                    'anthropic:claude-sonnet-4-0',
                     output_type=str,
                     deps_type=AgentDeps,
                     instructions='You are writing a blog post for the Pydantic blog.',
@@ -257,7 +257,7 @@
                     reference_links: list[str]
 
                 writer_agent = Agent(
-                    'anthropic:claude-3-7-sonnet-latest',
+                    'anthropic:claude-sonnet-4-0',
                     output_type=str,
                     deps_type=AgentDeps,
                     instructions='You are writing a blog post for the Pydantic blog.',
@@ -291,10 +291,11 @@
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="1-12|2">
                 @agent.tool_plain
-                def extract_technical_content(url: HttpUrl) -> str:
+                async def extract_technical_content(url: HttpUrl) -> str:
                     """Extract technical content from one of the reference links."""
 
-                    response = requests.get(str(url))
+                    async with httpx.AsyncClient() as client:
+                      response = client.get(str(url))
 
                     return trafilatura.extract(
                         response.text,
@@ -310,7 +311,7 @@
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers>
                 writer_agent = Agent(
-                    'anthropic:claude-3-7-sonnet-latest',
+                    'anthropic:claude-sonnet-4-0',
                     output_type=str,
                     deps_type=AgentDeps,
                     instructions='You are writing a blog post for the Pydantic blog.',
@@ -326,18 +327,19 @@
               </code>
             </pre>
         </section>
-		
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
             <code data-trim class="language-python" data-line-numbers="1-10|1-3">
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
-                  reason: str
+
+                  feedback: str
+                  """Feedback on what could be improved. Should contain specific examples."""
 
 
               reviewer_agent = Agent(
-                  'anthropic:claude-3-7-sonnet-latest',
+                  'anthropic:claude-sonnet-4-0',
                   output_type=Review,
                   instructions='Review and provide a score for a blog post.',
               )
@@ -350,11 +352,11 @@
             <code data-trim class="language-python" data-line-numbers=12-15|1-15>
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
-                  reason: str
+                  feedback: str
 
 
               reviewer_agent = Agent(
-                  'anthropic:claude-3-7-sonnet-latest',
+                  'anthropic:claude-sonnet-4-0',
                   output_type=Review,
                   instructions='Review and provide a score for a blog post.',
               )
@@ -378,7 +380,7 @@
 		<section>
 			(A little teaser)
 			<h3>Human-seeded evals</h3>
-			<p class="small"><a href="https://www.youtube.com/watch?v=wk6rPZ6qJSY" target="_blank">www.youtube.com/watch?v=wk6rPZ6qJSY</a></p>
+			<p class="small"><a href="https://www.youtube.com/watch?v=wk6rPZ6qJSY" target="_blank">youtube.com/watch?v=wk6rPZ6qJSY</a></p>
 		</section>
 		<section data-background="assets/grid.png">
           <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />

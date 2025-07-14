@@ -7,7 +7,11 @@ writer_http_client = httpx.AsyncClient()
 """An HTTP client for the writer agent."""
 
 # Configure Logfire for observability
-logfire.configure(scrubbing=False, console=logfire.ConsoleOptions(show_project_link=False))
+logfire.configure(
+    scrubbing=False,
+    send_to_logfire='if-token-present',
+    console=logfire.ConsoleOptions(show_project_link=False),
+)
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 logfire.instrument_httpx(writer_http_client, capture_all=True)

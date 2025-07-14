@@ -1,19 +1,22 @@
 """GitHub integration tools for creating pull requests with blog posts."""
 
-import os
 import base64
-from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+import os
+from datetime import date, datetime
+from textwrap import dedent
+from typing import TYPE_CHECKING
+
 import httpx
 from pydantic import BaseModel
 from pydantic_ai import RunContext
+from rich import print
+from rich.prompt import Confirm
 
-# Use TYPE_CHECKING to avoid circular import at runtime
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # circ. import
     from ghost_writer.agents.writer import WriterAgentDeps
 else:
-    # At runtime, we'll get the type from the function parameter
-    WriterAgentDeps = None
+    # Pydantic AI doesn't need to know about the dependency type at runtime
+    WriterAgentDeps = object
 
 
 class GitHubPRResponse(BaseModel):
@@ -23,211 +26,173 @@ class GitHubPRResponse(BaseModel):
 
 
 async def create_blog_pr(
-    ctx: RunContext[WriterAgentDeps], 
-    title: str, 
+    ctx: RunContext[WriterAgentDeps],
+    title: str,
     content: str,
-    description: str = "",
-    author_name: Optional[str] = None
 ) -> GitHubPRResponse:
     """
     Create a pull request with a blog post to the pydantic.dev repository.
-    
+
     Args:
-        title: The title of the blog post (will be used for filename and PR title)
+        title: The title of the blog post (will be used for filename and pull request title)
         content: The full markdown content of the blog post
-        description: Optional description for the PR
-        author_name: Optional author name (defaults to deps.author)
     """
-    github_token = os.getenv('GITHUB_TOKEN')
+    github_token = os.environ['GITHUB_TOKEN']
     if not github_token:
-        raise ValueError("GITHUB_TOKEN environment variable is required")
-    
-    # Use author from dependencies if not provided
-    author = author_name or ctx.deps.author or "Ghost Writer"
-    
+        raise ValueError('GITHUB_TOKEN environment variable is required')
+
+    author = ctx.deps.author or 'Ghost Writer'
+
     # Generate filename from title (lowercase, replace spaces with hyphens)
-    date_str = datetime.now().strftime("%Y-%m-%d")
+    date_str = date.today().isoformat()
     filename_base = title.lower().replace(' ', '-').replace('/', '-')
     # Remove any characters that aren't alphanumeric, hyphens, or underscores
     filename_base = ''.join(c for c in filename_base if c.isalnum() or c in '-_')
-    filename = f"{date_str}-{filename_base}.md"
-    
-    # Ensure content is properly formatted markdown
+    filename = f'{date_str}-{filename_base}.md'
+
+    # Add title as header if not already present
     if not content.strip().startswith('#'):
-        # Add title as header if not already present
-        formatted_content = f"# {title}\n\n{content}"
+        formatted_content = f'# {title}\n\n{content}'
     else:
         formatted_content = content
-    
+
     # Add metadata if not present
     if not formatted_content.startswith('---'):
-        metadata = f"""---
-title: "{title}"
-date: {datetime.now().strftime("%Y-%m-%d")}
-author: "{author}"
-ai_generated: true
-ai_system: "Pydantic Ghost Writer (Claude AI)"
-generated_date: "{datetime.now().isoformat()}"
----
+        metadata = dedent(
+            f"""---
+            title: "{title}"
+            date: {date_str}
+            author: "{author}"
+            ai_generated: true
+            ai_system: "Pydantic Ghost Writer (Claude AI)"
+            generated_date: "{datetime.now().isoformat()}"
+            ---
 
-"""
+            """
+        )
         formatted_content = metadata + formatted_content
-    
+
     # GitHub API setup
-    repo_owner = "pydantic"
-    repo_name = "pydantic.dev"
-    base_branch = "main"
-    new_branch = f"blog-post-{filename_base}-{date_str}"
-    file_path = f"docs/blog/{filename}"
-    
+    repo_owner = 'pydantic'
+    repo_name = 'pydantic.dev'
+    base_branch = 'main'
+    new_branch = f'blog-post-{filename_base}-{date_str}'
+    file_path = f'docs/blog/{filename}'
+
     headers = {
-        "Authorization": f"token {github_token}",
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Pydantic-Ghost-Writer"
+        'Authorization': f'token {github_token}',
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Pydantic-Ghost-Writer',
     }
-    
+
     async with httpx.AsyncClient() as client:
-        try:
-            # Get the default branch SHA
-            default_branch_response = await client.get(
-                f"https://api.github.com/repos/{repo_owner}/{repo_name}/branches/{base_branch}",
-                headers=headers
-            )
-            default_branch_response.raise_for_status()
-            base_sha = default_branch_response.json()["commit"]["sha"]
-            
-            # Create new branch
-            create_branch_response = await client.post(
-                f"https://api.github.com/repos/{repo_owner}/{repo_name}/git/refs",
-                headers=headers,
-                json={
-                    "ref": f"refs/heads/{new_branch}",
-                    "sha": base_sha
-                }
-            )
-            create_branch_response.raise_for_status()
-            
-            # Create the file with clear AI attribution in commit message
-            content_encoded = base64.b64encode(formatted_content.encode()).decode()
-            create_file_response = await client.put(
-                f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}",
-                headers=headers,
-                json={
-                    "message": f"🤖 Add AI-generated blog post: {title}\n\nGenerated by Pydantic Ghost Writer (Claude AI)",
-                    "content": content_encoded,
-                    "branch": new_branch
-                }
-            )
-            create_file_response.raise_for_status()
-            
-            # Create pull request with clear AI indicators
-            pr_title = f"🤖 AI Blog Post: {title}"
-            pr_body = description or f"""
-## 🤖 AI-Generated Blog Post: {title}
+        # Get the default branch SHA
+        default_branch_response = await client.get(
+            f'https://api.github.com/repos/{repo_owner}/{repo_name}/branches/{base_branch}',
+            headers=headers,
+        )
+        default_branch_response.raise_for_status()
+        base_sha = default_branch_response.json()['commit']['sha']
 
-This PR adds a new blog post **generated by Pydantic Ghost Writer** using Claude AI.
+        # Create new branch
+        create_branch_response = await client.post(
+            f'https://api.github.com/repos/{repo_owner}/{repo_name}/git/refs',
+            headers=headers,
+            json={'ref': f'refs/heads/{new_branch}', 'sha': base_sha},
+        )
+        create_branch_response.raise_for_status()
 
-### Content Summary
-- **Human Author Attribution:** {author}
-- **AI System:** Pydantic Ghost Writer (Claude AI)
-- **Topic:** {title}
-- **File:** `{file_path}`
-- **Generated:** {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}
+        # Create the file with clear AI attribution in commit message
+        create_file_response = await client.put(
+            f'https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}',
+            headers=headers,
+            json={
+                'message': f'🤖 Add AI-generated blog post: {title}\n\nGenerated by Pydantic Ghost Writer',
+                'content': base64.b64encode(formatted_content.encode()).decode(),
+                'branch': new_branch,
+            },
+        )
+        create_file_response.raise_for_status()
 
-### ⚠️ AI Content Review Required
-This content was generated by AI and requires human review before merging:
+        # Create pull request with clear AI indicators
+        pr_title = f'🤖 AI Blog Post: {title}'
+        pr_body = dedent(
+            f"""
+            ## 🤖 AI-Generated Blog Post: {title}
 
-- [ ] Content is technically accurate
-- [ ] Writing style matches Pydantic voice
-- [ ] Markdown formatting is correct
-- [ ] Code examples (if any) are tested and work
-- [ ] No hallucinated information or incorrect claims
-- [ ] SEO and readability considerations addressed
-- [ ] Human author attribution is appropriate
+            This PR adds a new blog post **generated by Pydantic Ghost Writer** using Claude AI.
 
-### 🔍 Review Guidelines for AI Content
-- Verify all technical claims and code examples
-- Check for consistency with Pydantic documentation
-- Ensure the tone matches our brand voice
-- Look out for potential AI hallucinations or inaccuracies
+            ### Content Summary
+            - **Human Author Attribution:** {author}
+            - **AI System:** Pydantic Ghost Writer (Claude AI)
+            - **Topic:** {title}
+            - **File:** `{file_path}`
+            - **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
 
----
-*🤖 This PR was automatically generated by **Pydantic Ghost Writer** using Claude AI*
-"""
-            
-            create_pr_response = await client.post(
-                f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls",
-                headers=headers,
-                json={
-                    "title": pr_title,
-                    "body": pr_body,
-                    "head": new_branch,
-                    "base": base_branch
-                }
-            )
-            create_pr_response.raise_for_status()
-            
-            pr_data = create_pr_response.json()
-            
-            # Try to add labels to indicate AI-generated content
-            try:
-                await client.post(
-                    f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr_data['number']}/labels",
-                    headers=headers,
-                    json=["ai-generated", "blog", "needs-review"]
-                )
-            except Exception:
-                # Labels might not exist or we might not have permission - that's okay
-                pass
-            
-            return GitHubPRResponse(
-                pr_url=pr_data["html_url"],
-                pr_number=pr_data["number"],
-                message=f"Successfully created AI-generated PR #{pr_data['number']}: {pr_title}"
-            )
-            
-        except httpx.HTTPStatusError as e:
-            error_detail = ""
-            try:
-                error_data = e.response.json()
-                error_detail = f" - {error_data.get('message', 'Unknown error')}"
-            except Exception:
-                pass
-            raise ValueError(f"GitHub API error: {e.response.status_code}{error_detail}")
-        except Exception as e:
-            raise ValueError(f"Failed to create PR: {str(e)}")
+            ### ⚠️ AI Content Review Required
+            This content was generated by AI and requires human review before merging:
+
+            - [ ] Content is technically accurate
+            - [ ] Writing style matches Pydantic voice
+            - [ ] Markdown formatting is correct
+            - [ ] Code examples (if any) are tested and work
+            - [ ] No hallucinated information or incorrect claims
+            - [ ] SEO and readability considerations addressed
+            - [ ] Human author attribution is appropriate
+
+            ### 🔍 Review Guidelines for AI Content
+            - Verify all technical claims and code examples
+            - Check for consistency with Pydantic documentation
+            - Ensure the tone matches our brand voice
+            - Look out for potential AI hallucinations or inaccuracies
+
+            ---
+            *🤖 This PR was automatically generated by **Pydantic Ghost Writer** using Claude AI*
+            """
+        )
+
+        create_pr_response = await client.post(
+            f'https://api.github.com/repos/{repo_owner}/{repo_name}/pulls',
+            headers=headers,
+            json={'title': pr_title, 'body': pr_body, 'head': new_branch, 'base': base_branch},
+        )
+        create_pr_response.raise_for_status()
+
+        pr_data = create_pr_response.json()
+
+        # Try to add labels to indicate AI-generated content
+        await client.post(
+            f'https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr_data["number"]}/labels',
+            headers=headers,
+            json=['ai-generated', 'blog', 'needs-review'],
+        )
+
+        return GitHubPRResponse(
+            pr_url=pr_data['html_url'],
+            pr_number=pr_data['number'],
+            message=f'Successfully created AI-generated PR #{pr_data["number"]}: {pr_title}',
+        )
 
 
-async def ask_user_approval(
-    ctx: RunContext[WriterAgentDeps],
-    blog_title: str,
-    blog_content: str
-) -> bool:
+async def ask_user_approval(blog_title: str, blog_content: str) -> bool:
     """
     Ask the user if they want to create a PR with the generated blog post.
-    
+
     Args:
         blog_title: The title of the blog post
         blog_content: The full content to be submitted
-        
+
     Returns:
         True if user approves, False otherwise
     """
-    print("\n" + "="*60)
-    print("BLOG POST READY FOR REVIEW")
-    print("="*60)
-    print(f"Title: {blog_title}")
-    print(f"Content Length: {len(blog_content)} characters")
-    print("\nFirst 300 characters of content:")
-    print("-" * 40)
-    print(blog_content[:300] + "..." if len(blog_content) > 300 else blog_content)
-    print("-" * 40)
-    
-    while True:
-        response = input("\nWould you like to create a PR with this blog post? (y/n): ").strip().lower()
-        if response in ['y', 'yes']:
-            return True
-        elif response in ['n', 'no']:
-            return False
-        else:
-            print("Please enter 'y' for yes or 'n' for no.")
+    print('\n' + '=' * 60)
+    print('BLOG POST READY FOR REVIEW')
+    print('=' * 60)
+    print(f'Title: {blog_title}')
+    print(f'Content Length: {len(blog_content)} characters')
+    print('\nFirst 300 characters of content:')
+    print('-' * 40)
+    print(blog_content[:300] + '...' if len(blog_content) > 300 else blog_content)
+    print('-' * 40)
+
+    return Confirm.ask('Would you like to create a PR with this blog post?')
