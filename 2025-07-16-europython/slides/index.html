@@ -86,6 +86,11 @@
             Discuss opportunities and engineering challenges
           </aside>
         </section>
+		<section>
+			<h2>LLM prototype hell </h2>
+			<img src="./assets/excitment.jpg" class="r-stretch" alt="LLM Prototype Hell" />
+			<p class="small">- Thanks to Hugo Bowne-Anderson</p>
+		</section>
         <section data-background="assets/grid.png">
           <h2>Setting the scene</h2>
           <ul>
@@ -119,12 +124,20 @@
         <section>
           <img src="./assets/ghost-writer.jpg" alt="Ghost Writer diagram" />
           <aside class="notes">
-            This was my lazy and half baked system diagram - first cut. Perhaps
+            <p>This was my lazy and half baked system diagram - first cut. Perhaps
             unsurprisingly we decided to scope our project down, we started with
             blog post outputs, but we factored the project in a way to ensure it
-            could scale if we wanted to add further content types over time.
+            could scale if we wanted to add further content types over time.</p>
           </aside>
         </section>
+		<section>
+			<h2 class="r-fit-text">Invest in your own mental model</h2>
+			<p class="fragment">Before exploring complex options, start simple</p>
+			<p class="fragment">Focus on a specific use-case, a clear problem or pain point, and then expand. Don't try to boil the ocean.</p>
+			<aside class="notes">			
+				<p>Perhaps it's obvious to say, but I think it's highly valuable to take the time to step back  and do some simple diagrams which consider the overall architecture and flow of the system.</p>
+				<p>Do you even need agents? DO you even need LLMs? Does your desired automation require consistency and determinism, or fluidity and "valuable" hallucinations? Rather than thinking of everything as starting at non-determinism, maybe reverse your mental model and start imaginging your system as normal computer logic, and then work out which inflection points must escape that determinism for effectiveness.</p>	
+		</section>
         <section>
 			<h2 class="r-fit-text">When (and when not) to use agents</h2>
           <blockquote class="small left">            
