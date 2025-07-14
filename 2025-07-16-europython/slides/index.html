@@ -38,6 +38,7 @@
     <div class="reveal">
       <div class="slides">
         <section data-background="assets/grid.png">
+          <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />
           <h1 class="r-fit-text">The Pydantic stack for AI apps</h1>
           <p>EuroPython, Prague, 16 July 2025</p>
         </section>
@@ -62,8 +63,8 @@
           <h2>The Pydantic Stack</h2>
           <img src="./assets/pydantic-stack.png" alt="Pydantic Stack" />
         </section>
-		<section>
-          <h2>Agents, models, tools, MCP, A2A</h2>
+        <section>
+          <h2 class="r-fit-text">Agents, models, tools, MCP, A2A</h2>
           <ul>
             <li class="fragment">
               Agents: LLMs + agency (interaction with the world)
@@ -79,23 +80,45 @@
             Discuss opportunities and engineering challenges
           </aside>
         </section>
-        <section>
+        <section data-background="assets/grid.png">
           <h2>Setting the scene</h2>
-		  <ul>
-			<li class="fragment">Docs bash week</li>
-			<li class="fragment">Some obvious failure modes - using LLMs ad hoc, consistency of style, differing levels of English </li>
-			<li class="fragment">Can we work smarter, not harder?</li>
-		  </ul>
-		  <aside class="notes">
-			<p>A few weeks ago we did a docs bash week with the whole team. We had fallen behind on our docs and wanted to give them some dedicated attention, make sure that it was visibly prioritised. </p>
-			<p>This raised some obvious questions about how we could improve our documentation process and ensure that we stay on track in the future. And also how can we make the tedious parts of writing easier, more reproducible while still allowing individual voices and ideas to shine through</p>
-			<p>This led to the idea of a ghost writer agent workflow - where we could speed up the writing workflow, provide some guidelines and guard rails for different kinds of content we wanted to produce.</p>
-		  </aside>
+          <ul>
+            <li class="fragment">Docs bash week</li>
+            <li class="fragment">
+              Some obvious failure modes - using LLMs ad hoc, consistency of
+              style, differing levels of English
+            </li>
+            <li class="fragment">Can we work smarter, not harder?</li>
+          </ul>
+          <aside class="notes">
+            <p>
+              A few weeks ago we did a docs bash week with the whole team. We
+              had fallen behind on our docs and wanted to give them some
+              dedicated attention, make sure that it was visibly prioritised.
+            </p>
+            <p>
+              This raised some obvious questions about how we could improve our
+              documentation process and ensure that we stay on track in the
+              future. And also how can we make the tedious parts of writing
+              easier, more reproducible while still allowing individual voices
+              and ideas to shine through
+            </p>
+            <p>
+              This led to the idea of a ghost writer agent workflow - where we
+              could speed up the writing workflow, provide some guidelines and
+              guard rails for different kinds of content we wanted to produce.
+            </p>
+          </aside>
         </section>
         <section>
           <img src="./assets/ghost-writer.jpg" alt="Ghost Writer diagram" />
-		  <aside class="notes">This was my lazy and half baked system diagram - first cut. Perhaps unsurprisingly we decided to scope our project down, we started with blog post outputs, but we factored the project in a way to ensure it could scale if we wanted to add further content types over time.</aside>
-        </section>        
+          <aside class="notes">
+            This was my lazy and half baked system diagram - first cut. Perhaps
+            unsurprisingly we decided to scope our project down, we started with
+            blog post outputs, but we factored the project in a way to ensure it
+            could scale if we wanted to add further content types over time.
+          </aside>
+        </section>
         <section>
           <h2>Creating agents with Pydantic AI</h2>
         </section>
@@ -144,7 +167,7 @@
           </div>
         </section>
         <section data-auto-animate>
-          <h2>Implementing the ghost writer</h2>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="1-5|3|1-5">
                 writer_agent = Agent(
@@ -156,7 +179,7 @@
             </pre>
         </section>
         <section data-auto-animate>
-          <h2>Implementing the ghost writer</h2>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="1-5">
                 @dataclass
@@ -173,7 +196,7 @@
             </pre>
         </section>
         <section data-auto-animate>
-          <h2>Implementing the ghost writer</h2>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="10|1-11">
                 @dataclass
@@ -191,7 +214,7 @@
             </pre>
         </section>
         <section data-auto-animate>
-          <h2>Implementing the ghost writer</h2>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers="13-17">
                 @dataclass
@@ -214,7 +237,7 @@
             </pre>
         </section>
         <section data-auto-animate>
-          <h2>Implementing the ghost writer</h2>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
               <code data-trim class="language-python" data-line-numbers>
                 @writer_agent.instructions
