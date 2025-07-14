@@ -32,6 +32,12 @@
       .circle {
         border-radius: 100px;
       }
+	  .small {
+		font-size: 0.75em;
+	  }
+	  .left {
+		text-align: left;
+	  }
     </style>
   </head>
   <body>
@@ -118,6 +124,17 @@
             blog post outputs, but we factored the project in a way to ensure it
             could scale if we wanted to add further content types over time.
           </aside>
+        </section>
+        <section>
+			<h2 class="r-fit-text">When (and when not) to use agents</h2>
+          <blockquote class="small left">            
+            "When building applications with LLMs, we recommend finding the
+            simplest solution possible, and only increasing complexity when
+            needed. This might mean not building agentic systems at all. Agentic
+            systems often trade latency and cost for better task performance,
+            and you should consider when this tradeoff makes sense."
+		  </blockquote>
+		  <p class="small"><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">https://www.anthropic.com/engineering/building-effective-agents</a></p>
         </section>
         <section>
           <h2>Creating agents with Pydantic AI</h2>
