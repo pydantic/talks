@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from rich import print
+from rich.markdown import Markdown
 from rich.prompt import Prompt
 
 from ghost_writer.main import generate_blog_post
@@ -57,7 +58,7 @@ async def main(info_file: Path | None) -> None:
     print('\n' + '=' * 50)
     print('GENERATED BLOG POST:')
     print('=' * 50)
-    print(response)
+    print(Markdown(response))
 
 
 if __name__ == '__main__':
