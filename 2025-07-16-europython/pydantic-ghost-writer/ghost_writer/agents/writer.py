@@ -9,6 +9,7 @@ from pydantic_ai import Agent, RunContext
 
 from ghost_writer.agents.reviewer import Score, reviewer_agent
 from ghost_writer.agents.shared import get_guidelines, load_prompt
+from ghost_writer.agents.github import create_blog_pr, ask_user_approval
 
 
 @dataclass
@@ -25,7 +26,7 @@ class WriterAgentDeps:
 writer_agent = Agent(
     'anthropic:claude-3-7-sonnet-latest',
     deps_type=WriterAgentDeps,
-    tools=[get_guidelines],
+    tools=[get_guidelines, create_blog_pr, ask_user_approval],
     instructions=load_prompt(role='writer', content_type='blog_post'),
 )
 
@@ -52,7 +53,6 @@ def add_user_info(ctx: RunContext[WriterAgentDeps]) -> str:
 
 
 # Writer agent-specific tools:
-
 
 @writer_agent.tool
 async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: HttpUrl) -> str:

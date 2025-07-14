@@ -1,6 +1,6 @@
 {
     "topic": "Using Pydantic validators",
-    "author": "John Doe",
+    "author": "Victorien Plot",
     "author_role": "Core Developer",
     "opinions": "Validators are actually more important than users think",
     "user_requirements": "No more than one paragraph",
