@@ -168,12 +168,12 @@
           <h2>The Pydantic AI framework</h2>
         </section>
         <section>
-          <!-- TODO two columns layout is really off (crazy that reveal.js doesn't support this out of the box?) -->
-          <div class="twocolumn">
-            <div class="col">
-              <!-- TODO rework images, maybe just use text (FastAPI + SQLAlchemy) instead -->
-              <img width="100" src="./assets/fastapi_logo.png" />
-              <img width="150" src="./assets/sqlalchemy_logo.svg" />
+          <div>
+            <div class="fragment">
+              <div class="items-center">
+				<img width="80" src="./assets/fastapi_logo.png" />
+              	<img width="150" src="./assets/sqlalchemy_logo.svg" />
+			  </div>
               <pre>
                 <code data-trim class="language-python" data-line-numbers="1-3|2|3">
                   @app.get('/attendees/{id}')
@@ -182,7 +182,7 @@
                 </code>
               </pre>
             </div>
-            <div class="col">
+            <div class="fragment">
               Pydantic AI
               <pre>
                 <code data-trim class="language-python" data-line-numbers="1-4|3|2">
