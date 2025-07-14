@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>The Pydantic stack for AI apps</title>
+
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/pydantic.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/github-dark.css" />
+    <style>
+      .twocolumn {
+        display: flex;
+      }
+      .col {
+        flex: 1;
+      }
+      .circle {
+        border-radius: 100px;
+      }
+	  .small {
+		font-size: 0.75em;
+	  }
+	  .left {
+		text-align: left;
+	  }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-background="assets/grid.png">
+          <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />
+          <h1 class="r-fit-text">The Pydantic stack for AI apps</h1>
+          <p>EuroPython, Prague, 16 July 2025</p>
+        </section>
+        <section>
+          <h2>Meet Laura & Victorien</h2>
+          <div class="items-center">
+            <img
+              class="circle"
+              src="./assets/laura.jpg"
+              alt="Laura"
+              width="200"
+            />
+            <img
+              class="circle"
+              src="./assets/victorien.jpg"
+              alt="Victorien"
+              width="200"
+            />
+          </div>
+        </section>
+        <section>
+          <h2>The Pydantic Stack</h2>
+          <img src="./assets/pydantic-stack.png" alt="Pydantic Stack" />
+        </section>
+        <section>
+          <h2 class="r-fit-text">Agents, models, tools, MCP, A2A</h2>
+          <ul>
+            <li class="fragment">
+              Agents: LLMs + agency (interaction with the world)
+            </li>
+            <li class="fragment">
+              Models: Foundation providers, open source, fine-tunes
+            </li>
+            <li class="fragment">Tools: How agents interact with the world</li>
+            <li class="fragment">MCP: Model Control Protocol</li>
+            <li class="fragment">A2A: Agent-to-Agent protocol</li>
+          </ul>
+          <aside class="notes">
+            Discuss opportunities and engineering challenges
+          </aside>
+        </section>
+		<section>
+			<h2>LLM prototype hell </h2>
+			<img src="./assets/excitment.jpg" class="r-stretch" alt="LLM Prototype Hell" />
+			<p class="small">- Thanks to Hugo Bowne-Anderson</p>
+		</section>
+        <section data-background="assets/grid.png">
+          <h2>Setting the scene</h2>
+          <ul>
+            <li class="fragment">Docs bash week</li>
+            <li class="fragment">
+              Some obvious failure modes - using LLMs ad hoc, consistency of
+              style, differing levels of English
+            </li>
+            <li class="fragment">Can we work smarter, not harder?</li>
+          </ul>
+          <aside class="notes">
+            <p>
+              A few weeks ago we did a docs bash week with the whole team. We
+              had fallen behind on our docs and wanted to give them some
+              dedicated attention, make sure that it was visibly prioritised.
+            </p>
+            <p>
+              This raised some obvious questions about how we could improve our
+              documentation process and ensure that we stay on track in the
+              future. And also how can we make the tedious parts of writing
+              easier, more reproducible while still allowing individual voices
+              and ideas to shine through
+            </p>
+            <p>
+              This led to the idea of a ghost writer agent workflow - where we
+              could speed up the writing workflow, provide some guidelines and
+              guard rails for different kinds of content we wanted to produce.
+            </p>
+          </aside>
+        </section>
+        <section>
+          <img src="./assets/ghost-writer.jpg" alt="Ghost Writer diagram" />
+          <aside class="notes">
+            <p>This was my lazy and half baked system diagram - first cut. Perhaps
+            unsurprisingly we decided to scope our project down, we started with
+            blog post outputs, but we factored the project in a way to ensure it
+            could scale if we wanted to add further content types over time.</p>
+          </aside>
+        </section>
+		<section>
+			<h2 class="r-fit-text">Invest in your own mental model</h2>
+			<p class="fragment">Before exploring complex options, start simple</p>
+			<p class="fragment">Focus on a specific use-case, a clear problem or pain point, and then expand. Don't try to boil the ocean.</p>
+			<aside class="notes">			
+				<p>Perhaps it's obvious to say, but I think it's highly valuable to take the time to step back  and do some simple diagrams which consider the overall architecture and flow of the system.</p>
+				<p>Do you even need agents? DO you even need LLMs? Does your desired automation require consistency and determinism, or fluidity and "valuable" hallucinations? Rather than thinking of everything as starting at non-determinism, maybe reverse your mental model and start imaginging your system as normal computer logic, and then work out which inflection points must escape that determinism for effectiveness.</p>	
+		</section>
+        <section>
+			<h2 class="r-fit-text">When (and when not) to use agents</h2>
+          <blockquote class="small left">            
+            "When building applications with LLMs, we recommend finding the
+            simplest solution possible, and only increasing complexity when
+            needed. This might mean not building agentic systems at all. Agentic
+            systems often trade latency and cost for better task performance,
+            and you should consider when this tradeoff makes sense."
+		  </blockquote>
+		  <p class="small"><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">https://www.anthropic.com/engineering/building-effective-agents</a></p>
+        </section>
+		<section>
+			<img src="./assets/should-i-use-an-agent.jpg" class="r-stretch" alt="Agent decision flow diagram" />
+			<p class="small"><a href="https://decodingml.substack.com/p/stop-building-ai-agents" target="_blank">https://decodingml.substack.com/p/stop-building-ai-agents</a></p>
+		</section>
+        <section>
+          <h2>Creating agents with Pydantic AI</h2>
+        </section>
+        <section>
+          <h2>Building our ghost writer agent</h2>
+        </section>
+        <section>
+          <video
+            id="chatgpt-first-use"
+            data-autoplay
+            autoplay
+            src="./assets/chatgpt_first_use.mp4"
+            type="video/mp4"
+          />
+        </section>
+        <section>
+          <h2>The Pydantic AI framework</h2>
+        </section>
+        <section>
+          <div>
+            <div class="fragment">
+              <div class="items-center">
+				<img width="80" src="./assets/fastapi_logo.png" />
+              	<img width="150" src="./assets/sqlalchemy_logo.svg" />
+			  </div>
+              <pre>
+                <code data-trim class="language-python" data-line-numbers="1-3|2|3">
+                  @app.get('/attendees/{id}')
+                  def get_attendee(id: int) -> Attendee:
+                      return select(Attendee).where(Attendee.id == id)
+                </code>
+              </pre>
+            </div>
+            <div class="fragment">
+              <img width="300" src="./assets/pydantic-ai-dark.svg" />
+              <pre>
+                <code data-trim class="language-python" data-line-numbers="1-4|3|2">
+                  agent = Agent(
+                      'google-vertex:gemini-2.5-pro',
+                      output_type=Annotated[int, Interval(ge=1, le=10)],
+                      system_prompt='Give me a number between 1 and 10.',
+                  )
+                </code>
+              </pre>
+            </div>
+          </div>
+        </section>
+        <section data-auto-animate>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-5|3|1-5">
+                writer_agent = Agent(
+                    'anthropic:claude-sonnet-4-0',
+                    output_type=str,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-4">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-sonnet-4-0',
+                    output_type=str,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="9|1-11">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-sonnet-4-0',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="13-17">
+                @dataclass
+                class AgentDeps:
+                    blog_author: str
+                    reference_links: list[str]
+
+                writer_agent = Agent(
+                    'anthropic:claude-sonnet-4-0',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+
+                await writer_agent.run(
+                  'Write a blog post about...',
+                  deps=AgentDeps(blog_author='Victorien', ...),
+                )
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2 class="r-fit-text">Implementing the ghost writer</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers>
+                @writer_agent.instructions
+                def add_author_info(ctx: RunContext[AgentDeps]) -> str:
+                    return f"""
+                    Author: {ctx.deps.blog_author}
+                    Links you may query: {', '.join(ctx.deps.reference_links)}
+                    """"
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing tools</h2>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing tools</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers="1-12|2">
+                @agent.tool_plain
+                async def extract_technical_content(url: HttpUrl) -> str:
+                    """Extract technical content from one of the reference links."""
+
+                    async with httpx.AsyncClient() as client:
+                      response = client.get(str(url))
+
+                    return trafilatura.extract(
+                        response.text,
+                        output_format="html",
+                        favor_precision=True,
+                        include_tables=True,
+                    )
+              </code>
+            </pre>
+        </section>
+        <section>
+          <h2>Quick recap</h2>
+          <pre data-id="code-animation">
+              <code data-trim class="language-python" data-line-numbers>
+                writer_agent = Agent(
+                    'anthropic:claude-sonnet-4-0',
+                    output_type=str,
+                    deps_type=AgentDeps,
+                    instructions='You are writing a blog post for the Pydantic blog.',
+                )
+
+                @writer_agent.instructions
+                def add_author_info(ctx: RunContext[AgentDeps]) -> str:
+                    ...
+
+                @writer_agent.tool_plain
+                def extract_technical_content(url: HttpUrl) -> str:
+                    ...
+              </code>
+            </pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing a reviewer agent</h2>
+          <pre data-id="code-animation">
+            <code data-trim class="language-python" data-line-numbers="1-10|1-3">
+              class Review(BaseModel):
+                  score: Annotated[int, Field(ge=1, le=10)]
+
+                  feedback: str
+                  """Feedback on what could be improved. Should contain specific examples."""
+
+
+              reviewer_agent = Agent(
+                  'anthropic:claude-sonnet-4-0',
+                  output_type=Review,
+                  instructions='Review and provide a score for a blog post.',
+              )
+            </code>
+          </pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing a reviewer agent</h2>
+          <pre data-id="code-animation">
+            <code data-trim class="language-python" data-line-numbers=12-15|1-15>
+              class Review(BaseModel):
+                  score: Annotated[int, Field(ge=1, le=10)]
+                  feedback: str
+
+
+              reviewer_agent = Agent(
+                  'anthropic:claude-sonnet-4-0',
+                  output_type=Review,
+                  instructions='Review and provide a score for a blog post.',
+              )
+
+              @writer_agent.tool_plain
+              async def review_blog_content(content: str) -> Review:
+                  result = await rewiewer_agent.run(f'Review:\n\n{content}')
+                  return result.output
+            </code>
+          </pre>
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/diagram-simple.svg" />
+        </section>
+		<section>
+          <img class="r-stretch" src="./assets/diagram-w-mcp.svg" />
+        </section>
+        <section>
+          <h2>Demo time...</h2>
+        </section>
+		<section>
+			(A little teaser)
+			<h3>Human-seeded evals</h3>
+			<p class="small"><a href="https://www.youtube.com/watch?v=wk6rPZ6qJSY" target="_blank">youtube.com/watch?v=wk6rPZ6qJSY</a></p>
+		</section>
+		<section data-background="assets/grid.png">
+          <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />
+          <h1 class="r-fit-text">Thank you!</h1>
+          <p>Any questions?</p>
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+
+      const chatgptVideo = document.getElementById("chatgpt-first-use");
+      chatgptVideo.playbackRate = 2.0;
+    </script>
+  </body>
+</html>

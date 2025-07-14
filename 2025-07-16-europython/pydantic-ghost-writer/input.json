@@ -1,0 +1,8 @@
+{
+    "topic": "Using Pydantic validators",
+    "author": "Victorien Plot",
+    "author_role": "Core Developer",
+    "opinions": "Validators are actually more important than users think",
+    "user_requirements": "No more than one paragraph",
+    "reference_links": ["https://docs.pydantic.dev/latest/concepts/validators/"]
+}

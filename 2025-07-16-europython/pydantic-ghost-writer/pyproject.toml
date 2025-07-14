@@ -1,0 +1,32 @@
+[project]
+name = "pydantic-ghost-writer"
+version = "0.1.0"
+description = "A Pydantic AI agent to write content"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "logfire[httpx]>=3.23.0",
+    "mcp>=1.10.1",
+    "pydantic-ai>=0.4.0",
+    "rich>=14.0.0",
+    "trafilatura>=2.0.0",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "C90", "UP", "I"]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+isort = { combine-as-imports = true }
+mccabe = { max-complexity = 15 }
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+# don't format python in docstrings, pytest-examples takes care of it
+docstring-code-format = false
+quote-style = "single"
