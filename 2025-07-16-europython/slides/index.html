@@ -11,7 +11,11 @@
 
     <link rel="stylesheet" href="dist/reset.css" />
     <link rel="stylesheet" href="dist/reveal.css" />
-    <link rel="stylesheet" href="dist/theme/dracula.css" />
+    <link rel="stylesheet" href="dist/theme/pydantic.css" />
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 
     <!-- Theme used for syntax highlighted code -->
     <link rel="stylesheet" href="plugin/highlight/monokai.css" />
@@ -28,7 +32,7 @@
     <div class="reveal">
       <div class="slides">
         <section>
-          <h1>The Pydantic stack for AI apps</h1>
+          <h1 class="r-fit-text">The Pydantic stack for AI apps</h1>
           <p>EuroPython, Prague, 16 July 2025</p>
         </section>
         <section>
@@ -42,10 +46,20 @@
 		    <section>
           <h2>Setting the scene</h2>
         </section>
-        <section>
-          <h2>Agents, models, tools, MCP</h2>
-          <p>opportunities, engineering challenges (Laura's part)</p>
+		<section>
+          <h2>Agents, models, tools, MCP, A2A</h2>
+		  <ul>
+			<li class="fragment">Agents: LLMs + agency (interaction with the world)</li>
+			<li class="fragment">Models: Foundation providers, open source, fine-tunes</li>
+			<li class="fragment">Tools: How agents interact with the world</li>
+			<li class="fragment">MCP: Model Control Protocol</li>
+			<li class="fragment">A2A: Agent-to-Agent protocol</li>
+		  </ul>
+		  <aside class="notes">Discuss opportunities and engineering challenges</aside>	
         </section>
+		<section>
+			<h2>Creating agents with Pydantic AI</h2>
+		</section>
         <section>
           <h2>Building our ghost writer agent</h2>
         </section>
