@@ -40,6 +40,12 @@ export GITHUB_TOKEN="your_github_personal_access_token"
 ### Run the CLI
 
 ```bash
+uv run python -m ghost_writer input.json
+```
+
+Or, if you want to have interactive input from the CLI:
+
+```bash
 uv run python -m ghost_writer
 ```
 

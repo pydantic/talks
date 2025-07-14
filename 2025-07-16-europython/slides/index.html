@@ -183,7 +183,7 @@
               </pre>
             </div>
             <div class="fragment">
-              Pydantic AI
+              <img width="300" src="./assets/pydantic-ai-dark.svg" />
               <pre>
                 <code data-trim class="language-python" data-line-numbers="1-4|3|2">
                   agent = Agent(
@@ -211,7 +211,7 @@
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
-              <code data-trim class="language-python" data-line-numbers="1-5">
+              <code data-trim class="language-python" data-line-numbers="1-4">
                 @dataclass
                 class AgentDeps:
                     blog_author: str
@@ -228,7 +228,7 @@
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
           <pre data-id="code-animation">
-              <code data-trim class="language-python" data-line-numbers="10|1-11">
+              <code data-trim class="language-python" data-line-numbers="9|1-11">
                 @dataclass
                 class AgentDeps:
                     blog_author: str
@@ -316,11 +316,56 @@
                 def add_author_info(ctx: RunContext[AgentDeps]) -> str:
                     ...
 
-                @agent.tool_plain
+                @writer_agent.tool_plain
                 def extract_technical_content(url: HttpUrl) -> str:
                     ...
               </code>
             </pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing a reviewer agent</h2>
+          <pre data-id="code-animation">
+            <code data-trim class="language-python" data-line-numbers="1-10|1-3">
+              class Review(BaseModel):
+                  score: Annotated[int, Field(ge=1, le=10)]
+                  reason: str
+
+
+              reviewer_agent = Agent(
+                  'anthropic:claude-3-7-sonnet-latest',
+                  output_type=Review,
+                  instructions='Review and provide a score for a blog post.',
+              )
+            </code>
+          </pre>
+        </section>
+        <section data-auto-animate>
+          <h2>Introducing a reviewer agent</h2>
+          <pre data-id="code-animation">
+            <code data-trim class="language-python" data-line-numbers=12-15|1-15>
+              class Review(BaseModel):
+                  score: Annotated[int, Field(ge=1, le=10)]
+                  reason: str
+
+
+              reviewer_agent = Agent(
+                  'anthropic:claude-3-7-sonnet-latest',
+                  output_type=Review,
+                  instructions='Review and provide a score for a blog post.',
+              )
+
+              @writer_agent.tool_plain
+              async def review_blog_content(content: str) -> Review:
+                  result = await rewiewer_agent.run(f'Review:\n\n{content}')
+                  return result.output
+            </code>
+          </pre>
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/recap_diagram.png" />
+        </section>
+        <section>
+          <h2>Demo time...</h2>
         </section>
       </div>
     </div>
