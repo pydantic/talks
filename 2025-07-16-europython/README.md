@@ -9,7 +9,8 @@
 
 👆 Check out the READMEs inside these folders for info on how to run the slides locally, and to read the demo code and try out the ghost writer yourself. 
 
-> If you can't be bothered with running the slides with `npm` you can also just open `2025-07-16-europython/slides/index.html` in any browser.
+> [!NOTE]
+> If you can't be bothered with building the slides with `npm`, you can also just open `2025-07-16-europython/slides/index.html` in any browser.
 
 ## Other stuff
 
