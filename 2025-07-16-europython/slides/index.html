@@ -319,6 +319,40 @@
               </code>
             </pre>
         </section>
+        <section>
+          <h2>Resources</h2>
+          <img
+            src="./assets/system-prompts.gif"
+            alt="System prompt architecture"
+          />
+          <aside class="notes">
+            <p>
+              Resources are a way to provide additional context to the agent. In
+              this case we are simply accessing the agent specific prompts plus
+              the shared prompts to create a tailored system prompt for the
+              agent. While we could easily make this a monolithic
+              prompt-per-agent, we factored it this way to make it easy to be
+              able to run evals and do prompt engineering experiments.
+            </p>
+            <p>
+              Maybe one of these is totally useless? We factored it in a way
+              that made sense to us conceptually, and would be easy to turn on
+              and off prompts accordingly.
+            </p>
+          </aside>
+        </section>
+        <section>
+          <h2>Our system prompts</h2>
+          <div class="r-stack">
+            <img class="fragment" class="r-stretch" src="./assets/prompt-global-styleguide.png" alt="Global style guide" />
+            <img class="fragment" class="r-stretch" src="./assets/prompt-vocabulary.png" alt="Global vocabulary" />
+            <img class="fragment" class="r-stretch" src="./assets/prompt-writer-blogpost.png" alt="Writer specific prompt" />
+            <img class="fragment" class="r-stretch" src="./assets/prompt-reviewer-blogpost.png" alt="Reviewer specific prompt" />
+          </div>
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/prompt-strunk-and-whites.png" alt="Strunk and Whites Elements of Style" />
+        </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
         </section>
@@ -425,17 +459,6 @@
         </section>
         <section>
           <h2>Demo time...</h2>
-        </section>
-        <section>
-          (A little teaser)
-          <h3>Human-seeded evals</h3>
-          <p class="small">
-            <a
-              href="https://www.youtube.com/watch?v=wk6rPZ6qJSY"
-              target="_blank"
-              >youtube.com/watch?v=wk6rPZ6qJSY</a
-            >
-          </p>
         </section>
         <section data-background="assets/grid.png">
           <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />
