@@ -4,8 +4,8 @@
 > This is the root repo holding both the demo project & slides for the talk.
 
 ## Subdirectories:  
-- pydantic-ghost-writer (demo code)
-- slides (talk code)
+- `/pydantic-ghost-writer` (demo code)
+- `/slides` (talk code)
 
 👆 Check out the READMEs inside these folders for info on how to run the slides locally, and to read the demo code and try out the ghost writer yourself. 
 
@@ -22,5 +22,5 @@
 https://logfire.pydantic.dev/docs/join-slack/
 
 **Stay tuned...**  
-Check out a little teaser of Human-seeded evals (demo starts around 45m)
+Check out a little teaser of Human-seeded evals (demo starts around 45m)  
 https://www.youtube.com/watch?v=wk6rPZ6qJSY
