@@ -17,7 +17,7 @@ async def log_handler(params: LoggingMessageNotificationParams):
 
 server = MCPServerStdio(command='uv', args=['run', 'pypi_mcp_server.py'], log_handler=log_handler)
 libs_agent = Agent(
-    'openai:gpt-4o',
+    'anthropic:claude-sonnet-4-0',
     mcp_servers=[server],
     instructions='your job is to help the user research software libraries and packages using the tools provided',
 )

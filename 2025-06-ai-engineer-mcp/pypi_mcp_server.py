@@ -119,6 +119,7 @@ ORDER BY `month` DESC, `num_downloads` DESC
 @pypi_agent.output_validator
 async def run_query(ctx: RunContext[Deps], sql: str) -> str:
     # remove "```sql...```"
+    # m = re.search(r'```.*\n([.\n]*?)```', sql)
     m = re.search(r'```\w*\n(.*?)```', sql, flags=re.S)
     if m:
         sql = m.group(1).strip()
