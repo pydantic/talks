@@ -1,7 +1,6 @@
 # Pydantic stack for AI Apps 
 ## EuroPython, July 16 20205, Prague
 
-> Info
 > This is the root repo holding both the demo project & slides for the talk.
 
 ## Subdirectories:  
