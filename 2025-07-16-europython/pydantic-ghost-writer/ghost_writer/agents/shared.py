@@ -10,7 +10,7 @@ def load_prompt(role: str, content_type: str) -> str:
 
 ## Shared tools:
 
-Guidelines: TypeAlias = Literal['brand_guidelines', 'global_styleguide', 'vocabulary']  # noqa: UP040
+Guidelines: TypeAlias = Literal['global_styleguide', 'vocabulary']  # noqa: UP040
 
 
 async def get_guidelines(guideline: Guidelines) -> str:
