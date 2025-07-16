@@ -31,7 +31,7 @@ if 'GITHUB_TOKEN' in os.environ:
     writer_tools.extend([create_blog_pr, ask_user_approval])
 
 writer_agent = Agent(
-    'anthropic:claude-3-7-sonnet-latest',
+    'anthropic:claude-4-sonnet-20250514',
     deps_type=WriterAgentDeps,
     tools=writer_tools,
     instructions=load_prompt(role='writer', content_type='blog_post'),
