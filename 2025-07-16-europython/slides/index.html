@@ -219,7 +219,7 @@
                 <img width="150" src="./assets/sqlalchemy_logo.svg" />
               </div>
               <pre>
-                <code data-trim class="language-python" data-line-numbers="1-3|2|3">
+                <code data-trim class="language-python" data-line-numbers="1-3|2|3|1-3">
                   @app.get('/attendees/{id}')
                   def get_attendee(id: int) -> Attendee:
                       return select(Attendee).where(Attendee.id == id)
@@ -229,7 +229,7 @@
             <div class="fragment">
               <img width="300" src="./assets/pydantic-ai-dark.svg" />
               <pre>
-                <code data-trim class="language-python" data-line-numbers="1-4|3|2">
+                <code data-trim class="language-python" data-line-numbers="1-4|3|2|1-4">
                   agent = Agent(
                       'google-vertex:gemini-2.5-pro',
                       output_type=Annotated[int, Interval(ge=1, le=10)],
@@ -428,12 +428,12 @@
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
-            <code data-trim class="language-python" data-line-numbers="1-10|1-3">
+            <code data-trim class="language-python" data-line-numbers="1-12|1-5">
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
 
                   feedback: str
-                  """Feedback on what could be improved. Should contain specific examples."""
+                  """Feedback on what could be improved."""
 
 
               reviewer_agent = Agent(
@@ -447,11 +447,12 @@
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
-            <code data-trim class="language-python" data-line-numbers=12-15|1-15>
+            <code data-trim class="language-python" data-line-numbers=13-16|1-16>
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
-                  feedback: str
 
+                  feedback: str
+                  """Feedback on what could be improved."""
 
               reviewer_agent = Agent(
                   'anthropic:claude-sonnet-4-0',
