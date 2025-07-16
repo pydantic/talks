@@ -11,7 +11,7 @@ class Review(BaseModel):
     """A score between 1 and 10."""
 
     feedback: str
-    """Feedback on what can be improved."""
+    """Feedback on what can be improved. Should contain specific examples."""
 
 
 reviewer_agent = Agent(

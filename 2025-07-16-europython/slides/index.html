@@ -32,12 +32,12 @@
       .circle {
         border-radius: 100px;
       }
-	  .small {
-		font-size: 0.75em;
-	  }
-	  .left {
-		text-align: left;
-	  }
+      .small {
+        font-size: 0.75em;
+      }
+      .left {
+        text-align: left;
+      }
     </style>
   </head>
   <body>
@@ -79,18 +79,22 @@
               Models: Foundation providers, open source, fine-tunes
             </li>
             <li class="fragment">Tools: How agents interact with the world</li>
-            <li class="fragment">MCP: Model Control Protocol</li>
+            <li class="fragment">MCP: Model Context Protocol</li>
             <li class="fragment">A2A: Agent-to-Agent protocol</li>
           </ul>
           <aside class="notes">
             Discuss opportunities and engineering challenges
           </aside>
         </section>
-		<section>
-			<h2>LLM prototype hell </h2>
-			<img src="./assets/excitment.jpg" class="r-stretch" alt="LLM Prototype Hell" />
-			<p class="small">- Thanks to Hugo Bowne-Anderson</p>
-		</section>
+        <section>
+          <h2>LLM prototype hell</h2>
+          <img
+            src="./assets/excitment.jpg"
+            class="r-stretch"
+            alt="LLM Prototype Hell"
+          />
+          <p class="small">- Thanks to Hugo Bowne-Anderson</p>
+        </section>
         <section data-background="assets/grid.png">
           <h2>Setting the scene</h2>
           <ul>
@@ -100,6 +104,10 @@
               style, differing levels of English
             </li>
             <li class="fragment">Can we work smarter, not harder?</li>
+            <li class="fragment">
+              Caveat: not trying to get rid of human writers, but to lower the
+              barrier to entry for developer writing
+            </li>
           </ul>
           <aside class="notes">
             <p>
@@ -124,37 +132,69 @@
         <section>
           <img src="./assets/ghost-writer.jpg" alt="Ghost Writer diagram" />
           <aside class="notes">
-            <p>This was my lazy and half baked system diagram - first cut. Perhaps
-            unsurprisingly we decided to scope our project down, we started with
-            blog post outputs, but we factored the project in a way to ensure it
-            could scale if we wanted to add further content types over time.</p>
+            <p>
+              This was my lazy and half baked system diagram - first cut.
+              Perhaps unsurprisingly we decided to scope our project down, we
+              started with blog post outputs, but we factored the project in a
+              way to ensure it could scale if we wanted to add further content
+              types over time.
+            </p>
           </aside>
         </section>
-		<section>
-			<h2 class="r-fit-text">Invest in your own mental model</h2>
-			<p class="fragment">Before exploring complex options, start simple</p>
-			<p class="fragment">Focus on a specific use-case, a clear problem or pain point, and then expand. Don't try to boil the ocean.</p>
-			<aside class="notes">			
-				<p>Perhaps it's obvious to say, but I think it's highly valuable to take the time to step back  and do some simple diagrams which consider the overall architecture and flow of the system.</p>
-				<p>Do you even need agents? DO you even need LLMs? Does your desired automation require consistency and determinism, or fluidity and "valuable" hallucinations? Rather than thinking of everything as starting at non-determinism, maybe reverse your mental model and start imaginging your system as normal computer logic, and then work out which inflection points must escape that determinism for effectiveness.</p>	
-		</section>
         <section>
-			<h2 class="r-fit-text">When (and when not) to use agents</h2>
-          <blockquote class="small left">            
+          <h2 class="r-fit-text">Invest in your own mental model</h2>
+          <p class="fragment">Before exploring complex options, start simple</p>
+          <p class="fragment">
+            Focus on a specific use-case, a clear problem or pain point, and
+            then expand. Don't try to boil the ocean.
+          </p>
+          <aside class="notes">
+            <p>
+              Perhaps it's obvious to say, but I think it's highly valuable to
+              take the time to step back and do some simple diagrams which
+              consider the overall architecture and flow of the system.
+            </p>
+            <p>
+              Do you even need agents? DO you even need LLMs? Does your desired
+              automation require consistency and determinism, or fluidity and
+              "valuable" hallucinations? Rather than thinking of everything as
+              starting at non-determinism, maybe reverse your mental model and
+              start imaginging your system as normal computer logic, and then
+              work out which inflection points must escape that determinism for
+              effectiveness.
+            </p>
+          </aside>
+        </section>
+        <section>
+          <h2 class="r-fit-text">When (and when not) to use agents</h2>
+          <blockquote class="small left">
             "When building applications with LLMs, we recommend finding the
             simplest solution possible, and only increasing complexity when
             needed. This might mean not building agentic systems at all. Agentic
             systems often trade latency and cost for better task performance,
             and you should consider when this tradeoff makes sense."
-		  </blockquote>
-		  <p class="small"><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">https://www.anthropic.com/engineering/building-effective-agents</a></p>
+          </blockquote>
+          <p class="small">
+            <a
+              href="https://www.anthropic.com/engineering/building-effective-agents"
+              target="_blank"
+              >https://www.anthropic.com/engineering/building-effective-agents</a
+            >
+          </p>
         </section>
-		<section>
-			<img src="./assets/should-i-use-an-agent.jpg" class="r-stretch" alt="Agent decision flow diagram" />
-			<p class="small"><a href="https://decodingml.substack.com/p/stop-building-ai-agents" target="_blank">https://decodingml.substack.com/p/stop-building-ai-agents</a></p>
-		</section>
         <section>
-          <h2>Creating agents with Pydantic AI</h2>
+          <img
+            src="./assets/should-i-use-an-agent.jpg"
+            class="r-stretch"
+            alt="Agent decision flow diagram"
+          />
+          <p class="small">
+            <a
+              href="https://decodingml.substack.com/p/stop-building-ai-agents"
+              target="_blank"
+              >https://decodingml.substack.com/p/stop-building-ai-agents</a
+            >
+          </p>
         </section>
         <section>
           <h2>Building our ghost writer agent</h2>
@@ -175,11 +215,11 @@
           <div>
             <div class="fragment">
               <div class="items-center">
-				<img width="80" src="./assets/fastapi_logo.png" />
-              	<img width="150" src="./assets/sqlalchemy_logo.svg" />
-			  </div>
+                <img width="80" src="./assets/fastapi_logo.png" />
+                <img width="150" src="./assets/sqlalchemy_logo.svg" />
+              </div>
               <pre>
-                <code data-trim class="language-python" data-line-numbers="1-3|2|3">
+                <code data-trim class="language-python" data-line-numbers="1-3|2|3|1-3">
                   @app.get('/attendees/{id}')
                   def get_attendee(id: int) -> Attendee:
                       return select(Attendee).where(Attendee.id == id)
@@ -189,7 +229,7 @@
             <div class="fragment">
               <img width="300" src="./assets/pydantic-ai-dark.svg" />
               <pre>
-                <code data-trim class="language-python" data-line-numbers="1-4|3|2">
+                <code data-trim class="language-python" data-line-numbers="1-4|3|2|1-4">
                   agent = Agent(
                       'google-vertex:gemini-2.5-pro',
                       output_type=Annotated[int, Interval(ge=1, le=10)],
@@ -283,6 +323,64 @@
               </code>
             </pre>
         </section>
+        <section>
+          <h2>Resources</h2>
+          <img
+            src="./assets/system-prompts.gif"
+            alt="System prompt architecture"
+          />
+          <aside class="notes">
+            <p>
+              Resources are a way to provide additional context to the agent. In
+              this case we are simply accessing the agent specific prompts plus
+              the shared prompts to create a tailored system prompt for the
+              agent. While we could easily make this a monolithic
+              prompt-per-agent, we factored it this way to make it easy to be
+              able to run evals and do prompt engineering experiments.
+            </p>
+            <p>
+              Maybe one of these is totally useless? We factored it in a way
+              that made sense to us conceptually, and would be easy to turn on
+              and off prompts accordingly.
+            </p>
+          </aside>
+        </section>
+        <section>
+          <h2>Our system prompts</h2>
+          <div class="r-stack">
+            <img
+              class="fragment"
+              class="r-stretch"
+              src="./assets/prompt-global-styleguide.png"
+              alt="Global style guide"
+            />
+            <img
+              class="fragment"
+              class="r-stretch"
+              src="./assets/prompt-vocabulary.png"
+              alt="Global vocabulary"
+            />
+            <img
+              class="fragment"
+              class="r-stretch"
+              src="./assets/prompt-writer-blogpost.png"
+              alt="Writer specific prompt"
+            />
+            <img
+              class="fragment"
+              class="r-stretch"
+              src="./assets/prompt-reviewer-blogpost.png"
+              alt="Reviewer specific prompt"
+            />
+          </div>
+        </section>
+        <section>
+          <img
+            class="r-stretch"
+            src="./assets/prompt-strunk-and-whites.png"
+            alt="Strunk and Whites Elements of Style"
+          />
+        </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
         </section>
@@ -330,12 +428,12 @@
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
-            <code data-trim class="language-python" data-line-numbers="1-10|1-3">
+            <code data-trim class="language-python" data-line-numbers="1-12|1-5">
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
 
                   feedback: str
-                  """Feedback on what could be improved. Should contain specific examples."""
+                  """Feedback on what could be improved."""
 
 
               reviewer_agent = Agent(
@@ -349,11 +447,12 @@
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
-            <code data-trim class="language-python" data-line-numbers=12-15|1-15>
+            <code data-trim class="language-python" data-line-numbers=13-16|1-16>
               class Review(BaseModel):
                   score: Annotated[int, Field(ge=1, le=10)]
-                  feedback: str
 
+                  feedback: str
+                  """Feedback on what could be improved."""
 
               reviewer_agent = Agent(
                   'anthropic:claude-sonnet-4-0',
@@ -368,24 +467,40 @@
             </code>
           </pre>
         </section>
+
         <section>
-          <img class="r-stretch" src="./assets/diagram-simple.svg" />
+          <img class="r-stretch" src="./assets/diagram-claude1.png" />
         </section>
-		<section>
-          <img class="r-stretch" src="./assets/diagram-w-mcp.svg" />
+        <section>
+          <img class="r-stretch" src="./assets/diagram-claude2.png" />
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/diagram1.svg" />
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/diagram2.svg" />
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/diagram3.svg" />
+        </section>
+        <section>
+          <img class="r-stretch" src="./assets/diagram4.svg" />
         </section>
         <section>
           <h2>Demo time...</h2>
         </section>
-		<section>
-			(A little teaser)
-			<h3>Human-seeded evals</h3>
-			<p class="small"><a href="https://www.youtube.com/watch?v=wk6rPZ6qJSY" target="_blank">youtube.com/watch?v=wk6rPZ6qJSY</a></p>
-		</section>
-		<section data-background="assets/grid.png">
-          <img src="./assets/pydantic-dark.svg" alt="Pydantic" width="220px" />
-          <h1 class="r-fit-text">Thank you!</h1>
-          <p>Any questions?</p>
+        <section data-background="assets/grid.png">
+          <h3>Thank you!</h3>
+          <img
+            src="./assets/talkqr.png"
+            alt="QR code to get the demo and slides"
+            class="r-stretch"
+          />
+          <p class="small left">p.s. AI won't write all your content</p>
+          <p class="small left">
+            p.p.s. Come see us at our sponsor booth, we would love to dig into this
+            code in more detail and answer any questions!!
+          </p>
         </section>
       </div>
     </div>
