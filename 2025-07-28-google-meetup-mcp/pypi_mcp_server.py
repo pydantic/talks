@@ -150,7 +150,7 @@ if __name__ == '__main__':
     if sys.argv[-1] == 'direct':
         result = pypi_agent.run_sync(
             'How many times has pydantic been downloaded this year?',
-            model='gemini-2.5-pro',
+            model='google-gla:gemini-2.5-flash',
         )
         print(result.output)
     else:

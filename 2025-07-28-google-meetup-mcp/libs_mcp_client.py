@@ -22,7 +22,7 @@ github_server = MCPServerStreamableHTTP(
     headers={'authorization': f'Bearer {github_mcp_pat}'},
 )
 libs_agent = Agent(
-    'gemini-2.5-pro',
+    'google-gla:gemini-2.5-flash',
     toolsets=[pypi_server, github_server],
     instructions='your job is to help the user research software libraries and packages using the tools provided. Reply concisely.',
 )
@@ -36,8 +36,10 @@ def add_date():
 
 
 async def main():
-    async with libs_agent:
-        result = await libs_agent.run('How many times has pydantic been downloaded this year?')
+    with logfire.span('running libs agent'):
+        async with libs_agent:
+            result = await libs_agent.run('How many times has pydantic been downloaded this year?')
+            # result = await libs_agent.run('how many stars does gemini-cli have')
     print(result.output)
 
 
