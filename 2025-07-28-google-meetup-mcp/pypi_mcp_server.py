@@ -12,7 +12,6 @@ from mcp.server.fastmcp import Context, FastMCP
 from pydantic_ai import Agent, ModelRetry, format_as_xml
 from pydantic_ai.models.mcp_sampling import MCPSamplingModel
 
-logfire.configure()
 logfire.configure(service_name='mcp-server')
 logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
