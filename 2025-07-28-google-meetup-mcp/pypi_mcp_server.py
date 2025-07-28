@@ -1,6 +1,8 @@
 """MCP server to get information about python package downloads."""
 
 import re
+import sys
+from datetime import date
 
 import logfire
 from google.api_core.exceptions import BadRequest
@@ -22,7 +24,7 @@ client = bigquery.Client()
 
 pypi_agent = Agent(
     retries=2,
-    system_prompt=f"""
+    instructions=f"""
 Your job is to help users analyze downloads of python packages.
 
 Convert the user's query into a BigQuery SQL query against the `{table_name}`
@@ -109,10 +111,14 @@ ORDER BY `month` DESC, `num_downloads` DESC
 )
 
 
+@pypi_agent.instructions
+def add_date():
+    return f'Today is {date.today():%Y-%m-%d}'
+
+
 @pypi_agent.output_validator
 async def run_query(sql: str) -> str:
     # remove "```sql...```"
-    # m = re.search(r'```.*\n([.\n]*?)```', sql)
     m = re.search(r'```\w*\n(.*?)```', sql, flags=re.S)
     if m:
         sql = m.group(1).strip()
@@ -140,7 +146,9 @@ async def pypi_downloads(question: str, ctx: Context[ServerSession, None]) -> st
 
 
 if __name__ == '__main__':
-    mcp.run()
-
-    # result = pypi_agent.run_sync('How many times has pydantic been downloaded this year?', model='openai:gpt-4o')
-    # print(result.output)
+    # to run this script directly, run `uv run pypi_mcp_server.py direct`
+    if sys.argv[-1] == 'direct':
+        result = pypi_agent.run_sync('How many times has pydantic been downloaded this year?', model='openai:gpt-4o')
+        print(result.output)
+    else:
+        mcp.run()

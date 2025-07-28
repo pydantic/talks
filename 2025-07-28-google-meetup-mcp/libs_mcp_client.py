@@ -18,7 +18,7 @@ libs_agent = Agent(
 )
 
 
-@libs_agent.system_prompt
+@libs_agent.instructions
 def add_date():
     return f'Today is {date.today():%Y-%m-%d}'
 
