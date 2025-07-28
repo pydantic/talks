@@ -22,7 +22,7 @@ github_server = MCPServerStreamableHTTP(
     headers={'authorization': f'Bearer {github_mcp_pat}'},
 )
 libs_agent = Agent(
-    'anthropic:claude-sonnet-4-0',
+    'gemini-2.5-pro',
     toolsets=[pypi_server, github_server],
     instructions='your job is to help the user research software libraries and packages using the tools provided. Reply concisely.',
 )

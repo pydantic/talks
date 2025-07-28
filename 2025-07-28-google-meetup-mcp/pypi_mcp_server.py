@@ -122,9 +122,10 @@ async def run_query(sql: str) -> str:
     if m:
         sql = m.group(1).strip()
 
-    logfire.info('running {sql}', sql=sql)
-    if f'from `{table_name}`' not in sql.lower():
+    if not re.search(rf'from\s+`{re.escape(table_name)}`', sql, flags=re.I):
         raise ModelRetry(f'Query must be against the `{table_name}` table')
+
+    logfire.info('running {sql}', sql=sql)
     try:
         query_job = client.query(sql)
         rows = query_job.result()
@@ -147,7 +148,10 @@ async def pypi_downloads(question: str, ctx: Context[ServerSession, None]) -> st
 if __name__ == '__main__':
     # to run this script directly, run `uv run pypi_mcp_server.py direct`
     if sys.argv[-1] == 'direct':
-        result = pypi_agent.run_sync('How many times has pydantic been downloaded this year?', model='openai:gpt-4o')
+        result = pypi_agent.run_sync(
+            'How many times has pydantic been downloaded this year?',
+            model='gemini-2.5-pro',
+        )
         print(result.output)
     else:
         mcp.run()
