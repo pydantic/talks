@@ -198,6 +198,12 @@
         </section>
         <section>
           <h2>Building our ghost writer agent</h2>
+          <aside class="notes">
+            Ok so we're going to build a simple agent workflow with some inputs
+            (say I want to write a blogpost about our brand redesign) and some
+            output - in this case a markdown file, and if we accept the model
+            output a pull request as a starting point for the final blog post.
+          </aside>
         </section>
         <section>
           <video
@@ -207,9 +213,20 @@
             src="./assets/chatgpt_first_use.mp4"
             type="video/mp4"
           />
+          <aside class="notes">
+            So the first thing you would do is of course have a conversation
+            about it with your favourite LLM client in a web UI or CLI. The goal
+            with the GhostWriter in Pydantic AI will be to express the same
+            concepts as code, in a structured way.
+          </aside>
         </section>
         <section>
           <h2>The Pydantic AI framework</h2>
+          <aside class="notes">
+            So I'll be using the Pydantic AI Framework. I use the word framework
+            because there are a lot of similarities with other web applications
+            you may have developed in the past.
+          </aside>
         </section>
         <section>
           <div>
@@ -239,6 +256,30 @@
               </pre>
             </div>
           </div>
+          <aside class="notes">
+            <p>
+              For example if you have used FastAPI web framework, Pydantic is
+              actually used under the hood to do validation of the type hints
+              you provide. So ID is a passed parameter, Pydantic is used to
+              enforce this type - so it's really an integer. Similarly if you've
+              used a database framework like SQL Alchemy you don't have to worry
+              about which database backend is used, whether it's Postgres or
+              MySQL - you just have one unified API to query.
+            </p>
+            <p>
+              Things are pretty similar with Pydantic AI. When we define an
+              agent we use this agent class. Every agent has a specific output
+              type - in this example an int between 1 and 10. And we use the
+              annotated pattern from Pydantic that you may know of, that's a way
+              to constrain to specific instances of generic types.
+            </p>
+            <p>
+              Pydantic AI is provider agnostic - all major vendors are available
+              off-the-shelf, and you can always extend the existing model class
+              to define a different model - if you have a fine tuned model
+              you're hosting locally, for example.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -251,6 +292,26 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              We're going to start really simply by giving a single instruction.
+              Because we want to output text we're going to use string as an
+              output type.
+            </p>
+            <p>
+              And now we're going to see how we can give more context to this
+              agent. Context in Pydantic AI is implemented using what we call
+              dependencies. Here we have declared a simple data class where we
+              will accept the blog author, and some reference links. These
+              dependencies will be provided for each run of your agent. You can
+              also specify dependencies in your agent for type checking
+              purposes.
+            </p>
+            <p>
+              And when you run the agent with the user prompt this is also where
+              you are going to specify the dependencies.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -268,6 +329,25 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              In order for the LLM to make use of these dependencies we make use
+              of what's called dynamic instructions. Here you can see a
+              decorator pattern - this is quite common in Pydantic AI, we are
+              trying to reuse existing concepts in Python so you don't get
+              confused or have to learn too much DLS to work with our framework.
+            </p>
+            <p>
+              And more generally we really are trying to keep the same feeling
+              using Pydantic and Pydantic AI - wherever possible we use the same
+              concepts, same APIs, same type safety.
+            </p>
+            <p>
+              So in this case the instructions are going to use the dependencies
+              to provide additional instructions: author and any links you may
+              query.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -286,6 +366,7 @@
                 )
               </code>
             </pre>
+          <aside class="notes"></aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -309,6 +390,7 @@
                 )
               </code>
             </pre>
+          <aside class="notes"></aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -322,6 +404,7 @@
                     """"
               </code>
             </pre>
+          <aside class="notes"></aside>
         </section>
         <section>
           <h2>Resources</h2>
@@ -403,6 +486,7 @@
                     )
               </code>
             </pre>
+          <aside class="notes"></aside>
         </section>
         <section>
           <h2>Quick recap</h2>
@@ -424,6 +508,7 @@
                     ...
               </code>
             </pre>
+          <aside class="notes"></aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
@@ -442,6 +527,7 @@
                   instructions='Review and provide a score for a blog post.',
               )
             </code>
+            <aside class="notes"></aside>
           </pre>
         </section>
         <section data-auto-animate>
@@ -466,6 +552,7 @@
                   return result.output
             </code>
           </pre>
+          <aside class="notes"></aside>
         </section>
 
         <section>
@@ -498,10 +585,11 @@
           />
           <p class="small left">p.s. AI won't write all your content</p>
           <p class="small left">
-            p.p.s. Come see us at our sponsor booth, we would love to dig into this
-            code in more detail and answer any questions!!
+            p.p.s. Come see us at our sponsor booth, we would love to dig into
+            this code in more detail and answer any questions!!
           </p>
         </section>
+        <aside class="notes"></aside>
       </div>
     </div>
 
