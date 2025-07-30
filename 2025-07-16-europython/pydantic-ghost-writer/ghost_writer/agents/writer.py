@@ -28,7 +28,7 @@ writer_agent = Agent(
     'anthropic:claude-4-sonnet-20250514',
     deps_type=WriterAgentDeps,
     # These tools are meant for the Github PR creation:
-    tools=[create_blog_pr, ask_user_approval] if 'GITHUB_TOKEN' is os.environ else [],
+    tools=[create_blog_pr, ask_user_approval] if 'GITHUB_TOKEN' in os.environ else [],
     instructions=load_prompt(role='writer', content_type='blog_post', add_guidelines=True),
 )
 
@@ -76,6 +76,12 @@ async def extract_technical_content(ctx: RunContext[WriterAgentDeps], url: HttpU
 
 @writer_agent.tool_plain
 async def review_page_content(content: str) -> Review:
-    """Review the content and return a score with feedback."""
+    """Review the content and return a score with feedback.
+    
+    Returns a Review object with:
+    - score (0-10): Numeric quality score
+    - passed (bool): Whether content meets quality standards if 8 or higher
+    - feedback (str): Detailed feedback for improvements
+    """
     result = await reviewer_agent.run(f'Review this content:\n\n{content}')
     return result.output
