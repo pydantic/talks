@@ -7,7 +7,7 @@ Use the 'ask_user_approval' tool to find out if the user wants to publish your o
 Use the 'create_blog_pr' tool to create a PR from your output if they say yes.  
 
 !IMPORTANT!
-You MUST use the 'ask_user_approval' tool before publishing to Github. If it says no, stop and just return
+You MUST use the 'ask_user_approval' tool before publishing to Github. If they say no, stop and just return
 the blog post as your output.
 
 Do not ask the user for confirmation if you need to make improvements after reviewing your content.
