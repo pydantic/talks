@@ -73,10 +73,10 @@
           <h2 class="r-fit-text">Agents, models, tools, MCP, A2A</h2>
           <ul>
             <li class="fragment">
-              Agents: LLMs + agency (interaction with the world)
+              Models: Foundation providers, open source, fine-tunes
             </li>
             <li class="fragment">
-              Models: Foundation providers, open source, fine-tunes
+              Agents: LLMs + agency (interaction with the world)
             </li>
             <li class="fragment">Tools: How agents interact with the world</li>
             <li class="fragment">MCP: Model Context Protocol</li>
@@ -198,6 +198,11 @@
         </section>
         <section>
           <h2>Building our ghost writer agent</h2>
+          <aside class="notes">
+            Ok so we're going to build a simple agent workflow with some inputs
+            (say I want to write a blogpost about our brand redesign) and some
+            output - in this case a markdown file.
+          </aside>
         </section>
         <section>
           <video
@@ -207,9 +212,20 @@
             src="./assets/chatgpt_first_use.mp4"
             type="video/mp4"
           />
+          <aside class="notes">
+            So the first thing you would do is of course have a conversation
+            about it with your favourite LLM client in a web UI or CLI. The goal
+            with the GhostWriter in Pydantic AI will be to express the same
+            concepts as code, in a structured way.
+          </aside>
         </section>
         <section>
           <h2>The Pydantic AI framework</h2>
+          <aside class="notes">
+            So I'll be using the Pydantic AI Framework. I use the word framework
+            because there are a lot of similarities with other web applications
+            you may have developed in the past.
+          </aside>
         </section>
         <section>
           <div>
@@ -239,6 +255,31 @@
               </pre>
             </div>
           </div>
+          <aside class="notes">
+            <p>
+              For example if you have used FastAPI web framework, Pydantic is
+              actually used under the hood to do validation of the type hints
+              you provide. So ID is a passed parameter, Pydantic is used to
+              enforce this type - to check that it really returns an integer.
+              Similarly if you've used a database framework like SQL Alchemy you
+              don't have to worry about which database backend is used, whether
+              it's Postgres or MySQL - you just have one unified API to query.
+            </p>
+            <p>
+              Things are pretty similar with Pydantic AI. When we define an
+              agent we use this agent class. Every agent has a specific output
+              type - in this example an int between 1 and 10. And we use the
+              annotated pattern from Pydantic that you may know of, that's a way
+              to constrain to specific instances of generic types.
+            </p>
+            <p>
+              Pydantic AI is model provider agnostic - all major vendors are
+              available off-the-shelf. Changing model is just one line of code.
+              You can also extend the existing model class to define a different
+              model - if you have a fine tuned model you're hosting locally, for
+              example.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -251,6 +292,13 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              We're going to start really simply by giving a single instruction.
+              Because we want to output text we're going to use string as an
+              output type.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -268,6 +316,15 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              And now we're going to see how we can give more context to this
+              agent. Context in Pydantic AI is implemented using what we call
+              dependencies. Here we have declared a simple data class where we
+              will accept the blog author, and some reference links. These
+              dependencies will be provided for each run of your agent.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -286,6 +343,12 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              You can also specify dependencies in your agent for type checking
+              purposes.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -309,6 +372,10 @@
                 )
               </code>
             </pre>
+          <aside class="notes">
+            And when you run the agent with the user prompt this is also where
+            you are going to specify the dependencies.
+          </aside>
         </section>
         <section data-auto-animate>
           <h2 class="r-fit-text">Implementing the ghost writer</h2>
@@ -322,18 +389,46 @@
                     """"
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              In order for the LLM to make use of these dependencies we make use
+              of what's called dynamic instructions. Here you can see a
+              decorator pattern - this is quite common in Pydantic AI, we are
+              trying to reuse existing concepts in Python so you don't have to
+              learn too much DLS to work with our framework.
+            </p>
+            <p>
+              More generally we really are trying to keep the same feeling using
+              Pydantic and Pydantic AI - wherever possible we use the same
+              concepts, same APIs, same type safety.
+            </p>
+            <p>
+              So in this case the instructions are going to use the dependencies
+              to provide additional instructions: author and any links the model
+              may query.
+            </p>
+          </aside>
         </section>
         <section>
-          <h2>Resources</h2>
+          <h2>System Prompts / Instructions</h2>
           <img
             src="./assets/system-prompts.gif"
             alt="System prompt architecture"
           />
           <aside class="notes">
             <p>
-              Resources are a way to provide additional context to the agent. In
-              this case we are simply accessing the agent specific prompts plus
-              the shared prompts to create a tailored system prompt for the
+              Of course we want to provide more context to the model using
+              system prompts. In Pydantic AI there are two concepts available to
+              use - System Prompts and Instructions. Instructions are the
+              initial message sent to the LLM - sent per run and specific to the
+              current agent. This is similar to, but different from, system
+              prompts, where your request to the model retains the system
+              prompts used in previous requests. In general we recommend using
+              Instructions.
+            </p>
+            <p>
+              In this case we are simply accessing the agent specific prompts
+              plus the shared prompts to create a tailored full prompt for the
               agent. While we could easily make this a monolithic
               prompt-per-agent, we factored it this way to make it easy to be
               able to run evals and do prompt engineering experiments.
@@ -346,7 +441,7 @@
           </aside>
         </section>
         <section>
-          <h2>Our system prompts</h2>
+          <h2>Our prompt factoring</h2>
           <div class="r-stack">
             <img
               class="fragment"
@@ -380,9 +475,45 @@
             src="./assets/prompt-strunk-and-whites.png"
             alt="Strunk and Whites Elements of Style"
           />
+          <aside class="notes">
+            <p>
+              This is an example of another resource we could add to the
+              available system prompts and experiment with model output quality.
+              I haven't tried it yet but I'm curious to see how effective adding
+              a short book (~80 pages) might be to tuning the language of the
+              output further.
+            </p>
+            <p>
+              We actually implemented our system prompt builder as a tool, in
+              order to make the logic clear and reusable. So let's talk about
+              tool calling in Pydantic AI.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
+          <aside class="notes">
+            <p>So we talked about dependencies and instructions.</p>
+            <p>
+              Dependencies are dependency injection system to provide data and
+              services to your agent's system prompts, tools and output
+              validators.
+            </p>
+            <p>
+              Instructions and System Prompts are very similar with Instructions
+              being sent per run and specific to the current agent, and system
+              prompts preserving system prompt messages in the message history
+              sent to the LLM in subsequent completions requests.
+            </p>
+            <p>
+              But of course the other concept we need to make our agents
+              agentive: Tools they can call. We are using models which are
+              reasonably recent but with well structured cut-off dates for their
+              training on recent web pages. So we actually want to give more
+              recent information to the Agent, and let the Agent interact with
+              other systems in the world. And for this we use Tools.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
@@ -403,6 +534,35 @@
                     )
               </code>
             </pre>
+          <aside class="notes">
+            <p>
+              Similar to dynamic Instructions, we use a decorator pattern for
+              this. A tool is simply a function that the Agent may or may not
+              decide to call - and its python code so its really powerful, you
+              can pretty much do anything you want.
+            </p>
+            <p>
+              You could have a database and run sql queries on it to fetch
+              custom log data, if you were writing a chatbot, for example.
+            </p>
+            <p>
+              In our case I mentioned reference links that the Agent may query
+              as it writes the blog post. We actually use an http client to make
+              the request, and we this Trafilatura library which can extract
+              content from web pages and has a specialty in extracting and
+              structuring code and technical content in a way that's easy for
+              the LLM to understand.
+            </p>
+            <p>
+              Again here we have specific arguments that can be provided by the
+              LLM and we want Pydantic validation to be hooked up here. So if
+              the LLM decides for some reason to try something that is not the
+              link to be queried, Pydantic will raise a validation error.
+              PydanticAI will raise that validation error to the Agent with a
+              thin wrapper to the effect of "hey you made a mistake here, we
+              want a URL that can be queried, please try again".
+            </p>
+          </aside>
         </section>
         <section>
           <h2>Quick recap</h2>
@@ -424,9 +584,24 @@
                     ...
               </code>
             </pre>
+          <aside class="notes">
+            <p>A quick recap of what we have now:</p>
+            <ul>
+              <li>Our agent</li>
+              <li>instructions & tools using the decorator pattern</li>
+            </ul>
+            <p>
+              The nice thing is we can see its declarative and simple to read
+              but under the hood Pydantic AI is doing a lot of nice stuff for
+              us. On each agent run it creates a graph, and iterates over each
+              node in the graph. Each node can represent a model request, a user
+              response, a tool call. And Pydantic validation is everywhere so
+              you don't have to worry about it.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
-          <h2>Introducing a reviewer agent</h2>
+          <h2 class="r-fit-text">Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
             <code data-trim class="language-python" data-line-numbers="1-12|1-5">
               class Review(BaseModel):
@@ -441,8 +616,12 @@
                   output_type=Review,
                   instructions='Review and provide a score for a blog post.',
               )
-            </code>
+            </code>            
           </pre>
+          <aside class="notes">
+            <p>So we decided next to define a new agent, a reviewer agent so we can attempt to automate assessing on the quality of the content the writer agent produces.</p>
+            <p>Here you can see the output type is a bit more involved, we are going to use a Pydantic BaseModel to define it. This reviewer agent will take the generated blog post markdown as an input, review it, and give a score back to the writer agent.</p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
@@ -466,6 +645,10 @@
                   return result.output
             </code>
           </pre>
+          <aside class="notes">
+            <p>Here you can see we're defining a new tool call for the writer agent. so it can hand-off to our reviewer agent.</p>
+            <p>And we'll just talk a little bit more about thinking about this systems design before running the demo locally on command line and seeing whether the demo gods are with me</p>
+          </aside>
         </section>
 
         <section>
@@ -498,10 +681,11 @@
           />
           <p class="small left">p.s. AI won't write all your content</p>
           <p class="small left">
-            p.p.s. Come see us at our sponsor booth, we would love to dig into this
-            code in more detail and answer any questions!!
+            p.p.s. Come see us at our sponsor booth, we would love to dig into
+            this code in more detail and answer any questions!!
           </p>
         </section>
+        <aside class="notes"></aside>
       </div>
     </div>
 

@@ -1,4 +1,5 @@
-# Positioning Pydantic
+# Brand guidelines
+
 Positioning, Narrative and Tone
 June 12, 2025
 

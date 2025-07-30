@@ -1,0 +1,9 @@
+{
+    "topic": "Rebranding Pydantic AI and Pydantic Logfire",
+    "author": "Laura Summers",
+    "author_role": "Lead Design Engineer",
+    "user_requirements": "Return an outline of the blog as a json object. No more than 120 characters.",
+    "opinions": "We wanted to simplify our branding and make it easier for everyone to recognise us as the Pydantic company. So we're saying goodbye to the Pydantic AI flower graphic, and the chunky pixelated Logfire logo. Sometimes, simplicity is best.",
+    "examples": "",
+    "reference_links": ["https://designpickle.com/blog/rewind-to-fast-forward", "https://pydantic.dev/", "https://ai.pydantic.dev/", "https://logfire-us.pydantic.dev/login"]
+}

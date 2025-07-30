@@ -3,6 +3,5 @@
     "author": "Victorien Plot",
     "author_role": "Core Developer",
     "opinions": "Validators are actually more important than users think",
-    "user_requirements": "No more than two paragraphs, include at least one code example",
     "reference_links": ["https://docs.pydantic.dev/latest/concepts/validators/"]
 }

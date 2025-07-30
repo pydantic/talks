@@ -1,4 +1,5 @@
 # Vocabulary
+
 A reference of key concepts we use throughout our libraries and products.
 
 ## Product names
@@ -6,7 +7,6 @@ A reference of key concepts we use throughout our libraries and products.
 - Pydantic, Pydantic Validation - the original library for typing in Python
 - Pydantic AI (Previously Pydantic AI) - Agent orchestrator, uses Pydantic to structure LLM outputs
 - Pydantic Logfire, Logfire - Observability tool built on OpenTelemetry
-
 
 ## Observability
 
