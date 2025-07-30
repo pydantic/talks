@@ -410,7 +410,7 @@
           </aside>
         </section>
         <section>
-          <h2>System prompts</h2>
+          <h2>System Prompts / Instructions</h2>
           <img
             src="./assets/system-prompts.gif"
             alt="System prompt architecture"
@@ -418,12 +418,20 @@
           <aside class="notes">
             <p>
               Of course we want to provide more context to the model using
-              system prompts. In this case we are simply accessing the agent
-              specific prompts plus the shared prompts to create a tailored
-              system prompt for the agent. While we could easily make this a
-              monolithic prompt-per-agent, we factored it this way to make it
-              easy to be able to run evals and do prompt engineering
-              experiments.
+              system prompts. In Pydantic AI there are two concepts available to
+              use - System Prompts and Instructions. Instructions are the
+              initial message sent to the LLM - sent per run and specific to the
+              current agent. This is similar to, but different from, system
+              prompts, where your request to the model retains the system
+              prompts used in previous requests. In general we recommend using
+              Instructions.
+            </p>
+            <p>
+              In this case we are simply accessing the agent specific prompts
+              plus the shared prompts to create a tailored full prompt for the
+              agent. While we could easily make this a monolithic
+              prompt-per-agent, we factored it this way to make it easy to be
+              able to run evals and do prompt engineering experiments.
             </p>
             <p>
               Maybe one of these is totally useless? We factored it in a way
@@ -433,7 +441,7 @@
           </aside>
         </section>
         <section>
-          <h2>Our system prompts</h2>
+          <h2>Our prompt factoring</h2>
           <div class="r-stack">
             <img
               class="fragment"
@@ -484,6 +492,28 @@
         </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
+          <aside class="notes">
+            <p>So we talked about dependencies and instructions.</p>
+            <p>
+              Dependencies are dependency injection system to provide data and
+              services to your agent's system prompts, tools and output
+              validators.
+            </p>
+            <p>
+              Instructions and System Prompts are very similar with Instructions
+              being sent per run and specific to the current agent, and system
+              prompts preserving system prompt messages in the message history
+              sent to the LLM in subsequent completions requests.
+            </p>
+            <p>
+              But of course the other concept we need to make our agents
+              agentive: Tools they can call. We are using models which are
+              reasonably recent but with well structured cut-off dates for their
+              training on recent web pages. So we actually want to give more
+              recent information to the Agent, and let the Agent interact with
+              other systems in the world. And for this we use Tools.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing tools</h2>
@@ -504,7 +534,35 @@
                     )
               </code>
             </pre>
-          <aside class="notes"></aside>
+          <aside class="notes">
+            <p>
+              Similar to dynamic Instructions, we use a decorator pattern for
+              this. A tool is simply a function that the Agent may or may not
+              decide to call - and its python code so its really powerful, you
+              can pretty much do anything you want.
+            </p>
+            <p>
+              You could have a database and run sql queries on it to fetch
+              custom log data, if you were writing a chatbot, for example.
+            </p>
+            <p>
+              In our case I mentioned reference links that the Agent may query
+              as it writes the blog post. We actually use an http client to make
+              the request, and we this Trafilatura library which can extract
+              content from web pages and has a specialty in extracting and
+              structuring code and technical content in a way that's easy for
+              the LLM to understand.
+            </p>
+            <p>
+              Again here we have specific arguments that can be provided by the
+              LLM and we want Pydantic validation to be hooked up here. So if
+              the LLM decides for some reason to give something that is not the
+              link to be queried, Pydantic will raise a validation error.
+              PydanticAI will raise that validation error to the Agent with a
+              thin wrapper to the effect of "hey you made a mistake here, we
+              want a URL that can be queried, please try again".
+            </p>
+          </aside>
         </section>
         <section>
           <h2>Quick recap</h2>
@@ -545,7 +603,14 @@
                   instructions='Review and provide a score for a blog post.',
               )
             </code>
-            <aside class="notes"></aside>
+            <aside class="notes">
+              <p>A quick recap of what we have now:</p>
+              <ul>
+                <li>Agent definition </li>
+                <li></li>
+              </ul>
+
+            </aside>
           </pre>
         </section>
         <section data-auto-animate>
