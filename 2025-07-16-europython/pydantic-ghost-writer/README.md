@@ -29,7 +29,7 @@ For more details, refer to the [list of available models](https://ai.pydantic.de
 If you want to send logs to Pydantic Logfire, make sure to set up a project:
 
 ```bash
-logfire project use
+logfire projects use
 ```
 
 See [the Logfire documentation](https://logfire.pydantic.dev/docs/how-to-guides/create-write-tokens/)
