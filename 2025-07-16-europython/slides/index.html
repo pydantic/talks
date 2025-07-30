@@ -556,7 +556,7 @@
             <p>
               Again here we have specific arguments that can be provided by the
               LLM and we want Pydantic validation to be hooked up here. So if
-              the LLM decides for some reason to give something that is not the
+              the LLM decides for some reason to try something that is not the
               link to be queried, Pydantic will raise a validation error.
               PydanticAI will raise that validation error to the Agent with a
               thin wrapper to the effect of "hey you made a mistake here, we
@@ -584,10 +584,24 @@
                     ...
               </code>
             </pre>
-          <aside class="notes"></aside>
+          <aside class="notes">
+            <p>A quick recap of what we have now:</p>
+            <ul>
+              <li>Our agent</li>
+              <li>instructions & tools using the decorator pattern</li>
+            </ul>
+            <p>
+              The nice thing is we can see its declarative and simple to read
+              but under the hood Pydantic AI is doing a lot of nice stuff for
+              us. On each agent run it creates a graph, and iterates over each
+              node in the graph. Each node can represent a model request, a user
+              response, a tool call. And Pydantic validation is everywhere so
+              you don't have to worry about it.
+            </p>
+          </aside>
         </section>
         <section data-auto-animate>
-          <h2>Introducing a reviewer agent</h2>
+          <h2 class="r-fit-text">Introducing a reviewer agent</h2>
           <pre data-id="code-animation">
             <code data-trim class="language-python" data-line-numbers="1-12|1-5">
               class Review(BaseModel):
@@ -602,16 +616,12 @@
                   output_type=Review,
                   instructions='Review and provide a score for a blog post.',
               )
-            </code>
-            <aside class="notes">
-              <p>A quick recap of what we have now:</p>
-              <ul>
-                <li>Agent definition </li>
-                <li></li>
-              </ul>
-
-            </aside>
+            </code>            
           </pre>
+          <aside class="notes">
+            <p>So we decided next to define a new agent, a reviewer agent so we can attempt to automate assessing on the quality of the content the writer agent produces.</p>
+            <p>Here you can see the output type is a bit more involved, we are going to use a Pydantic BaseModel to define it. This reviewer agent will take the generated blog post markdown as an input, review it, and give a score back to the writer agent.</p>
+          </aside>
         </section>
         <section data-auto-animate>
           <h2>Introducing a reviewer agent</h2>
@@ -635,7 +645,10 @@
                   return result.output
             </code>
           </pre>
-          <aside class="notes"></aside>
+          <aside class="notes">
+            <p>Here you can see we're defining a new tool call for the writer agent. so it can hand-off to our reviewer agent.</p>
+            <p>And we'll just talk a little bit more about thinking about this systems design before running the demo locally on command line and seeing whether the demo gods are with me</p>
+          </aside>
         </section>
 
         <section>
