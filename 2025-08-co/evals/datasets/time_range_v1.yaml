@@ -1,0 +1,117 @@
+# yaml-language-server: $schema=time_range_v1_schema.json
+cases:
+  - name: Single time point
+    inputs:
+      prompt: I'd like logs from 2 PM on 2024-05-20.
+      now: "2024-05-20T14:15:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-05-20T14:00:00Z"
+      max_timestamp_with_offset: "2024-05-20T14:30:00Z"
+      explanation:
+        You provided a single time (2 PM), so we selected a short window
+        around that time.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+  - name: Ambiguous request for tomorrow
+    inputs:
+      prompt: Show me what's going on tomorrow.
+      now: "2024-05-19T09:00:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-05-20T00:00:00Z"
+      max_timestamp_with_offset: "2024-05-20T23:59:59Z"
+      explanation: We interpreted 'tomorrow' as the entire next day in UTC.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+      - LLMJudge: We want the entire next day in UTC to cover all events tomorrow.
+  - name: Future logs not available
+    inputs:
+      prompt: I'd like logs from next year.
+      now: "2025-01-01T00:00:00Z"
+    expected_output:
+      error_message:
+        We cannot generate a time range in the future based on the provided
+        'now'.
+    evaluators:
+      - IsInstance: TimeRangeBuilderError
+  - name: No time reference at all
+    inputs:
+      prompt: Give me the logs.
+      now: "2024-01-01T00:00:00Z"
+    expected_output:
+      error_message: No time references were detected in your request.
+    evaluators:
+      - IsInstance: TimeRangeBuilderError
+  - name: Exact small range
+    inputs:
+      prompt: Could I see logs from 3:00 PM to 3:45 PM on Feb 10, 2024?
+      now: "2024-02-10T15:30:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-02-10T15:00:00Z"
+      max_timestamp_with_offset: "2024-02-10T15:45:00Z"
+      explanation: You specifically requested logs between 3:00 PM and 3:45 PM.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+  - name: All-day request
+    inputs:
+      prompt: I need logs from October 25th, 2024.
+      now: "2024-10-24T10:00:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-10-25T00:00:00Z"
+      max_timestamp_with_offset: "2024-10-25T23:59:59Z"
+      explanation:
+        We interpreted the request for October 25, 2024 as the entire day
+        in UTC.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+  - name: Unrecognized date format
+    inputs:
+      prompt: Get logs from 13/13/2024.
+      now: "2024-10-24T10:00:00Z"
+    expected_output:
+      error_message: We could not recognize a valid date from your request.
+    evaluators:
+      - IsInstance: TimeRangeBuilderError
+  - name: Ambiguous reference to next weekend
+    inputs:
+      prompt: I want logs from next weekend.
+      now: "2024-05-16T12:00:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-05-18T00:00:00Z"
+      max_timestamp_with_offset: "2024-05-19T23:59:59Z"
+      explanation:
+        We interpreted 'next weekend' as Saturday and Sunday following your
+        current date.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+      - LLMJudge:
+          We assume the user wants the entire upcoming Saturday and Sunday in
+          UTC.
+  - name: Last night logs
+    inputs:
+      prompt: Show me the logs from last night.
+      now: "2024-08-01T09:00:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-07-31T20:00:00Z"
+      max_timestamp_with_offset: "2024-08-01T06:00:00Z"
+      explanation:
+        We interpreted 'last night' as 8 PM to 6 AM prior to your current
+        morning time.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+  - name: Cross-year boundary
+    inputs:
+      prompt: Show me logs from 2024-12-31 23:59 UTC to 2025-01-01 00:15 UTC.
+      now: "2025-01-01T12:00:00Z"
+    expected_output:
+      min_timestamp_with_offset: "2024-12-31T23:59:00Z"
+      max_timestamp_with_offset: "2025-01-01T00:15:00Z"
+      explanation:
+        We selected the precise range you requested, crossing into the new
+        year.
+    evaluators:
+      - IsInstance: TimeRangeBuilderSuccess
+evaluators:
+  - LLMJudge:
+      Ensure explanation or error_message is in second person. Provide helpful
+      but concise feedback. Must not conflict with user question. Must not be insulting.
+      The user is the primary audience.
