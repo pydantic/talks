@@ -17,7 +17,7 @@ github_server = MCPServerStreamableHTTP(
     headers={'authorization': f'Bearer {github_mcp_pat}'},
 )
 libs_agent = Agent(
-    'anthropic:claude-sonnet-4-0',
+    'google-vertex:gemini-2.5-flash',
     toolsets=[github_server],
     instructions='your job is to help the user research software libraries and packages using the tools provided. Reply concisely.',
 )
@@ -34,7 +34,7 @@ async def main():
     with logfire.span('running libs agent'):
         async with libs_agent:
             result = await libs_agent.run(
-                'how many pull requests are open on pydantic-ai'
+                'how many pull requests are open on pydantic/pydantic-ai'
             )
             # result = await libs_agent.run('how many stars does gemini-cli have')
     print(result.output)
