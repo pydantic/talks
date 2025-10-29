@@ -60,7 +60,7 @@ This led to an expression and expanded positioning idea that we think dovetails 
 
 # Pydantic brand tagline
 
-## Know More. Build Faster.
+## AI, it's still just engineering
 
 The Pydantic Stack gives devs visibility to stay in flow, from local to prod, from AI to API.
 
