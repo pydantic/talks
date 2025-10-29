@@ -2,8 +2,8 @@
 
 ## Style preferences
 
-- Our voice and style leans British or European, and not American
-- We use British spelling as the gold standard everywhere
+- Our voice and style leans towards British or European, and not American
+- We use US-English spelling as the gold standard everywhere
 - Avoid $10 words, technical jargon and writing to "seem smart"
 - Focus on making it as easy as possible for the reader to understand the point
 - Only use tricky words when simpler ones can not clearly express the idea
