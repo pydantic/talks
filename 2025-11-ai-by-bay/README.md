@@ -211,3 +211,23 @@ print(repr(result.output))
 * Pydantic AI supports: **Temporal**, **DBOS** and **Prefect**
 
 * Temporal relies on the separation of Worflows and Activities
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Thank you
+
+Find us:
+* pydantic.dev
+* github.com/pydantic
+* x.com/pydantic
