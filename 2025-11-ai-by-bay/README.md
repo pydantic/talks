@@ -166,7 +166,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'gateway/anthropic:claude-sonnet-4-5',
+    'gateway/openai:gpt-4.1',
     output_type=City,
     instructions='Extract information about the city',
 )
@@ -221,7 +221,7 @@ print(repr(result.output))
 
 * Pydantic AI supports: **Temporal**, **DBOS** and **Prefect**
 
-* Temporal relies on the separation of Worflows and Activities
+* Temporal relies on the separation of Workflows and Activities
 
 
 
