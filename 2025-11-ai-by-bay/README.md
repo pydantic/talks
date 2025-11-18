@@ -33,7 +33,7 @@ Samuel Colvin
 
 **Durable Agents: long running AI workflows in a flakey world**
 
-* Part of the boarder topic of Engineering an AI
+* Part of the boarder topic of Engineering in AI - reliable AI
 * But won't make much sense without some background...
 * What does Pydantic do?
 
