@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Workflow
+    participant Activities
+
+    Note over Workflow: Deterministic<br/>Orchestration Logic
+    Note over Activities: Non-deterministic<br/>Side Effects
+
+    Workflow->>Activities: Execute Activity 1
+    Activities-->>Workflow: Result 1
+
+    Workflow->>Workflow: Process Result 1
+
+    Workflow->>Activities: Execute Activity 2
+    Activities-->>Workflow: Result 2
+
+    Workflow->>Workflow: Process Result 2
+
+    Workflow->>Activities: Execute Activity 3
+    Activities-->>Workflow: Result 3
+
+    Workflow->>Workflow: Process Result 3
+
+    Note over Workflow: Workflow Complete
