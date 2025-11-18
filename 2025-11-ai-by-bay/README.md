@@ -18,10 +18,18 @@ Samuel Colvin
 
 
 
+
+
+
+
+
+
+
 ## what
 
 **Durable Agents: long running AI workflows in a flakey world**
 
+* Part of the boarder top of Engineering an AI
 * But won't make much sense without some background...
 * What does Pydantic do?
 
@@ -37,7 +45,7 @@ Samuel Colvin
 
 ## 1: Pydantic Validation
 
-```py
+```py {title="pydantic-validation.py"}
 from datetime import date
 from pydantic import BaseModel
 
@@ -48,7 +56,7 @@ class City(BaseModel):
     location: tuple[float, float]
 
 
-city = City(name='London', founded='0050-01-01', location=['51.5074', '0.1278'])
+city = City(name='London', founded='0050-01-01', location=['51.5074', b'0.1278'])
 print(repr(city))
 ```
 
@@ -68,7 +76,7 @@ print(repr(city))
 
 ## 2: Pydantic AI
 
-```py {title="agent.py"}
+```py {title="pydantic-ai.py"}
 from datetime import date
 from typing import TypedDict
 from pydantic_ai import Agent
@@ -103,7 +111,7 @@ print(repr(result.output))
 
 ## 3: Pydantic Logfire
 
-```py
+```py {title="pydantic-logfire.py"}
 from datetime import date
 from typing import TypedDict
 from pydantic_ai import Agent
@@ -125,7 +133,7 @@ agent = Agent(
     instructions='Extract information about the city',
 )
 result = agent.run_sync("London was founded in 50AD it's located at 51.5074, 0.1278")
-print(repr(result.output))
+logfire.info(f'{result.output=}')
 ```
 
 
@@ -142,7 +150,7 @@ print(repr(result.output))
 
 ## 4: Pydantic AI Gateway
 
-```py {title="agent.py"}
+```py {title="pydantic-ai-gateway.py"}
 from datetime import date
 from typing import TypedDict
 from pydantic_ai import Agent
@@ -154,7 +162,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'gateway/openai:gpt-4.1',
+    'gateway/anthropic:claude-sonnet-4-5',
     output_type=City,
     instructions='Extract information about the city',
 )
@@ -178,7 +186,6 @@ print(repr(result.output))
 ## So the point is:
 
 **AI is still Engineering!**
-
 
 * Lots of people seem to argue otherwise. I think they're wrong.
 * AI doesn't run in a vacuum, isolated from practical challenges of the cloud
@@ -211,6 +218,22 @@ print(repr(result.output))
 * Pydantic AI supports: **Temporal**, **DBOS** and **Prefect**
 
 * Temporal relies on the separation of Worflows and Activities
+
+
+
+
+
+
+
+
+
+
+
+
+## Let's look at an example
+
+...
+
 
 
 

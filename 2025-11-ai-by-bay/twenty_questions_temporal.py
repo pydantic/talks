@@ -35,8 +35,7 @@ answerer_agent = Agent(
     "anthropic:claude-haiku-4-5",
     instructions=f"""
 You are playing a question and answer game.
-Your job is to answer yes/no questions about the secret object truthfully.
-ALWAYS answer with only true for 'yes' and false for 'no'.
+Your job is to answer questions about a secret object only you know truthfully.
 
 THE SECRET OBJECT IS: {secret}.
 """,
@@ -101,9 +100,11 @@ async def play(resume_id: str | None):
             print("resuming existing workflow", resume_id)
             await client.get_workflow_handle(resume_id).result()  # type: ignore[ReportUnknownMemberType]
         else:
+            job_id = f"twenty_questions-{uuid.uuid4()}"
+            print(f"{job_id=}")
             await client.execute_workflow(  # type: ignore[ReportUnknownMemberType]
                 TwentyQuestionsWorkflow.run,
-                id=f"twenty_questions-{uuid.uuid4()}",
+                id=job_id,
                 task_queue="twenty_questions",
             )
 
