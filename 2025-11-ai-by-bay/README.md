@@ -255,6 +255,6 @@ print(repr(result.output))
 ## Thank you
 
 Find us:
-* pydantic.dev
-* github.com/pydantic
-* x.com/pydantic
+* <https://pydantic.dev>
+* <https://github.com/pydantic>
+* <https://x.com/pydantic>
