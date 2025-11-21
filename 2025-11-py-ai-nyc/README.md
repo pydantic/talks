@@ -45,6 +45,12 @@ Samuel Colvin
 
 
 
+
+
+
+
+
+
 ## 1: Pydantic Validation
 
 ```py {title="pydantic-validation.py"}
