@@ -1,0 +1,3 @@
+[submodule "2025-11-py-ai-nyc/mcp-server"]
+	path = 2025-11-py-ai-nyc/mcp-server
+	url = git@github.com:samuelcolvin/py-ai-mcp.git
