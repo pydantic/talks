@@ -5,7 +5,7 @@
 
 # Py AI
 
-## NYC, November 2025
+## NYC, 21 November 2025
 
 Slides at <https://github.com/pydantic/talks>
 

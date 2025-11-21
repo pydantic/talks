@@ -18,7 +18,7 @@ from .agent import agent
 logfire.configure(service_name='ai-chat')
 logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()
-logfire.instrument_httpx(capture_all=True)
+# logfire.instrument_httpx(capture_all=True)
 
 
 @asynccontextmanager

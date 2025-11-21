@@ -1,3 +1,5 @@
+from datetime import date
+
 import httpx
 from pydantic_ai import Agent, ModelRetry
 from pydantic_ai.mcp import MCPServerStreamableHTTP
@@ -11,9 +13,15 @@ agent = Agent(
     Use the provided tools to find answers, never guess at the answer from your own knowledge.
     """,
     toolsets=[
+        # MCPServerStreamableHTTP('http://localhost:8001/mcp'),
         MCPServerStreamableHTTP('https://py-ai-mcp.fastmcp.app/mcp'),
     ],
 )
+
+
+@agent.instructions
+def add_date() -> str:
+    return f"Today's date is: {date.today()}"
 
 
 @agent.tool
