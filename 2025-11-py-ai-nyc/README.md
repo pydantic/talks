@@ -136,7 +136,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'openai:gpt-4.1',
+    'anthropic:claude-sonnet-4-5',
     output_type=City,
     instructions='Extract information about the city',
 )
