@@ -30,7 +30,7 @@ Samuel Colvin
 
 
 
-## what
+## What is the Pydantic Stack?
 
 **We do more than just validation.**
 
@@ -52,6 +52,7 @@ Samuel Colvin
 
 
 ## 1: Pydantic Validation
+Open source python tool with 500 million downloads.
 
 ```py {title="pydantic-validation.py"}
 from datetime import date
@@ -83,6 +84,7 @@ print(repr(city))
 
 
 ## 2: Pydantic AI
+Type-safe AI Agent orchestration.
 
 ```py {title="pydantic-ai.py"}
 from datetime import date
@@ -118,6 +120,7 @@ print(repr(result.output))
 
 
 ## 3: Pydantic Logfire
+Observability tool from AI to API.
 
 ```py {title="pydantic-logfire.py"}
 from datetime import date
@@ -157,6 +160,7 @@ logfire.info(f'{result.output=}')
 
 
 ## 4: Pydantic AI Gateway
+AI model routing that simply works.
 
 ```py {title="pydantic-ai-gateway.py"}
 from datetime import date
@@ -216,5 +220,6 @@ uv run uvicorn src.server:app
 
 Find us:
 * <https://pydantic.dev>
+* <https://pydantic.dev/links>
 * <https://github.com/pydantic>
 * <https://x.com/pydantic>
