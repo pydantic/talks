@@ -9,7 +9,7 @@
 
 Slides at <https://github.com/pydantic/talks>
 
-Samuel Colvin
+By [Samuel Colvin](https://x.com/samuel_colvin/)
 
 
 
