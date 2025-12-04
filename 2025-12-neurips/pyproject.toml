@@ -1,0 +1,9 @@
+[project]
+name = "2025-12-neurips"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "logfire>=4.16.0",
+    "pydantic-ai>=1.26.0",
+]
