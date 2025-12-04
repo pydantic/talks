@@ -201,31 +201,6 @@ print(repr(result.output))
 
 
 
-
-
-
-
-
-## Let's look at an example
-
-```bash
-uv run uvicorn src.server:app
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Thank you
 
 Find us:
