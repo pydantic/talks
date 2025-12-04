@@ -37,13 +37,14 @@ Samuel Colvin
 We're at a crossroads - there are two potential ways the future of software can look.
 
 On the one hand, we have:
-* A small number of vertically integrated everything platform
-* Who annoint "leaders" - software you have to use (OSS or not)
+* A small number of vertically integrated everything platforms
+* Who annoint software you have to use (OSS or not)
 
 On the other hand, we have:
 * Open standards and open protocols!
 * Agent Frameworks that let you build AI applications where you can switch model
 provider in seconds
+* A choice of libraries where the best software wins
 
 **The preferable choice for developers is obvious!**
 
