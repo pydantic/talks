@@ -41,7 +41,7 @@ On the one hand, we have:
 * Who annoint software you have to use (OSS or not)
 
 On the other hand, we have:
-* Open standards and open protocols!
+* Open standards and open protocols! MCP, OpenTelemetry, AG-UI
 * Agent Frameworks that let you build AI applications where you can switch model
 provider in seconds
 * A choice of libraries where the best software wins
