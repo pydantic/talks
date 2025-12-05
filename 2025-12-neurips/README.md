@@ -139,7 +139,6 @@ from pydantic_ai import Agent
 from pydantic import BaseModel
 
 import logfire
-
 logfire.configure()
 logfire.instrument_pydantic_ai()
 
