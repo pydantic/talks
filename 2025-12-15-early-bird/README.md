@@ -132,7 +132,6 @@ from pydantic_ai import Agent
 from pydantic import BaseModel
 
 import logfire
-
 logfire.configure()
 logfire.instrument_pydantic_ai()
 
@@ -142,7 +141,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'anthropic:claude-sonnet-4-5',
+    'openai:gpt-4.1',
     output_type=City,
     instructions='Extract information about the city',
 )
@@ -171,6 +170,11 @@ from typing import TypedDict
 from pydantic_ai import Agent
 from pydantic import BaseModel
 
+import logfire
+logfire.configure()
+logfire.instrument_pydantic_ai()
+logfire.instrument_httpx()
+
 class City(BaseModel):
     name: str
     founded: date
@@ -178,6 +182,7 @@ class City(BaseModel):
 
 agent = Agent(
     'gateway/openai:gpt-4.1',
+    # 'gateway/anthropic:claude-sonnet-4-5',
     output_type=City,
     instructions='Extract information about the city',
 )
@@ -202,7 +207,7 @@ print(repr(result.output))
 ## Let's look at an example
 
 ```bash
-uv run uvicorn src.server:app
+uv run libs_mcp_client.py
 ```
 
 

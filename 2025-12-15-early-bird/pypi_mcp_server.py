@@ -2,13 +2,14 @@
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 import logfire
 from google.api_core.exceptions import BadRequest
 from google.cloud import bigquery
 from mcp import ServerSession
 from mcp.server.fastmcp import Context, FastMCP
-from pydantic_ai import Agent, ModelRetry, RunContext, format_as_xml
+from pydantic_ai import Agent, ModelRetry, RunContext, TextOutput, format_as_xml
 from pydantic_ai.models.mcp_sampling import MCPSamplingModel
 
 logfire.configure()
@@ -21,6 +22,28 @@ table_name = 'bigquery-public-data.pypi.file_downloads'
 client = bigquery.Client()
 
 
+async def run_query(ctx: RunContext[Deps], sql: str) -> list[dict[str, Any]]:
+    # remove "```sql...```"
+    # m = re.search(r'```.*\n([.\n]*?)```', sql)
+    m = re.search(r'```\w*\n(.*?)```', sql, flags=re.S)
+    if m:
+        sql = m.group(1).strip()
+
+    logfire.info('running {sql}', sql=sql)
+    await ctx.deps.mcp_context.log('info', 'running query...')
+    if f'from `{table_name}`' not in sql.lower():
+        raise ModelRetry(f'Query must be against the `{table_name}` table')
+    try:
+        query_job = client.query(sql)
+        rows = query_job.result()
+    except BadRequest as e:
+        await ctx.deps.mcp_context.log('warning', 'query error retrying')
+        raise ModelRetry(f'Invalid query: {e}') from e
+    await ctx.deps.mcp_context.log('info', 'query successful')
+    data: list[dict[str, Any]] = [dict(row) for row in rows]  # type: ignore
+    return data
+
+
 @dataclass
 class Deps:
     mcp_context: Context[ServerSession, None]
@@ -29,6 +52,7 @@ class Deps:
 pypi_agent = Agent(
     retries=2,
     deps_type=Deps,
+    output_type=TextOutput(run_query),
     system_prompt=f"""
 Your job is to help users analyze downloads of python packages.
 
@@ -116,37 +140,15 @@ ORDER BY `month` DESC, `num_downloads` DESC
 )
 
 
-@pypi_agent.output_validator
-async def run_query(ctx: RunContext[Deps], sql: str) -> str:
-    # remove "```sql...```"
-    # m = re.search(r'```.*\n([.\n]*?)```', sql)
-    m = re.search(r'```\w*\n(.*?)```', sql, flags=re.S)
-    if m:
-        sql = m.group(1).strip()
-
-    logfire.info('running {sql}', sql=sql)
-    await ctx.deps.mcp_context.log('info', 'running query')
-    if f'from `{table_name}`' not in sql.lower():
-        raise ModelRetry(f'Query must be against the `{table_name}` table')
-    try:
-        query_job = client.query(sql)
-        rows = query_job.result()
-    except BadRequest as e:
-        await ctx.deps.mcp_context.log('warning', 'query error retrying')
-        raise ModelRetry(f'Invalid query: {e}') from e
-    await ctx.deps.mcp_context.log('info', 'query successful')
-    data = [dict(row) for row in rows]  # type: ignore
-    return format_as_xml(data, item_tag='row')
-
-
 mcp = FastMCP('PyPI query', log_level='WARNING')
 
 
 @mcp.tool()
 async def pypi_downloads(question: str, ctx: Context[ServerSession, None]) -> str:
     """Analyze downloads of packages from the Python package index PyPI to answer questions about package downloads."""
+    await ctx.log('info', 'Generating query...')
     result = await pypi_agent.run(question, model=MCPSamplingModel(session=ctx.session), deps=Deps(ctx))
-    return result.output
+    return format_as_xml(result.output, item_tag='row')
 
 
 if __name__ == '__main__':

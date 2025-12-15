@@ -9,6 +9,11 @@ dependencies = [
     "pydantic-ai>=1.32.0",
 ]
 
+# while waiting for https://github.com/pydantic/pydantic-ai/pull/3732
+[tool.uv.sources]
+pydantic-ai = { git = "https://github.com/pydantic/pydantic-ai.git", rev = "support-typed-runcontext-in-textoutput-signature" }
+
+
 [dependency-groups]
 dev = [
     "ruff>=0.14.9",
