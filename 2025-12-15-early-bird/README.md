@@ -182,7 +182,7 @@ class City(BaseModel):
 
 agent = Agent(
     'gateway/openai:gpt-4.1',
-    # 'gateway/anthropic:claude-sonnet-4-5',
+    # 'gateway/gemini:gemini-2.5-flash',
     output_type=City,
     instructions='Extract information about the city',
 )
