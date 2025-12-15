@@ -1,0 +1,41 @@
+[project]
+name = "2025-12-15-early-bird"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "google-cloud-bigquery>=3.38.0",
+    "logfire>=4.16.0",
+    "pydantic-ai>=1.32.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.9",
+]
+
+# https://beta.ruff.rs/docs/configuration/
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = [
+    "Q",      # https://docs.astral.sh/ruff/rules/#flake8-quotes-q
+    "RUF100", # https://docs.astral.sh/ruff/rules/unused-noqa/
+    "I",      # https://docs.astral.sh/ruff/rules/#isort-i
+    "FA",     # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+isort = { combine-as-imports = true }
+ignore = [
+    # "F632", # ignore replace `is` with `==` - we have lots of these tests
+    # "F811", # Redefinition of unused variable
+    # "F541", # f-string without any placeholders
+    # "E711", # Comparison to `None` should be `cond is None`
+    # "E712", # Comparison to True/False - needed for testing boolean behavior
+    # "E714", # Test for object identity should be `is not`
+    # "E721", # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+]
+
+[tool.ruff.format]
+quote-style = "single"
