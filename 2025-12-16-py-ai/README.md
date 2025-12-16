@@ -173,7 +173,6 @@ from pydantic import BaseModel
 import logfire
 logfire.configure()
 logfire.instrument_pydantic_ai()
-logfire.instrument_httpx()
 
 class City(BaseModel):
     name: str
@@ -185,6 +184,7 @@ agent = Agent(
     # 'gateway/gemini:gemini-2.5-flash',
     output_type=City,
     instructions='Extract information about the city',
+    retries=4,
 )
 result = agent.run_sync("London was founded in 50AD it's located at 51.5074, 0.1278")
 print(repr(result.output))
