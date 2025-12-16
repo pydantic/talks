@@ -1,3 +1,4 @@
+import asyncio
 from datetime import date
 
 import httpx
@@ -30,3 +31,22 @@ async def fetch(ctx: RunContext[httpx.AsyncClient], url: str) -> str:
     if r.status_code > 299:
         raise ModelRetry(f'Failed to fetch {url}: {r.status_code}')
     return r.text
+
+
+async def main():
+    async with httpx.AsyncClient(timeout=30) as client:
+        result = await agent.run(
+            'what event is happening today',
+            deps=client,
+            model='gateway/openai:gpt-4.1',
+        )
+        print(result.output)
+
+
+if __name__ == '__main__':
+    import logfire
+
+    logfire.configure()
+    logfire.instrument_pydantic_ai()
+    logfire.instrument_mcp()
+    asyncio.run(main())
