@@ -1,0 +1,33 @@
+[project]
+name = "2025-12-15-early-bird"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.124.4",
+    "google-cloud-bigquery>=3.38.0",
+    "logfire[fastapi]>=4.16.0",
+    "pydantic-ai>=1.32.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.9",
+]
+
+# https://beta.ruff.rs/docs/configuration/
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = [
+    "Q",      # https://docs.astral.sh/ruff/rules/#flake8-quotes-q
+    "RUF100", # https://docs.astral.sh/ruff/rules/unused-noqa/
+    "I",      # https://docs.astral.sh/ruff/rules/#isort-i
+    "FA",     # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+isort = { combine-as-imports = true }
+
+[tool.ruff.format]
+quote-style = "single"
