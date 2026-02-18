@@ -1,0 +1,169 @@
+{
+  "openai/gpt-oss-20b": {
+    "unique_id": "openai/gpt-oss-20b",
+    "name": "GPT OSS 20B 128k",
+    "description": "Large Language Model available on Groq. Speed: 1,000 TPS, Context: 128k",
+    "input_mtok": 0.075,
+    "output_mtok": 0.3,
+    "attributes": {
+      "speed_tps": "1,000 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "openai/gpt-oss-safeguard-20b": {
+    "unique_id": "openai/gpt-oss-safeguard-20b",
+    "name": "GPT OSS Safeguard 20B",
+    "description": "Large Language Model available on Groq. Speed: 1,000 TPS, Context: ",
+    "input_mtok": 0.075,
+    "output_mtok": 0.3,
+    "attributes": {
+      "speed_tps": "1,000 TPS",
+      "type": "LLM"
+    }
+  },
+  "openai/gpt-oss-120b": {
+    "unique_id": "openai/gpt-oss-120b",
+    "name": "GPT OSS 120B 128k",
+    "description": "Large Language Model available on Groq. Speed: 500 TPS, Context: 128k",
+    "input_mtok": 0.15,
+    "output_mtok": 0.6,
+    "attributes": {
+      "speed_tps": "500 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "moonshotai/kimi-k2-instruct-0905": {
+    "unique_id": "moonshotai/kimi-k2-instruct-0905",
+    "name": "Kimi K2-0905 1T 256k",
+    "description": "Large Language Model available on Groq. Speed: 200 TPS, Context: 256k",
+    "input_mtok": 1.0,
+    "output_mtok": 3.0,
+    "attributes": {
+      "speed_tps": "200 TPS",
+      "type": "LLM",
+      "context_window": "256k"
+    }
+  },
+  "meta-llama/llama-4-scout-17b-16e-instruct": {
+    "unique_id": "meta-llama/llama-4-scout-17b-16e-instruct",
+    "name": "Llama 4 Scout (17Bx16E) 128k",
+    "description": "Large Language Model available on Groq. Speed: 594 TPS, Context: 128k",
+    "input_mtok": 0.11,
+    "output_mtok": 0.34,
+    "attributes": {
+      "speed_tps": "594 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "meta-llama/llama-4-maverick-17b-128e-instruct": {
+    "unique_id": "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "name": "Llama 4 Maverick (17Bx128E) 128k",
+    "description": "Large Language Model available on Groq. Speed: 562 TPS, Context: 128k",
+    "input_mtok": 0.2,
+    "output_mtok": 0.6,
+    "attributes": {
+      "speed_tps": "562 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "meta-llama/llama-guard-4-12b": {
+    "unique_id": "meta-llama/llama-guard-4-12b",
+    "name": "Llama Guard 4 12B 128k",
+    "description": "Large Language Model available on Groq. Speed: 325 TPS, Context: 128k",
+    "input_mtok": 0.2,
+    "output_mtok": 0.2,
+    "attributes": {
+      "speed_tps": "325 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "qwen/qwen3-32b": {
+    "unique_id": "qwen/qwen3-32b",
+    "name": "Qwen3 32B 131k",
+    "description": "Large Language Model available on Groq. Speed: 662 TPS, Context: 131k",
+    "input_mtok": 0.29,
+    "output_mtok": 0.59,
+    "attributes": {
+      "speed_tps": "662 TPS",
+      "type": "LLM",
+      "context_window": "131k"
+    }
+  },
+  "llama-3.3-70b-versatile": {
+    "unique_id": "llama-3.3-70b-versatile",
+    "name": "Llama 3.3 70B Versatile 128k",
+    "description": "Large Language Model available on Groq. Speed: 394 TPS, Context: 128k",
+    "input_mtok": 0.59,
+    "output_mtok": 0.79,
+    "attributes": {
+      "speed_tps": "394 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "llama-3.1-8b-instant": {
+    "unique_id": "llama-3.1-8b-instant",
+    "name": "Llama 3.1 8B Instant 128k",
+    "description": "Large Language Model available on Groq. Speed: 840 TPS, Context: 128k",
+    "input_mtok": 0.05,
+    "output_mtok": 0.08,
+    "attributes": {
+      "speed_tps": "840 TPS",
+      "type": "LLM",
+      "context_window": "128k"
+    }
+  },
+  "canopylabs/orpheus-v1-english": {
+    "unique_id": "canopylabs/orpheus-v1-english",
+    "name": "Canopy Labs Orpheus English",
+    "description": "Text-to-Speech model on Groq. 100 characters/second.",
+    "input_mtok": 0.0,
+    "output_mtok": 0.0,
+    "attributes": {
+      "price_per_m_chars": 22.0,
+      "chars_per_s": 100.0,
+      "type": "TTS"
+    }
+  },
+  "canopylabs/orpheus-arabic-saudi": {
+    "unique_id": "canopylabs/orpheus-arabic-saudi",
+    "name": "Canopy Labs Orpheus Arabic Saudi",
+    "description": "Text-to-Speech model on Groq. 100 characters/second.",
+    "input_mtok": 0.0,
+    "output_mtok": 0.0,
+    "attributes": {
+      "price_per_m_chars": 40.0,
+      "chars_per_s": 100.0,
+      "type": "TTS"
+    }
+  },
+  "whisper-large-v3": {
+    "unique_id": "whisper-large-v3",
+    "name": "Whisper V3 Large",
+    "description": "Automatic Speech Recognition model on Groq. Speed factor: 217x. Priced per hour transcribed.",
+    "input_mtok": 0.0,
+    "output_mtok": 0.0,
+    "attributes": {
+      "price_per_hour_transcribed": 0.111,
+      "speed_factor": "217x",
+      "type": "ASR"
+    }
+  },
+  "whisper-large-v3-turbo": {
+    "unique_id": "whisper-large-v3-turbo",
+    "name": "Whisper Large v3 Turbo",
+    "description": "Automatic Speech Recognition model on Groq. Speed factor: 228x. Priced per hour transcribed.",
+    "input_mtok": 0.0,
+    "output_mtok": 0.0,
+    "attributes": {
+      "price_per_hour_transcribed": 0.04,
+      "speed_factor": "228x",
+      "type": "ASR"
+    }
+  }
+}

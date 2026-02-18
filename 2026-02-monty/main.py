@@ -102,11 +102,11 @@ async def get_prices(provider: str, allow_code_reuse: bool = False) -> dict[str,
     ):
         deps = RunDeps(previous_code=previous_code)
         r = await prices_agent.run(urls[provider], deps=deps)
-        debug(r.output, deps.models)
 
         if not prev_code.exists():
             prev_code.write_text(r.output.optimal_code)
 
+        logfire.info('{models=}', models=deps.models)
         prices = Path(f'{provider}_prices.json')
         if not prices.exists():
             prices.write_bytes(pydantic_core.to_json(deps.models, indent=2))
@@ -116,4 +116,5 @@ async def get_prices(provider: str, allow_code_reuse: bool = False) -> dict[str,
 if __name__ == '__main__':
     logfire.configure(service_name='llm-prices-run')
     logfire.instrument_pydantic_ai()
-    asyncio.run(get_prices('anthropic', allow_code_reuse=True))
+    models = asyncio.run(get_prices('anthropic', allow_code_reuse=True))
+    debug(models)

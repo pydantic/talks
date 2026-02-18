@@ -72,8 +72,8 @@ dataset: Dataset[str, dict[str, ModelInfo]] = Dataset(
 
 async def run_evals():
     models = [
-        # 'gateway/anthropic:claude-sonnet-4-5',
-        # 'gateway/anthropic:claude-sonnet-4-6',
+        'gateway/anthropic:claude-sonnet-4-6',
+        'gateway/anthropic:claude-opus-4-6',
         'gateway/openai:gpt-5.2',
         'gateway/openai:gpt-5-mini',
     ]
