@@ -34,6 +34,7 @@ agent = Agent(
 @dataclass
 class RunDeps:
     previous_code: str | None
+    previous_model_ids: list[str] | None
     models: dict[str, ModelInfo] = field(default_factory=dict)
 
 

@@ -52,4 +52,4 @@ venv = ".venv"
 
 [tool.uv.sources]
 pydantic-ai = { git = "https://github.com/pydantic/pydantic-ai", rev = "refs/pull/4153/head" }
-pydantic-monty = { path = "../../monty/crates/monty-python" }
+pydantic-monty = { git = "https://github.com/pydantic/monty", subdirectory = "crates/monty-python" }

@@ -89,18 +89,36 @@ async def add_optimal_code(ctx: RunContext[RunDeps]) -> str | None:
         return f'Optimal code from previous run:\n\n```python\n{ctx.deps.previous_code}\n```'
 
 
+@prices_agent.instructions
+async def add_previous_model_ids(ctx: RunContext[RunDeps]) -> str | None:
+    if ctx.deps.previous_model_ids is not None:
+        return f"""
+Model IDs from previous run:
+
+{ctx.deps.previous_model_ids}
+
+You should use these model ids where possible when returning model information.
+"""
+
+
 async def get_prices(provider: str, allow_code_reuse: bool = False) -> dict[str, ModelInfo]:
     prev_code = Path(f'{provider}_previous_code.py')
     previous_code = None
     if allow_code_reuse and prev_code.exists():
         previous_code = prev_code.read_text()
 
+    prices = Path(f'{provider}_prices.json')
+    previous_model_ids: list[str] | None = None
+    if prices.exists():
+        previous_model_ids = list(pydantic_core.from_json(prices.read_bytes()))
+
     with logfire.span(
-        'getting prices for {provider} {existing_code=}',
+        'getting prices for {provider} {existing_code=} {existing_model_ids=}',
         provider=provider,
         existing_code=previous_code is not None,
+        existing_model_ids=previous_model_ids is not None,
     ):
-        deps = RunDeps(previous_code=previous_code)
+        deps = RunDeps(previous_code=previous_code, previous_model_ids=previous_model_ids)
         r = await prices_agent.run(urls[provider], deps=deps)
 
         if not prev_code.exists():
@@ -114,7 +132,7 @@ async def get_prices(provider: str, allow_code_reuse: bool = False) -> dict[str,
 
 
 if __name__ == '__main__':
-    logfire.configure(service_name='llm-prices-run')
+    logfire.configure(environment='llm-prices-run')
     logfire.instrument_pydantic_ai()
     models = asyncio.run(get_prices('anthropic', allow_code_reuse=True))
     debug(models)

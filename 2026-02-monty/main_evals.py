@@ -11,7 +11,7 @@ from pydantic_evals.evaluators import Evaluator, EvaluatorContext
 from main import get_prices, prices_agent
 from sub_agent import ModelInfo
 
-logfire.configure(service_name='llm-prices-evals', console=False)
+logfire.configure(environment='llm-prices-evals', console=False)
 logfire.instrument_pydantic_ai()
 
 reference_models: dict[str, ModelInfo] = {
@@ -70,6 +70,12 @@ dataset: Dataset[str, dict[str, ModelInfo]] = Dataset(
 )
 
 
+async def run_eval(model: str):
+    with prices_agent.override(model=model):
+        report = await dataset.evaluate(get_prices, name=model)
+        report.print(include_input=False, include_output=False)
+
+
 async def run_evals():
     models = [
         'gateway/anthropic:claude-sonnet-4-6',
@@ -77,10 +83,7 @@ async def run_evals():
         'gateway/openai:gpt-5.2',
         'gateway/openai:gpt-5-mini',
     ]
-    for model in models:
-        with prices_agent.override(model=model):
-            report = await dataset.evaluate(get_prices, name=model)
-            report.print(include_input=False, include_output=False)
+    await asyncio.gather(*[run_eval(model) for model in models])
 
 
 if __name__ == '__main__':
