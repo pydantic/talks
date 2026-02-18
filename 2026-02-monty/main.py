@@ -6,6 +6,7 @@ from typing import Any
 
 import logfire
 import pydantic_core
+import tiktoken
 from devtools import debug
 from playwright.async_api import async_playwright
 from pydantic import BaseModel
@@ -46,13 +47,18 @@ class OutputData(BaseModel, use_attribute_docstrings=True):
     """
 
 
+_tiktoken_encoding = tiktoken.get_encoding('cl100k_base')
+
+
 class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
     async def call_tool(self, *args: Any, **kwargs: Any) -> Any:
         output = await super().call_tool(*args, **kwargs)
-        json_output = pydantic_core.to_json(output)
-        if len(json_output) > 5_000:
-            logfire.warn('Output truncated, {total_length=}', total_length=len(json_output))
-            return f'{json_output[:5_000]}... (WARNING: output truncated, total length: {len(json_output)})'
+        json_output = pydantic_core.to_json(output).decode()
+        tokens = _tiktoken_encoding.encode(json_output)
+        if len(tokens) > 10_000:
+            logfire.warn('Output truncated, {total_tokens=}', total_tokens=len(tokens))
+            truncated = _tiktoken_encoding.decode(tokens[:10_000])
+            return f'{truncated}... (WARNING: output truncated to 10k tokens, total tokens: {len(tokens)})'
         else:
             return output
 
@@ -90,11 +96,14 @@ async def add_optimal_code() -> str | None:
 
 
 async def main():
-    model_results = ModelResults()
-    r = await prices_agent.run(urls[provider], deps=model_results)
-    debug(r.output, model_results)
-    previous_code_file.write_text(r.output.optimal_code)
-    Path(f'{provider}_prices.json').write_bytes(pydantic_core.to_json(model_results.models, indent=2))
+    with logfire.span(
+        'getting prices for {provider} {existing_code=}', provider=provider, existing_code=previous_code_file.exists()
+    ):
+        model_results = ModelResults()
+        r = await prices_agent.run(urls[provider], deps=model_results)
+        debug(r.output, model_results)
+        previous_code_file.write_text(r.output.optimal_code)
+        Path(f'{provider}_prices.json').write_bytes(pydantic_core.to_json(model_results.models, indent=2))
 
 
 if __name__ == '__main__':
