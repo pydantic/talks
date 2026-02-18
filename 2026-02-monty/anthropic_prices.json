@@ -1,0 +1,98 @@
+{
+  "claude-opus-4.6": {
+    "unique_id": "claude-opus-4.6",
+    "name": "Claude Opus 4.6",
+    "description": null,
+    "input_mtok": 2.5,
+    "output_mtok": 12.5,
+    "attributes": null
+  },
+  "claude-opus-4.5": {
+    "unique_id": "claude-opus-4.5",
+    "name": "Claude Opus 4.5",
+    "description": null,
+    "input_mtok": 2.5,
+    "output_mtok": 12.5,
+    "attributes": null
+  },
+  "claude-opus-4.1": {
+    "unique_id": "claude-opus-4.1",
+    "name": "Claude Opus 4.1",
+    "description": null,
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": null
+  },
+  "claude-opus-4": {
+    "unique_id": "claude-opus-4",
+    "name": "Claude Opus 4",
+    "description": null,
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": null
+  },
+  "claude-sonnet-4.6": {
+    "unique_id": "claude-sonnet-4.6",
+    "name": "Claude Sonnet 4.6",
+    "description": null,
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": null
+  },
+  "claude-sonnet-4.5": {
+    "unique_id": "claude-sonnet-4.5",
+    "name": "Claude Sonnet 4.5",
+    "description": null,
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": null
+  },
+  "claude-sonnet-4": {
+    "unique_id": "claude-sonnet-4",
+    "name": "Claude Sonnet 4",
+    "description": null,
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": null
+  },
+  "claude-sonnet-3.7-deprecated": {
+    "unique_id": "claude-sonnet-3.7-deprecated",
+    "name": "Claude Sonnet 3.7 (deprecated)",
+    "description": null,
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": null
+  },
+  "claude-haiku-4.5": {
+    "unique_id": "claude-haiku-4.5",
+    "name": "Claude Haiku 4.5",
+    "description": null,
+    "input_mtok": 0.5,
+    "output_mtok": 2.5,
+    "attributes": null
+  },
+  "claude-haiku-3.5": {
+    "unique_id": "claude-haiku-3.5",
+    "name": "Claude Haiku 3.5",
+    "description": null,
+    "input_mtok": 0.4,
+    "output_mtok": 2.0,
+    "attributes": null
+  },
+  "claude-opus-3-deprecated": {
+    "unique_id": "claude-opus-3-deprecated",
+    "name": "Claude Opus 3 (deprecated)",
+    "description": null,
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": null
+  },
+  "claude-haiku-3": {
+    "unique_id": "claude-haiku-3",
+    "name": "Claude Haiku 3",
+    "description": null,
+    "input_mtok": 0.125,
+    "output_mtok": 0.625,
+    "attributes": null
+  }
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from typing import Any
 
 import logfire
@@ -37,8 +38,8 @@ toolset = FunctionToolset(tools=[get_html, record_model_info, *tools])
 class OutputData(BaseModel, use_attribute_docstrings=True):
     run_summary: str
     """Summary of how you performed the task and any issues encountered."""
-    optimial_code: str
-    """Optimial python code for getting prices data, to use in future runs.
+    optimal_code: str
+    """Optimal python code for getting prices data, to use in future runs.
 
     This should NOT contain any model names or model-specific details, just the code needed to get and extract
     the data.
@@ -56,7 +57,7 @@ class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
             return output
 
 
-agent = Agent(
+prices_agent = Agent(
     'gateway/anthropic:claude-sonnet-4-5',
     toolsets=[TruncateCodeExecutionToolset(toolset=toolset)],
     output_type=OutputData,
@@ -73,14 +74,27 @@ You should record information about each model by calling `record_model_info`.
 """,
 )
 
-openai_url = 'https://developers.openai.com/api/docs/pricing'
-anthropic_url = 'https://platform.claude.com/docs/en/about-claude/pricing'
+urls = {
+    'openai': 'https://developers.openai.com/api/docs/pricing',
+    'anthropic': 'https://platform.claude.com/docs/en/about-claude/pricing',
+}
+provider = 'anthropic'
+previous_code_file = Path(f'{provider}_previous_code.py')
+
+
+@prices_agent.instructions
+async def add_optimal_code() -> str | None:
+    if previous_code_file.exists():
+        code = previous_code_file.read_text()
+        return f'Optimal code from previous run:\n\n```python\n{code}\n```'
 
 
 async def main():
     model_results = ModelResults()
-    r = await agent.run(anthropic_url, deps=model_results)
+    r = await prices_agent.run(urls[provider], deps=model_results)
     debug(r.output, model_results)
+    previous_code_file.write_text(r.output.optimal_code)
+    Path(f'{provider}_prices.json').write_bytes(pydantic_core.to_json(model_results.models, indent=2))
 
 
 if __name__ == '__main__':
