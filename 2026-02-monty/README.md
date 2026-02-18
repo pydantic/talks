@@ -4,11 +4,7 @@
 
 # Pydantic Monty
 
-**Codemode!**
-
-Programmatic tool calling is faster, cheaper and more reliable than calling tools in a loop.
-
-Codemode is great ... until you need to run that code in a production setting.
+Code execution is great ... until you need to run that code in a production setting.
 
 
 
@@ -58,16 +54,23 @@ A minimal, secure Python interpreter written in Rust for use by AI.
 
 
 
+
+
+
+
+
 ## Why
 
-Making agentics executing code trivial and reliable.
+Making agents executing code trivial and reliable.
 
 * Completely block access to the host environment
 * Call functions on the host - only functions you give it access to
 * Run typechecking - with ty
+* mounted filesystem access - complete control over which files are accessible
 * Be snapshotted to bytes at external function calls
 * Startup is <1us
 * Be called from Rust, Python, or Javascript
+* no (extra) sandbox required
 
 This is NOT to run your existing Python application, that will probably never be possible.
 
@@ -96,6 +99,16 @@ m.run(inputs={'who': 'World'})
 ```
 
 
+
+
+
+
+
+
+
+## Demo...
+
+😱
 
 
 

@@ -14,7 +14,7 @@ from pydantic_ai import Agent, FunctionToolset, RunContext
 from pydantic_ai.tools import AgentDepsT
 from pydantic_ai.toolsets.code_execution import CodeExecutionToolset
 
-from bs import tools
+import bs
 from sub_agent import ModelInfo, RunDeps, record_model_info
 
 
@@ -56,9 +56,10 @@ class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
             return output
 
 
-toolset = FunctionToolset(tools=[get_html, record_model_info, *tools])
+toolset = FunctionToolset(tools=[get_html, record_model_info, *bs.tools])
+
 prices_agent = Agent(
-    'gateway/anthropic:claude-sonnet-4-5',
+    'gateway/anthropic:claude-sonnet-4-6',
     toolsets=[TruncateCodeExecutionToolset(toolset=toolset)],
     output_type=OutputData,
     deps_type=RunDeps,
