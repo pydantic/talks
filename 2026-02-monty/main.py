@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 import logfire
+import pydantic_core
 from devtools import debug
 from playwright.async_api import async_playwright
 from pydantic import BaseModel
-from pydantic_ai import Agent, WebSearchTool
+from pydantic_ai import Agent
+from pydantic_ai.tools import AgentDepsT
 from pydantic_ai.toolsets.code_execution import CodeExecutionToolset
 from pydantic_ai.toolsets.function import FunctionToolset
 
 from bs import tools
+from sub_agent import ModelResults, record_model_info
 
 logfire.configure()
 logfire.instrument_pydantic_ai()
@@ -27,52 +31,56 @@ async def get_html(url: str) -> str:
     return html
 
 
-toolset = FunctionToolset(tools=[get_html, *tools])
-
-
-class ModelInfo(BaseModel, use_attribute_docstrings=True):
-    name: str
-    """Name of the model."""
-    description: str | None = None
-    """Description of the model."""
-    prices: dict[str, float]
-    """Consumption prices per million tokens, e.g. "input tokens", "output tokens", "cached tokens" etc."""
-    attributes: dict[str, float | str]
-    """Any other attributes of the model."""
+toolset = FunctionToolset(tools=[get_html, record_model_info, *tools])
 
 
 class OutputData(BaseModel, use_attribute_docstrings=True):
-    models: list[ModelInfo]
-    """List of models with information including prices."""
     run_summary: str
     """Summary of how you performed the task and any issues encountered."""
     optimial_code: str
-    """Optimial python code for getting prices data, to use in future runs."""
+    """Optimial python code for getting prices data, to use in future runs.
+
+    This should NOT contain any model names or model-specific details, just the code needed to get and extract
+    the data.
+    """
+
+
+class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
+    async def call_tool(self, *args: Any, **kwargs: Any) -> Any:
+        output = await super().call_tool(*args, **kwargs)
+        json_output = pydantic_core.to_json(output)
+        if len(json_output) > 5_000:
+            logfire.warn('Output truncated, {total_length=}', total_length=len(json_output))
+            return f'{json_output[:5_000]}... (WARNING: output truncated, total length: {len(json_output)})'
+        else:
+            return output
 
 
 agent = Agent(
-    'gateway/anthropic:claude-sonnet-4-6',
-    builtin_tools=[WebSearchTool()],
-    toolsets=[CodeExecutionToolset(toolset=toolset)],
+    'gateway/anthropic:claude-sonnet-4-5',
+    toolsets=[TruncateCodeExecutionToolset(toolset=toolset)],
     output_type=OutputData,
-)
+    deps_type=ModelResults,
+    instructions="""
+Get structured information including pricing data for all models from the URL provided
 
-# Get prices for all anthropic models in markdown.
-prompt = """
-Get structured information including pricing data for all anthropic models from
-
-https://platform.claude.com/docs/en/about-claude/pricing.
-
-NOTE: the HTML returned from this URL is too big for context, so make sure to process it with beautiful_soup
+The HTML returned from this URL is too big for context, so make sure to process it with beautiful_soup
 or return a small snippet of the HTML to process.
 
 Do not use `print` in code, you can't see the output.
-"""
+
+You should record information about each model by calling `record_model_info`.
+""",
+)
+
+openai_url = 'https://developers.openai.com/api/docs/pricing'
+anthropic_url = 'https://platform.claude.com/docs/en/about-claude/pricing'
 
 
 async def main():
-    r = await agent.run(prompt)
-    debug(r.output)
+    model_results = ModelResults()
+    r = await agent.run(anthropic_url, deps=model_results)
+    debug(r.output, model_results)
 
 
 if __name__ == '__main__':
