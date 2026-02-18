@@ -10,16 +10,12 @@ import tiktoken
 from devtools import debug
 from playwright.async_api import async_playwright
 from pydantic import BaseModel
-from pydantic_ai import Agent
+from pydantic_ai import Agent, FunctionToolset, RunContext
 from pydantic_ai.tools import AgentDepsT
 from pydantic_ai.toolsets.code_execution import CodeExecutionToolset
-from pydantic_ai.toolsets.function import FunctionToolset
 
 from bs import tools
-from sub_agent import ModelResults, record_model_info
-
-logfire.configure()
-logfire.instrument_pydantic_ai()
+from sub_agent import ModelInfo, RunDeps, record_model_info
 
 
 async def get_html(url: str) -> str:
@@ -31,9 +27,6 @@ async def get_html(url: str) -> str:
         html = await page.content()
         await browser.close()
     return html
-
-
-toolset = FunctionToolset(tools=[get_html, record_model_info, *tools])
 
 
 class OutputData(BaseModel, use_attribute_docstrings=True):
@@ -63,16 +56,19 @@ class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
             return output
 
 
+toolset = FunctionToolset(tools=[get_html, record_model_info, *tools])
 prices_agent = Agent(
     'gateway/anthropic:claude-sonnet-4-5',
     toolsets=[TruncateCodeExecutionToolset(toolset=toolset)],
     output_type=OutputData,
-    deps_type=ModelResults,
+    deps_type=RunDeps,
     instructions="""
-Get structured information including pricing data for all models from the URL provided
+Get structured information including pricing data for all models from the URL provided.
 
 The HTML returned from this URL is too big for context, so make sure to process it with beautiful_soup
 or return a small snippet of the HTML to process.
+
+Ignore any deprecated models.
 
 Do not use `print` in code, you can't see the output.
 
@@ -83,28 +79,41 @@ You should record information about each model by calling `record_model_info`.
 urls = {
     'openai': 'https://developers.openai.com/api/docs/pricing',
     'anthropic': 'https://platform.claude.com/docs/en/about-claude/pricing',
+    'groq': 'https://groq.com/pricing',
 }
-provider = 'anthropic'
-previous_code_file = Path(f'{provider}_previous_code.py')
 
 
 @prices_agent.instructions
-async def add_optimal_code() -> str | None:
-    if previous_code_file.exists():
-        code = previous_code_file.read_text()
-        return f'Optimal code from previous run:\n\n```python\n{code}\n```'
+async def add_optimal_code(ctx: RunContext[RunDeps]) -> str | None:
+    if ctx.deps.previous_code is not None:
+        return f'Optimal code from previous run:\n\n```python\n{ctx.deps.previous_code}\n```'
 
 
-async def main():
+async def get_prices(provider: str, allow_code_reuse: bool = False) -> dict[str, ModelInfo]:
+    prev_code = Path(f'{provider}_previous_code.py')
+    previous_code = None
+    if allow_code_reuse and prev_code.exists():
+        previous_code = prev_code.read_text()
+
     with logfire.span(
-        'getting prices for {provider} {existing_code=}', provider=provider, existing_code=previous_code_file.exists()
+        'getting prices for {provider} {existing_code=}',
+        provider=provider,
+        existing_code=previous_code is not None,
     ):
-        model_results = ModelResults()
-        r = await prices_agent.run(urls[provider], deps=model_results)
-        debug(r.output, model_results)
-        previous_code_file.write_text(r.output.optimal_code)
-        Path(f'{provider}_prices.json').write_bytes(pydantic_core.to_json(model_results.models, indent=2))
+        deps = RunDeps(previous_code=previous_code)
+        r = await prices_agent.run(urls[provider], deps=deps)
+        debug(r.output, deps.models)
+
+        if not prev_code.exists():
+            prev_code.write_text(r.output.optimal_code)
+
+        prices = Path(f'{provider}_prices.json')
+        if not prices.exists():
+            prices.write_bytes(pydantic_core.to_json(deps.models, indent=2))
+        return deps.models
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    logfire.configure(service_name='llm-prices-run')
+    logfire.instrument_pydantic_ai()
+    asyncio.run(get_prices('anthropic', allow_code_reuse=True))

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import field
+import json
+from dataclasses import dataclass, field
 from typing import Any
 
 from pydantic import BaseModel, ValidationError
-from pydantic.dataclasses import dataclass
 from pydantic_ai import Agent, ModelRetry, RunContext, format_as_xml
 
 
@@ -32,85 +32,15 @@ agent = Agent(
 
 
 @dataclass
-class ModelResults:
+class RunDeps:
+    previous_code: str | None
     models: dict[str, ModelInfo] = field(default_factory=dict)
 
 
-async def record_model_info(ctx: RunContext[ModelResults], model_information: dict[str, Any]) -> str:
+async def record_model_info(ctx: RunContext[RunDeps], model_information: dict[str, Any]) -> str:
     """Record information about a model.
 
     The input should have the following schema:
-
-    ```json
-    {
-        "properties": {
-        "unique_id": {
-            "description": "Unique identifier for the model.",
-            "title": "Unique Id",
-            "type": "string"
-        },
-        "name": {
-            "description": "Name of the model.",
-            "title": "Name",
-            "type": "string"
-        },
-        "description": {
-            "anyOf": [
-            {
-                "type": "string"
-            },
-            {
-                "type": "null"
-            }
-            ],
-            "default": null,
-            "description": "Description of the model.",
-            "title": "Description"
-        },
-        "input_mtok": {
-            "description": "Input tokens per million tokens.",
-            "title": "Input Mtok",
-            "type": "number"
-        },
-        "output_mtok": {
-            "description": "Output tokens per million tokens.",
-            "title": "Output Mtok",
-            "type": "number"
-        },
-        "attributes": {
-            "anyOf": [
-            {
-                "additionalProperties": {
-                "anyOf": [
-                    {
-                    "type": "number"
-                    },
-                    {
-                    "type": "string"
-                    }
-                ]
-                },
-                "type": "object"
-            },
-            {
-                "type": "null"
-            }
-            ],
-            "default": null,
-            "description": "Any other attributes of the model.",
-            "title": "Attributes"
-        }
-        },
-        "required": [
-        "unique_id",
-        "name",
-        "input_mtok",
-        "output_mtok"
-        ],
-        "title": "ModelInfo",
-        "type": "object"
-    }
-    ```
     """
 
     try:
@@ -132,3 +62,7 @@ async def record_model_info(ctx: RunContext[ModelResults], model_information: di
         else:
             ctx.deps.models[output.unique_id] = output
             return f'Model information recorded successfully for {output.unique_id}'
+
+
+s = json.dumps(ModelInfo.model_json_schema(), indent=2)
+record_model_info.__doc__ = f'{record_model_info.__doc__}\n```json\n{s}\n```\n'

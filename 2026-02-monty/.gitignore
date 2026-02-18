@@ -1,1 +1,3 @@
 scratch/
+.playwright-mcp/
+.claude/settings.local.json
