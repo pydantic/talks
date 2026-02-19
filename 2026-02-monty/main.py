@@ -59,7 +59,7 @@ class TruncateCodeExecutionToolset(CodeExecutionToolset[AgentDepsT]):
 toolset = FunctionToolset(tools=[get_html, record_model_info, *bs.tools])
 
 prices_agent = Agent(
-    'gateway/anthropic:claude-sonnet-4-6',
+    'gateway/anthropic:claude-sonnet-4-5',
     toolsets=[TruncateCodeExecutionToolset(toolset=toolset)],
     output_type=OutputData,
     deps_type=RunDeps,

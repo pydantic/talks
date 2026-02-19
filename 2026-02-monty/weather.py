@@ -43,11 +43,11 @@ async def get_temp(ctx: RunContext[AsyncClient], lat: float, lng: float) -> floa
 
 
 @weather_toolset.tool
-async def get_weather_description(ctx: RunContext[AsyncClient], lat: float, lng: float) -> str:
-    """Get the weather description at a location."""
+async def get_weather_description(ctx: RunContext[AsyncClient], temp: float) -> str:
+    """Get the weather description from the temperature."""
     r = await ctx.deps.get(
         'https://demo-endpoints.pydantic.workers.dev/weather',
-        params={'lat': lat, 'lng': lng},
+        params={'temp': temp},
     )
     r.raise_for_status()
     return r.text
@@ -63,7 +63,7 @@ agent = Agent(
 
 async def main():
     async with AsyncClient() as client:
-        await agent.run('Compare the weather of London, Paris, and Tokyo.', deps=client)
+        await agent.run('Compare the weather of London and Paris.', deps=client)
 
 
 if __name__ == '__main__':
