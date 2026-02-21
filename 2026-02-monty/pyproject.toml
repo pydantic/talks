@@ -1,0 +1,55 @@
+[project]
+name = "2026-02-monty"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic==0.79.0",
+    "beautifulsoup4>=4.14.3",
+    "devtools>=0.12.2",
+    "logfire>=4.24.0",
+    "playwright>=1.58.0",
+    "pydantic-ai",
+    "pydantic-monty",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.38.0",
+    "ruff>=0.15.1",
+]
+
+# https://beta.ruff.rs/docs/configuration/
+[tool.ruff]
+line-length = 120
+include = [
+    "**/*.py"
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "Q",      # https://docs.astral.sh/ruff/rules/#flake8-quotes-q
+    "RUF100", # https://docs.astral.sh/ruff/rules/unused-noqa/
+    "I",      # https://docs.astral.sh/ruff/rules/#isort-i
+    "FA",     # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+mccabe = { max-complexity = 14 }
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "single"
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComment = true
+venv = ".venv"
+
+[tool.uv.sources]
+pydantic-ai = { git = "https://github.com/pydantic/pydantic-ai", rev = "refs/pull/4153/head" }
+pydantic-monty = { git = "https://github.com/pydantic/monty", subdirectory = "crates/monty-python" }

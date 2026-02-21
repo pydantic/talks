@@ -1,0 +1,308 @@
+{
+  "claude-opus-4.6": {
+    "unique_id": "claude-opus-4.6",
+    "name": "Claude Opus 4.6",
+    "description": "Standard pricing",
+    "input_mtok": 5.0,
+    "output_mtok": 25.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-opus-4.5": {
+    "unique_id": "claude-opus-4.5",
+    "name": "Claude Opus 4.5",
+    "description": "Standard pricing",
+    "input_mtok": 5.0,
+    "output_mtok": 25.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-opus-4.1": {
+    "unique_id": "claude-opus-4.1",
+    "name": "Claude Opus 4.1",
+    "description": "Standard pricing",
+    "input_mtok": 15.0,
+    "output_mtok": 75.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-opus-4": {
+    "unique_id": "claude-opus-4",
+    "name": "Claude Opus 4",
+    "description": "Standard pricing",
+    "input_mtok": 15.0,
+    "output_mtok": 75.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-sonnet-4.6": {
+    "unique_id": "claude-sonnet-4.6",
+    "name": "Claude Sonnet 4.6",
+    "description": "Standard pricing",
+    "input_mtok": 3.0,
+    "output_mtok": 15.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-sonnet-4.5": {
+    "unique_id": "claude-sonnet-4.5",
+    "name": "Claude Sonnet 4.5",
+    "description": "Standard pricing",
+    "input_mtok": 3.0,
+    "output_mtok": 15.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-sonnet-4": {
+    "unique_id": "claude-sonnet-4",
+    "name": "Claude Sonnet 4",
+    "description": "Standard pricing",
+    "input_mtok": 3.0,
+    "output_mtok": 15.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-sonnet-3.7-deprecated": {
+    "unique_id": "claude-sonnet-3.7-deprecated",
+    "name": "Claude Sonnet 3.7 (deprecated)",
+    "description": "Standard pricing",
+    "input_mtok": 3.0,
+    "output_mtok": 15.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-haiku-4.5": {
+    "unique_id": "claude-haiku-4.5",
+    "name": "Claude Haiku 4.5",
+    "description": "Standard pricing",
+    "input_mtok": 1.0,
+    "output_mtok": 5.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-haiku-3.5": {
+    "unique_id": "claude-haiku-3.5",
+    "name": "Claude Haiku 3.5",
+    "description": "Standard pricing",
+    "input_mtok": 0.8,
+    "output_mtok": 4.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-opus-3-deprecated": {
+    "unique_id": "claude-opus-3-deprecated",
+    "name": "Claude Opus 3 (deprecated)",
+    "description": "Standard pricing",
+    "input_mtok": 15.0,
+    "output_mtok": 75.0,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-haiku-3": {
+    "unique_id": "claude-haiku-3",
+    "name": "Claude Haiku 3",
+    "description": "Standard pricing",
+    "input_mtok": 0.25,
+    "output_mtok": 1.25,
+    "attributes": {
+      "pricing_type": "standard"
+    }
+  },
+  "claude-opus-4-extended-lte-200K-input-tokens": {
+    "unique_id": "claude-opus-4-extended-lte-200K-input-tokens",
+    "name": "Claude Opus 4 Extended Context (≤ 200K input tokens)",
+    "description": "Extended context pricing for ≤ 200K input tokens",
+    "input_mtok": 30.0,
+    "output_mtok": 150.0,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "≤ 200K input tokens"
+    }
+  },
+  "claude-opus-4-extended-gt-200K-input-tokens": {
+    "unique_id": "claude-opus-4-extended-gt-200K-input-tokens",
+    "name": "Claude Opus 4 Extended Context (> 200K input tokens)",
+    "description": "Extended context pricing for > 200K input tokens",
+    "input_mtok": 60.0,
+    "output_mtok": 225.0,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "> 200K input tokens"
+    }
+  },
+  "claude-opus-4.6-batch": {
+    "unique_id": "claude-opus-4.6-batch",
+    "name": "Claude Opus 4.6 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 2.5,
+    "output_mtok": 12.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-opus-4.5-batch": {
+    "unique_id": "claude-opus-4.5-batch",
+    "name": "Claude Opus 4.5 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 2.5,
+    "output_mtok": 12.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-opus-4.1-batch": {
+    "unique_id": "claude-opus-4.1-batch",
+    "name": "Claude Opus 4.1 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-opus-4-batch": {
+    "unique_id": "claude-opus-4-batch",
+    "name": "Claude Opus 4 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-sonnet-4.6-batch": {
+    "unique_id": "claude-sonnet-4.6-batch",
+    "name": "Claude Sonnet 4.6 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-sonnet-4.5-batch": {
+    "unique_id": "claude-sonnet-4.5-batch",
+    "name": "Claude Sonnet 4.5 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-sonnet-4-batch": {
+    "unique_id": "claude-sonnet-4-batch",
+    "name": "Claude Sonnet 4 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-sonnet-3.7-deprecated-batch": {
+    "unique_id": "claude-sonnet-3.7-deprecated-batch",
+    "name": "Claude Sonnet 3.7 (deprecated) (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 1.5,
+    "output_mtok": 7.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-haiku-4.5-batch": {
+    "unique_id": "claude-haiku-4.5-batch",
+    "name": "Claude Haiku 4.5 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 0.5,
+    "output_mtok": 2.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-haiku-3.5-batch": {
+    "unique_id": "claude-haiku-3.5-batch",
+    "name": "Claude Haiku 3.5 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 0.4,
+    "output_mtok": 2.0,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-opus-3-deprecated-batch": {
+    "unique_id": "claude-opus-3-deprecated-batch",
+    "name": "Claude Opus 3 (deprecated) (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 7.5,
+    "output_mtok": 37.5,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-haiku-3-batch": {
+    "unique_id": "claude-haiku-3-batch",
+    "name": "Claude Haiku 3 (Batch API)",
+    "description": "Batch API pricing",
+    "input_mtok": 0.125,
+    "output_mtok": 0.625,
+    "attributes": {
+      "pricing_type": "batch_api"
+    }
+  },
+  "claude-opus-4.6-extended-lte200k": {
+    "unique_id": "claude-opus-4.6-extended-lte200k",
+    "name": "Claude Opus 4.6 Extended (≤ 200K tokens)",
+    "description": "Extended context pricing for Claude Opus 4.6 with ≤ 200K input tokens",
+    "input_mtok": 5.0,
+    "output_mtok": 25.0,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "≤ 200K input tokens"
+    }
+  },
+  "claude-opus-4.6-extended-gt200k": {
+    "unique_id": "claude-opus-4.6-extended-gt200k",
+    "name": "Claude Opus 4.6 Extended (> 200K tokens)",
+    "description": "Extended context pricing for Claude Opus 4.6 with > 200K input tokens",
+    "input_mtok": 10.0,
+    "output_mtok": 37.5,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "> 200K input tokens"
+    }
+  },
+  "claude-sonnet-4.6---4.5---4-extended-lte200k": {
+    "unique_id": "claude-sonnet-4.6---4.5---4-extended-lte200k",
+    "name": "Claude Sonnet 4.6 / 4.5 / 4 Extended (≤ 200K tokens)",
+    "description": "Extended context pricing for Claude Sonnet 4.6 / 4.5 / 4 with ≤ 200K input tokens",
+    "input_mtok": 3.0,
+    "output_mtok": 15.0,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "≤ 200K input tokens"
+    }
+  },
+  "claude-sonnet-4.6---4.5---4-extended-gt200k": {
+    "unique_id": "claude-sonnet-4.6---4.5---4-extended-gt200k",
+    "name": "Claude Sonnet 4.6 / 4.5 / 4 Extended (> 200K tokens)",
+    "description": "Extended context pricing for Claude Sonnet 4.6 / 4.5 / 4 with > 200K input tokens",
+    "input_mtok": 6.0,
+    "output_mtok": 22.5,
+    "attributes": {
+      "pricing_type": "extended_context",
+      "context_window": "> 200K input tokens"
+    }
+  }
+}
