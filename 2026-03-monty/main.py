@@ -4,13 +4,14 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
 import logfire
 import pydantic_core
 from pydantic_ai import Agent, ModelRequest, ModelRequestNode, UserPromptPart
 from pydantic_graph import End
-from pydantic_monty import Monty, MontyError, MontyRuntimeError, run_monty_async
+from pydantic_monty import MontyError, MontyRepl, MontyRuntimeError, run_repl_async
+
+from external_functions import display_table, plot, show_plot, sql_query
 
 logfire.configure()
 logfire.instrument_pydantic_ai()
@@ -32,111 +33,92 @@ def _generate_stubs() -> str:
 
 
 stubs = _generate_stubs()
-instrunctions = f"""
+instructions = f"""
 You MUST return markdown with either a comment and python code to execute
 in a "```python" code block, or an explanation of your process to end.
 
 You MUST return only one code block to execute. DO NOT return multiple code blocks.
 
-You MUST use the `record_model_info` function to record information about every model you find.
+Use `sql_query` to query the data, `plot` and `show_plot` to create visualizations,
+and `display_table` to show formatted tables.
 
 The runtime uses a restricted Python subset:
-- you cannot use the standard library except builtin functions and the following modules: `sys`, `typing`, `asyncio`
-- this means `json`, `collections`, `json`, `re`, `math`, `datetime`, `itertools`, `functools`, etc. are NOT available  use plain dicts, lists, and builtins instead
-- you cannot use third party libraries
-- you cannot define classes
-- the python executor is NOT a REPL, you must define all values each time you call python
+- you CANNOT use the standard library except builtin functions and the following modules: `sys`, `typing`, `asyncio`
+- this means `json`, `collections`, `json`, `re`, `math`, `datetime`, `itertools`, `functools`, etc. are NOT available — use plain dicts, lists, and builtins instead
+- you CANNOT use third party libraries
+- you CANNOT define classes
+- the python executor is a REPL — variables and state persist between code blocks, so you can build on previous results without redefining them
+- you CAN define and reuse functions
 
 The last expression evaluated is the return value.
 
 You can use `print()` to get debug information while developing the code.
 
-Parallelism: use `asyncio.gather` to fire multiple calls at the same time instead of awaiting each one sequentially:
+Parallelism: use `asyncio.gather` to fire multiple calls at the same time instead of awaiting each one sequentially.
 
-You can use the following types functions and types:
+You can use the following functions and types:
 
 ```python
 {stubs}
 ```
 """
 
-agent = Agent('gateway/anthropic:claude-sonnet-4-5', instructions=instrunctions)
+agent = Agent('gateway/anthropic:claude-sonnet-4-5', instructions=instructions)
+
+prompt = 'Investigate why downloads increased recently.'
 
 
-async def main(model: str):
-    url = urls[model]
-    prompt = f"""
-Get structured information including pricing data for all models from the following URL:
-
-{url}
-
-The HTML returned from this URL is too big for context, so make sure to process it with
-the functions provided or return a small snippet of the HTML to process.
-
-Ignore any deprecated models.
-"""
-
+async def main():
     print_output: list[str] = []
 
-    def monty_print(_: Literal['stdout'], content: str):
+    def monty_print(_: object, content: str) -> None:
         print_output.append(content)
 
-    record_models = RecordModels()
+    repl = MontyRepl()
 
-    async with start_browser() as browser:
-        async with scrape_agent.iter(prompt) as agent_run:
-            node = agent_run.next_node
-            while True:
-                while not isinstance(node, End):
-                    node = await agent_run.next(node)
+    external_functions = {
+        'sql_query': sql_query,
+        'plot': plot,
+        'show_plot': show_plot,
+        'display_table': display_table,
+    }
 
-                extracted = ExtractCode.extract(node.data.output)
-                logfire.info(f'{extracted}')
-                if extracted.comment:
-                    print(f'LLM: {extracted.comment}')
+    async with agent.iter(prompt) as agent_run:
+        node = agent_run.next_node
+        while True:
+            while not isinstance(node, End):
+                node = await agent_run.next(node)
 
-                if not extracted.code:
-                    print('done')
-                    break
+            extracted = ExtractCode.extract(node.data.output)
+            logfire.info(f'{extracted}')
+            if extracted.comment:
+                print(f'LLM: {extracted.comment}')
 
-                try:
-                    with logfire.span('prepare monty', code=extracted.code):
-                        m = Monty(
-                            extracted.code,
-                            type_check=True,
-                            type_check_stubs=stubs,
-                        )
-                except MontyError as e:
-                    msg = f'Error Preparing Code: {e}'
-                    node = await agent_run.next(new_node(msg))
-                    continue
+            if not extracted.code:
+                print('done')
+                break
 
-                try:
-                    with logfire.span('running monty'):
-                        output = await run_monty_async(
-                            m,
-                            external_functions={
-                                'open_page': browser.open_page,
-                                'beautiful_soup': beautiful_soup,
-                                'record_model_info': record_models.record_model_info,
-                            },
-                            print_callback=monty_print,
-                        )
-                except MontyRuntimeError as e:
-                    msg = f'Error running code: {e.display()}'
-                else:
-                    msg = pydantic_core.to_json(output).decode()
+            try:
+                with logfire.span('running monty repl', code=extracted.code):
+                    output = await run_repl_async(
+                        repl,
+                        extracted.code,
+                        external_functions=external_functions,
+                        print_callback=monty_print,
+                    )
+            except (MontyError, MontyRuntimeError) as e:
+                msg = f'Error running code: {e.display() if isinstance(e, MontyRuntimeError) else str(e)}'
+            else:
+                msg = pydantic_core.to_json(output).decode()
 
-                if print_output:
-                    msg += f'\n\nPrint Output:\n---\n{"".join(print_output)}\n---'
-                    print_output.clear()
-                node = await agent_run.next(new_node(msg))
-
-        logfire.info('{models=}', models=record_models.models)
+            if print_output:
+                msg += f'\n\nPrint Output:\n---\n{"".join(print_output)}\n---'
+                print_output.clear()
+            node = await agent_run.next(new_node(msg))
 
 
 def new_node(msg: str) -> ModelRequestNode[None, str]:
-    return ModelRequestNode(request=ModelRequest(instructions=instrunctions, parts=[UserPromptPart(content=msg)]))
+    return ModelRequestNode(request=ModelRequest(instructions=instructions, parts=[UserPromptPart(content=msg)]))
 
 
 @dataclass
@@ -175,4 +157,4 @@ class ExtractCode:
 
 
 if __name__ == '__main__':
-    asyncio.run(main('anthropic'))
+    asyncio.run(main())
