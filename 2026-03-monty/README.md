@@ -112,12 +112,27 @@ Making agents executing code trivial and reliable.
 
 
 
-
-**Tradeoff:** This is NOT to run your existing Python application, that will probably never be possible.
+**Tradeoff:** Monty will NOT to run your existing Python application, that will probably never be possible.
 
 
 **That's fine with me**
 
+
+
+
+
+
+
+
+
+
+
+
+
+## The Golden Rule
+
+**Python is the truth**, we speak nothing but the truth
+(but not the whole truth)
 
 
 
