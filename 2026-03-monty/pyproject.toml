@@ -8,7 +8,7 @@ dependencies = [
     "duckdb>=1.5.0",
     "logfire>=4.27.0",
     "pydantic-ai>=1.67.0",
-    "pydantic-monty>=0.0.7",
+    "pydantic-monty>=0.0.8",
     "matplotlib>=3.10.0",
     "rich>=14.0.0",
     "mypy>=1.19.1",
@@ -49,6 +49,3 @@ pythonVersion = "3.14"
 typeCheckingMode = "strict"
 reportUnnecessaryTypeIgnoreComment = true
 venv = ".venv"
-
-[tool.uv.sources]
-pydantic-monty = { git = "https://github.com/pydantic/monty", subdirectory = "crates/monty-python" }
