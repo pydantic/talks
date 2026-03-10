@@ -27,6 +27,7 @@ Code execution is a great idea ... until you need to use it.
 * **Codemode** from Cloudflare
 * **Programmatic Tool Calling** from Anthropic
 * **Code Execution with MCP** from Anthropic
+* **SmolAgents** from huggingface
 * and many more...
 
 
@@ -101,10 +102,26 @@ Making agents executing code trivial and reliable.
 * **Portability:** Be called from Rust, Python, or Javascript
 * **Simplicity:** no (extra) sandbox required
 
+
+
+
+
+
+
+
+
+
+
+
 **Tradeoff:** This is NOT to run your existing Python application, that will probably never be possible.
 
 
 **That's fine with me**
+
+
+
+
+
 
 
 

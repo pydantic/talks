@@ -10,7 +10,7 @@ import pydantic_core
 from pydantic_ai import Agent, ModelRequest, ModelRequestNode, UserPromptPart
 from pydantic_ai.models.anthropic import AnthropicModelSettings
 from pydantic_graph import End
-from pydantic_monty import MontyError, MontyRepl, MontyRuntimeError, run_repl_async
+from pydantic_monty import Monty, MontyError, MontyRepl, MontyRuntimeError, run_repl_async
 from rich.console import Console
 from rich.markdown import Markdown
 
@@ -65,6 +65,8 @@ You can use the following functions and types:
 ```python
 {stubs}
 ```
+
+You should start by describing the SQL schema.
 """
 
 agent = Agent(
@@ -90,6 +92,8 @@ async def main():
         'show_plot': show_plot,
         'display_table': display_table,
     }
+    console = Console()
+    combined: list[str] = []
 
     async with agent.iter(prompt) as agent_run:
         node = agent_run.next_node
@@ -101,19 +105,19 @@ async def main():
             logfire.info(f'{extracted}')
             if extracted.comment:
                 print()
-                Console().print(Markdown(extracted.comment))
+                console.print(Markdown(f'---\n{extracted.comment}'))
 
             if not extracted.code:
                 print('model stopped')
-                response = input('> ')
-                if response.lower() in {f'exit', ''}:
-                    break
-                else:
-                    node = await agent_run.next(new_node(response))
-                    continue
+                break
 
             try:
                 with logfire.span('running monty repl', code=extracted.code):
+                    Monty(
+                        '\n'.join(combined + [extracted.code]),
+                        type_check=True,
+                        type_check_stubs=stubs,
+                    )
                     output = await run_repl_async(
                         repl,
                         extracted.code,
@@ -123,6 +127,7 @@ async def main():
             except (MontyError, MontyRuntimeError) as e:
                 msg = f'Error running code: {e.display() if isinstance(e, MontyRuntimeError) else str(e)}'
             else:
+                combined.append(extracted.code)
                 msg = pydantic_core.to_json(output).decode()
 
             if print_output:

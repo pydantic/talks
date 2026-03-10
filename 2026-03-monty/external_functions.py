@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 import subprocess
-import tempfile
 from typing import Any
 
 import duckdb
