@@ -95,8 +95,13 @@ async def main():
                 print(f'LLM: {extracted.comment}')
 
             if not extracted.code:
-                print('done')
-                break
+                print('model stopped')
+                response = input('> ')
+                if response.lower() in {f'exit', ''}:
+                    break
+                else:
+                    node = await agent_run.next(new_node(response))
+                    continue
 
             try:
                 with logfire.span('running monty repl', code=extracted.code):
@@ -157,4 +162,7 @@ class ExtractCode:
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print('exiting...')
