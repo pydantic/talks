@@ -4,29 +4,9 @@
 
 # Pydantic Monty
 
-Code execution is great ... until you need to run that code in a production setting.
+## Py AI - March 2026
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Monty
-
-A minimal, secure Python interpreter written in Rust for use by AI.
+Code execution is a great idea ... until you need to use it.
 
 
 
@@ -59,23 +39,22 @@ A minimal, secure Python interpreter written in Rust for use by AI.
 
 
 
-## Why
-
-Making agents executing code trivial and reliable.
-
-* Completely block access to the host environment
-* Call functions on the host - only functions you give it access to
-* Run typechecking - with ty
-* mounted filesystem access - complete control over which files are accessible
-* Be snapshotted to bytes at external function calls
-* Startup is <1us
-* Be called from Rust, Python, or Javascript
-* no (extra) sandbox required
-
-This is NOT to run your existing Python application, that will probably never be possible.
 
 
-**That's fine with me**
+
+
+
+
+
+
+## Monty
+
+A minimal, secure Python interpreter written in Rust, for running code written by AI agents.
+
+
+
+
+
 
 
 
@@ -97,6 +76,70 @@ m = pydantic_monty.Monty("print(f'Hello {who}')", inputs=['who'])
 
 m.run(inputs={'who': 'World'})
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+## Why
+
+Making agents executing code trivial and reliable.
+
+* **Block:** Completely block access to the host environment
+* **Allow:** Call functions on the host - only functions you give it access to
+* **Typecheck:** Run typechecking - with ty
+* **Allow:** mounted filesystem access - complete control over which files are accessible
+* **Durable Execution:** Be snapshotted to bytes at external function calls
+* **Latency:** Startup is <1us
+* **Portability:** Be called from Rust, Python, or Javascript
+* **Simplicity:** no (extra) sandbox required
+
+**Tradeoff:** This is NOT to run your existing Python application, that will probably never be possible.
+
+
+**That's fine with me**
+
+
+
+
+
+
+
+
+
+
+
+## The impotence vs. chaos Continuum
+
+When you harness an LLM, you're making a trade-off between the control you retain and the capability you grant.
+
+At one extreme, the LLM picks a function name and fills in some JSON.
+
+At the other, you've handed a neural network your mouse and keyboard.
+
+And there are other trade-offs...
+
+
+
+
+
+
+
+
+
+
+
+## Start left, move right
+
+It's like whitelisting - instead of blocking things you don't want (and hoping you've covered everything), you start with nothing, add some functionality ... and wait for users to demand more.
+
 
 
 
