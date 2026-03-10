@@ -44,6 +44,29 @@ Code execution is a great idea ... until you need to use it.
 
 
 
+## The impotence vs. chaos Continuum
+
+When you harness an LLM, you're making a trade-off between the control you retain and the capability you grant.
+
+At one extreme, the LLM picks a function name and fills in some JSON.
+
+At the other, you've handed a neural network your mouse and keyboard.
+
+And there are other trade-offs...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -89,7 +112,7 @@ m.run(inputs={'who': 'World'})
 
 
 
-## Why
+## What
 
 Making agents executing code trivial and reliable.
 
@@ -134,29 +157,6 @@ Making agents executing code trivial and reliable.
 **Python is the truth**, we speak nothing but the truth
 (but not the whole truth)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## The impotence vs. chaos Continuum
-
-When you harness an LLM, you're making a trade-off between the control you retain and the capability you grant.
-
-At one extreme, the LLM picks a function name and fills in some JSON.
-
-At the other, you've handed a neural network your mouse and keyboard.
-
-And there are other trade-offs...
 
 
 
