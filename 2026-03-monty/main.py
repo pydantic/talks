@@ -8,12 +8,15 @@ from pathlib import Path
 import logfire
 import pydantic_core
 from pydantic_ai import Agent, ModelRequest, ModelRequestNode, UserPromptPart
+from pydantic_ai.models.anthropic import AnthropicModelSettings
 from pydantic_graph import End
 from pydantic_monty import MontyError, MontyRepl, MontyRuntimeError, run_repl_async
+from rich.console import Console
+from rich.markdown import Markdown
 
 from external_functions import display_table, plot, show_plot, sql_query
 
-logfire.configure()
+logfire.configure(console=False)
 logfire.instrument_pydantic_ai()
 
 THIS_DIR = Path(__file__).parent
@@ -37,18 +40,19 @@ instructions = f"""
 You MUST return markdown with either a comment and python code to execute
 in a "```python" code block, or an explanation of your process to end.
 
-You MUST return only one code block to execute. DO NOT return multiple code blocks.
-
 Use `sql_query` to query the data, `plot` and `show_plot` to create visualizations,
 and `display_table` to show formatted tables.
 
 The runtime uses a restricted Python subset:
-- you CANNOT use the standard library except builtin functions and the following modules: `sys`, `typing`, `asyncio`
-- this means `json`, `collections`, `json`, `re`, `math`, `datetime`, `itertools`, `functools`, etc. are NOT available — use plain dicts, lists, and builtins instead
+- you CANNOT use the standard library except builtin functions and the following modules: `sys`, `typing`, `asyncio`, `re`, `math`
+- this means the following modules are NOT available: `json`, `collections`, `json`, `datetime`, `itertools`, `functools`, etc.
+- you CAN use plain dicts, lists, and builtins instead
+- you CAN define and reuse functions
 - you CANNOT use third party libraries
 - you CANNOT define classes
-- the python executor is a REPL — variables and state persist between code blocks, so you can build on previous results without redefining them
-- you CAN define and reuse functions
+- you MUST import modules you want to use e.g. `import asyncio`
+- the python executor is a REPL — variables, state and functions you define persist between calls, so you can build on previous results without redefining them
+
 
 The last expression evaluated is the return value.
 
@@ -63,9 +67,13 @@ You can use the following functions and types:
 ```
 """
 
-agent = Agent('gateway/anthropic:claude-sonnet-4-5', instructions=instructions)
+agent = Agent(
+    'gateway/anthropic:claude-opus-4-5',
+    instructions=instructions,
+    model_settings=AnthropicModelSettings(anthropic_cache_messages=True),
+)
 
-prompt = 'Investigate why downloads increased recently.'
+prompt = 'Investigate why downloads increased recently, is this real usage or something else.'
 
 
 async def main():
@@ -92,7 +100,8 @@ async def main():
             extracted = ExtractCode.extract(node.data.output)
             logfire.info(f'{extracted}')
             if extracted.comment:
-                print(f'LLM: {extracted.comment}')
+                print()
+                Console().print(Markdown(extracted.comment))
 
             if not extracted.code:
                 print('model stopped')
@@ -146,17 +155,17 @@ class ExtractCode:
 
     @classmethod
     def extract(cls, response: str) -> ExtractCode:
-        # Try ```python or ```py fences first
-        m = re.search(r'```(?:python|py)\s*\n(.*?)```', response, re.DOTALL)
-        if not m:
-            # Try any code fence
-            m = re.search(r'```\w*\s*\n(.*?)```', response, re.DOTALL)
+        # Find all ```python/py blocks first, fall back to any code fence
+        blocks = re.findall(r'```(?:python|py)\s*\n(.*?)```', response, re.DOTALL)
+        if not blocks:
+            blocks = re.findall(r'```\w*\s*\n(.*?)```', response, re.DOTALL)
 
-        if m:
-            code = m.group(1).strip()
-            # Extract comment as text before the code fence
-            comment = response[: m.start()].strip() or None
-            return cls(code=code, comment=comment)
+        if blocks:
+            code = '\n'.join(block.strip() for block in blocks)
+            # Extract comment as text before the first code fence
+            first = re.search(r'```', response)
+            comment = response[: first.start()].strip() if first else None
+            return cls(code=code, comment=comment or None)
 
         return cls(code=None, comment=response.strip())
 

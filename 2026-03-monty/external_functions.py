@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import subprocess
 import tempfile
 from typing import Any
 
@@ -104,6 +105,7 @@ async def show_plot(plot_name: str) -> str:
     plt.savefig(save_path, dpi=150)  # pyright: ignore[reportUnknownMemberType]
     plt.close('all')
     print(f'Saved plot to {save_path}')
+    subprocess.run(['open', save_path])
 
     return f'File saved to {save_path}'
 
