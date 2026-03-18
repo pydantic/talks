@@ -105,7 +105,7 @@ async def main():
             logfire.info(f'{extracted}')
             if extracted.comment:
                 print()
-                console.print(Markdown(f'---\n{extracted.comment}'))
+                console.print(Markdown(f'---\n{node.data.output.strip()}\n'))
 
             if not extracted.code:
                 print('model stopped')
