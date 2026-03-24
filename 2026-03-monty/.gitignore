@@ -1,0 +1,3 @@
+pypi_downloads.parquet
+/charts/
+.claude/settings.local.json

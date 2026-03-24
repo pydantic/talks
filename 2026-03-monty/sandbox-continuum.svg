@@ -1,0 +1,81 @@
+<svg viewBox="0 0 800 420" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, -apple-system, sans-serif; background: #fafafa; border-radius: 8px; border: 1px solid #e0e0e0;">
+  <!-- Grid lines -->
+  <line x1="80" y1="60" x2="80" y2="310" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="80" y1="310" x2="750" y2="310" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="80" y1="248" x2="750" y2="248" stroke="#f0f0f0" stroke-width="0.5"/>
+  <line x1="80" y1="185" x2="750" y2="185" stroke="#f0f0f0" stroke-width="0.5"/>
+  <line x1="80" y1="122" x2="750" y2="122" stroke="#f0f0f0" stroke-width="0.5"/>
+  <line x1="80" y1="60" x2="750" y2="60" stroke="#f0f0f0" stroke-width="0.5"/>
+
+  <!-- Y-axis labels -->
+  <text x="72" y="314" text-anchor="end" font-size="10" fill="#888">Low</text>
+  <text x="72" y="64" text-anchor="end" font-size="10" fill="#888">High</text>
+
+  <!-- Solution markers on x-axis -->
+  <line x1="120" y1="310" x2="120" y2="320" stroke="#666" stroke-width="1.5"/>
+  <text x="120" y="336" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Tool</text>
+  <text x="120" y="348" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Calling</text>
+
+  <line x1="275" y1="310" x2="275" y2="320" stroke="#666" stroke-width="1.5"/>
+  <text x="275" y="336" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Monty</text>
+
+  <line x1="430" y1="310" x2="430" y2="320" stroke="#666" stroke-width="1.5"/>
+  <text x="430" y="336" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Sandbox</text>
+  <text x="430" y="348" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Services</text>
+
+  <line x1="580" y1="310" x2="580" y2="320" stroke="#666" stroke-width="1.5"/>
+  <text x="580" y="336" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Coding</text>
+  <text x="580" y="348" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Agents</text>
+
+  <line x1="720" y1="310" x2="720" y2="320" stroke="#666" stroke-width="1.5"/>
+  <text x="720" y="336" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Full Computer</text>
+  <text x="720" y="348" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Use</text>
+
+  <!-- Dashed vertical lines at each solution -->
+  <line x1="120" y1="60" x2="120" y2="310" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="275" y1="60" x2="275" y2="310" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="430" y1="60" x2="430" y2="310" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="580" y1="60" x2="580" y2="310" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="720" y1="60" x2="720" y2="310" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+  <!-- Control line (blue) — high left, low right — solid thick -->
+  <line x1="120" y1="75" x2="720" y2="295" stroke="#0072B2" stroke-width="3"/>
+  <circle cx="120" cy="75" r="5" fill="#0072B2"/>
+  <circle cx="720" cy="295" r="5" fill="#0072B2"/>
+
+  <!-- Capabilities line (vermillion) — low left, high right — solid -->
+  <line x1="120" y1="260" x2="720" y2="68" stroke="#D55E00" stroke-width="3"/>
+  <circle cx="120" cy="260" r="5" fill="#D55E00"/>
+  <circle cx="720" cy="68" r="5" fill="#D55E00"/>
+
+  <!-- LLM Complexity line (reddish purple) — low left, high right — long dash -->
+  <line x1="120" y1="280" x2="720" y2="88" stroke="#CC79A7" stroke-width="2.5" stroke-dasharray="12,4"/>
+  <circle cx="120" cy="280" r="5" fill="#CC79A7"/>
+  <circle cx="720" cy="88" r="5" fill="#CC79A7"/>
+
+  <!-- Price line (amber/gold) — zero except high for sandbox services — short dash -->
+  <polyline points="120,300 275,300 430,80 580,300 720,300" fill="none" stroke="#E69F00" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <circle cx="120" cy="300" r="5" fill="#E69F00"/>
+  <circle cx="275" cy="300" r="5" fill="#E69F00"/>
+  <circle cx="430" cy="80" r="5" fill="#E69F00"/>
+  <circle cx="580" cy="300" r="5" fill="#E69F00"/>
+  <circle cx="720" cy="300" r="5" fill="#E69F00"/>
+
+  <!-- Setup Complexity line (sky blue) — low left, high right — dotted -->
+  <line x1="120" y1="300" x2="720" y2="108" stroke="#56B4E9" stroke-width="2.5" stroke-dasharray="2,5"/>
+  <circle cx="120" cy="300" r="5" fill="#56B4E9"/>
+  <circle cx="720" cy="108" r="5" fill="#56B4E9"/>
+
+  <!-- Legend -->
+  <rect x="555" y="355" width="195" height="62" rx="4" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="565" y1="370" x2="585" y2="370" stroke="#0072B2" stroke-width="3"/>
+  <text x="590" y="374" font-size="10" fill="#333">Control</text>
+  <line x1="565" y1="385" x2="585" y2="385" stroke="#D55E00" stroke-width="3"/>
+  <text x="590" y="389" font-size="10" fill="#333">Capabilities</text>
+  <line x1="565" y1="400" x2="585" y2="400" stroke="#CC79A7" stroke-width="2.5" stroke-dasharray="12,4"/>
+  <text x="590" y="404" font-size="10" fill="#333">LLM Complexity</text>
+  <line x1="670" y1="370" x2="690" y2="370" stroke="#E69F00" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="695" y="374" font-size="10" fill="#333">Price</text>
+  <line x1="670" y1="385" x2="690" y2="385" stroke="#56B4E9" stroke-width="2.5" stroke-dasharray="2,5"/>
+  <text x="695" y="389" font-size="10" fill="#333">Setup</text>
+</svg>
