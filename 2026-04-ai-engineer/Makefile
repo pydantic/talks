@@ -7,7 +7,7 @@
 .PHONY: install
 install: .uv ## Install python dependencies
 	# --only-dev to avoid building the python package, use make dev for that
-	uv sync --all-packages --only-dev
+	uv sync
 
 .PHONY: format
 format: ## Format Python code

@@ -20,7 +20,7 @@ from gepa.api import optimize  # pyright: ignore[reportUnknownVariableType]
 
 from adapter import create_adapter
 from evals import relations_dataset
-from task import relations_agent, extract_relations
+from task import extract_relations, relations_agent
 
 # Configure logfire for observability
 logfire.configure(
