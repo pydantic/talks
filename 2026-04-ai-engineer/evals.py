@@ -1,9 +1,9 @@
-"""Evaluation dataset and evaluators for contact extraction.
+"""Evaluation dataset and evaluators for political relations extraction.
 
 This module defines:
-- ContactCaseMetadata: Metadata for each test case
-- FieldAccuracyEvaluator: Evaluates per-field extraction accuracy
-- contact_dataset: The evaluation dataset
+- RelationsCaseMetadata: Metadata for each test case
+- RelationsAccuracyEvaluator: Evaluates extraction accuracy
+- relations_dataset: The evaluation dataset
 """
 
 from __future__ import annotations
@@ -14,229 +14,180 @@ from typing import Any
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import Evaluator, EvaluatorContext
 
-from task import ContactInfo, TaskInput
+from task import MP, PoliticalRelation, TaskInput
 
 
 @dataclass
-class ContactCaseMetadata:
-    """Metadata for contact extraction test cases."""
+class RelationsCaseMetadata:
+    """Metadata for political relations extraction test cases."""
 
     difficulty: str  # 'easy', 'medium', 'hard'
-    has_noise: bool  # Whether the text contains irrelevant information
-    description: str  # What this case tests
+    description: str
 
 
 @dataclass
-class FieldAccuracyEvaluator(Evaluator[TaskInput, ContactInfo, ContactCaseMetadata]):
-    """Evaluates how many fields were correctly extracted.
+class RelationsAccuracyEvaluator(Evaluator[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]):
+    """Evaluates how accurately political relations were extracted.
 
-    Returns a score between 0.0 and 1.0 based on field-level accuracy.
+    Compares extracted relations against expected ones by matching on name.
+    Returns a score between 0.0 and 1.0.
     """
 
-    def evaluate(self, ctx: EvaluatorContext[TaskInput, ContactInfo, ContactCaseMetadata]) -> dict[str, Any]:
+    def evaluate(
+        self, ctx: EvaluatorContext[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]
+    ) -> dict[str, Any]:
         if ctx.expected_output is None:
             return {'accuracy': 1.0}
 
         expected = ctx.expected_output
         output = ctx.output
 
-        # Count correct fields
-        fields = ['name', 'email', 'phone', 'company', 'title']
-        correct = 0
-        total = 0
+        if not expected and not output:
+            return {'accuracy': 1.0, 'expected_count': 0, 'output_count': 0, 'matched': 0}
 
-        field_results = {}
-        for field in fields:
-            expected_val = getattr(expected, field)
-            output_val = getattr(output, field)
+        if not expected:
+            # Expected no relations but got some — penalise
+            return {'accuracy': 0.0, 'expected_count': 0, 'output_count': len(output), 'matched': 0}
 
-            # Only count fields that have expected values
-            if expected_val is not None:
-                total += 1
-                # Normalize comparison (case-insensitive, strip whitespace)
-                expected_norm = str(expected_val).lower().strip()
-                output_norm = str(output_val).lower().strip() if output_val else ''
+        matched = 0
+        for exp in expected:
+            exp_name = exp.name.lower().strip()
+            for out in output:
+                if exp_name in out.name.lower().strip() or out.name.lower().strip() in exp_name:
+                    matched += 1
+                    break
 
-                is_correct = (
-                    expected_norm == output_norm or expected_norm in output_norm or output_norm in expected_norm
-                )
-                if is_correct:
-                    correct += 1
-                field_results[f'{field}_correct'] = is_correct
-
-        accuracy = correct / total if total > 0 else 1.0
+        # Score: fraction of expected relations found, penalised by false positives
+        precision = matched / len(output) if output else 0.0
+        recall = matched / len(expected)
+        if precision + recall == 0:
+            accuracy = 0.0
+        else:
+            accuracy = 2 * precision * recall / (precision + recall)  # F1
 
         return {
             'accuracy': accuracy,
-            'fields_correct': correct,
-            'fields_total': total,
-            **field_results,
+            'expected_count': len(expected),
+            'output_count': len(output),
+            'matched': matched,
         }
 
 
-# Define test cases for contact extraction
-contact_cases: list[Case[TaskInput, ContactInfo, ContactCaseMetadata]] = [
-    # Easy cases - straightforward contact information
+def _mp(id: int, name: str, party: str) -> MP:
+    return MP(id=id, name=name, url='', raw_party=party)
+
+
+relations_cases: list[Case[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]] = [
+    # MP with multiple well-known political relations
     Case(
-        name='simple_email_signature',
-        inputs=TaskInput(text='Best regards,\nJohn Smith\njohn.smith@example.com\n555-123-4567'),
-        expected_output=ContactInfo(
-            name='John Smith',
-            email='john.smith@example.com',
-            phone='555-123-4567',
-        ),
-        metadata=ContactCaseMetadata(
+        name='stephen_kinnock',
+        inputs=TaskInput(mp=_mp(2, 'Stephen Kinnock', 'Labour')),
+        expected_output=[
+            PoliticalRelation(
+                name='Neil Kinnock',
+                role='Former Leader of the Labour Party; Member of Parliament',
+                relation='father',
+                party='Labour',
+            ),
+            PoliticalRelation(
+                name='Glenys Kinnock',
+                role='Member of the European Parliament',
+                relation='mother',
+                party='Labour',
+            ),
+            PoliticalRelation(
+                name='Helle Thorning-Schmidt',
+                role='Prime Minister of Denmark',
+                relation='wife',
+            ),
+        ],
+        metadata=RelationsCaseMetadata(
             difficulty='easy',
-            has_noise=False,
-            description='Simple email signature format',
+            description='MP with multiple prominent political family members',
         ),
     ),
+    # MP with one relation
     Case(
-        name='business_card_format',
-        inputs=TaskInput(
-            text='Jane Doe\nSenior Software Engineer\nAcme Corporation\njane.doe@acme.com\n(415) 555-0100'
+        name='kirsty_blackman',
+        inputs=TaskInput(mp=_mp(3, 'Kirsty Blackman', 'Scottish National Party')),
+        expected_output=[
+            PoliticalRelation(
+                name='John West',
+                role='Aberdeen City Councillor',
+                relation='brother',
+            ),
+        ],
+        metadata=RelationsCaseMetadata(
+            difficulty='medium',
+            description='MP with one less prominent political relation',
         ),
-        expected_output=ContactInfo(
-            name='Jane Doe',
-            email='jane.doe@acme.com',
-            phone='(415) 555-0100',
-            company='Acme Corporation',
-            title='Senior Software Engineer',
+    ),
+    # MP with one relation
+    Case(
+        name='stephen_flynn',
+        inputs=TaskInput(mp=_mp(4, 'Stephen Flynn', 'Scottish National Party')),
+        expected_output=[
+            PoliticalRelation(
+                name='Mark Flynn',
+                role='Leader of Dundee City Council',
+                relation='father',
+            ),
+        ],
+        metadata=RelationsCaseMetadata(
+            difficulty='medium',
+            description='MP whose father is a council leader',
         ),
-        metadata=ContactCaseMetadata(
+    ),
+    # MPs with no political relations
+    Case(
+        name='seamus_logan',
+        inputs=TaskInput(mp=_mp(5, 'Seamus Logan', 'Scottish National Party')),
+        expected_output=[],
+        metadata=RelationsCaseMetadata(
             difficulty='easy',
-            has_noise=False,
-            description='Standard business card format',
-        ),
-    ),
-    # Medium cases - some ambiguity or formatting variations
-    Case(
-        name='inline_contact',
-        inputs=TaskInput(
-            text='For more information, contact Michael Johnson at michael.j@techcorp.io or call him at 1-800-TECH-123.'
-        ),
-        expected_output=ContactInfo(
-            name='Michael Johnson',
-            email='michael.j@techcorp.io',
-            phone='1-800-TECH-123',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='medium',
-            has_noise=True,
-            description='Contact info embedded in a sentence',
+            description='MP with no political relations',
         ),
     ),
     Case(
-        name='international_format',
-        inputs=TaskInput(
-            text='Dr. Maria Garcia\nHead of Research\nGlobal Health Institute\nmgarcia@ghi.org\n+44 20 7946 0958'
-        ),
-        expected_output=ContactInfo(
-            name='Maria Garcia',
-            email='mgarcia@ghi.org',
-            phone='+44 20 7946 0958',
-            company='Global Health Institute',
-            title='Head of Research',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='medium',
-            has_noise=False,
-            description='International phone format and title prefix',
-        ),
-    ),
-    # Hard cases - noisy text, unusual formats
-    Case(
-        name='noisy_email_thread',
-        inputs=TaskInput(
-            text="""Re: Meeting Follow-up
-
-Hi team,
-
-Thanks for joining today's call. As discussed, please reach out to our new vendor contact:
-
-Robert Chen
-VP of Sales, CloudTech Solutions
-r.chen@cloudtech.solutions
-Mobile: +1 (650) 555-8900
-
-He'll be handling our account going forward. The previous contact (sarah@oldvendor.com) is no longer with the company.
-
-Best,
-Alex"""
-        ),
-        expected_output=ContactInfo(
-            name='Robert Chen',
-            email='r.chen@cloudtech.solutions',
-            phone='+1 (650) 555-8900',
-            company='CloudTech Solutions',
-            title='VP of Sales',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='hard',
-            has_noise=True,
-            description='Email thread with multiple contacts, need to identify the main one',
+        name='alex_baker',
+        inputs=TaskInput(mp=_mp(7, 'Alex Baker', 'Labour')),
+        expected_output=[],
+        metadata=RelationsCaseMetadata(
+            difficulty='easy',
+            description='MP with no political relations',
         ),
     ),
     Case(
-        name='partial_info',
-        inputs=TaskInput(text='Please contact support at help@service.io for assistance.'),
-        expected_output=ContactInfo(
-            email='help@service.io',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='medium',
-            has_noise=False,
-            description='Only email available, no name or phone',
+        name='wendy_morton',
+        inputs=TaskInput(mp=_mp(8, 'Wendy Morton', 'Conservative')),
+        expected_output=[],
+        metadata=RelationsCaseMetadata(
+            difficulty='easy',
+            description='Conservative MP with no political relations',
         ),
     ),
     Case(
-        name='informal_intro',
-        inputs=TaskInput(text="Hey! I'm Sam from StartupXYZ. Hit me up at sam@startupxyz.com or text 555-STARTUP"),
-        expected_output=ContactInfo(
-            name='Sam',
-            email='sam@startupxyz.com',
-            phone='555-STARTUP',
-            company='StartupXYZ',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='medium',
-            has_noise=False,
-            description='Informal language and vanity phone number',
+        name='connor_rand',
+        inputs=TaskInput(mp=_mp(10, 'Connor Rand', 'Labour')),
+        expected_output=[],
+        metadata=RelationsCaseMetadata(
+            difficulty='easy',
+            description='MP with no political relations',
         ),
     ),
     Case(
-        name='complex_signature',
-        inputs=TaskInput(
-            text="""--
-Emily Watson, Ph.D.
-Director of Engineering | AI Division
-TechGiant Inc. (NASDAQ: TGNT)
-
-Email: e.watson@techgiant.com
-Office: (555) 100-2000 ext. 4501
-LinkedIn: linkedin.com/in/emilywatson
-
-"Innovation distinguishes between a leader and a follower."
-This email may contain confidential information..."""
-        ),
-        expected_output=ContactInfo(
-            name='Emily Watson',
-            email='e.watson@techgiant.com',
-            phone='(555) 100-2000 ext. 4501',
-            company='TechGiant Inc.',
-            title='Director of Engineering',
-        ),
-        metadata=ContactCaseMetadata(
-            difficulty='hard',
-            has_noise=True,
-            description='Complex signature with credentials, stock ticker, and noise',
+        name='mark_tami',
+        inputs=TaskInput(mp=_mp(11, 'Mark Tami', 'Labour')),
+        expected_output=[],
+        metadata=RelationsCaseMetadata(
+            difficulty='easy',
+            description='MP with no political relations',
         ),
     ),
 ]
 
-# Create the evaluation dataset
-contact_dataset: Dataset[TaskInput, ContactInfo, ContactCaseMetadata] = Dataset(
-    name='contact_extraction',
-    cases=contact_cases,
-    evaluators=[FieldAccuracyEvaluator()],
+relations_dataset: Dataset[TaskInput, list[PoliticalRelation], RelationsCaseMetadata] = Dataset(
+    name='political_relations_extraction',
+    cases=relations_cases,
+    evaluators=[RelationsAccuracyEvaluator()],
 )

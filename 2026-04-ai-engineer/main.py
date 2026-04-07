@@ -1,17 +1,10 @@
-"""Run prompt optimization for contact extraction.
-
-This script demonstrates using GEPA with pydantic-ai and pydantic-evals
-to automatically optimize agent instructions.
+"""Run prompt optimization for political relations extraction.
 
 Usage:
-    # Run a quick evaluation with current instructions
-    uv run python pai-gepa-prompt-optimization/run_optimization.py eval
-
-    # Run optimization
-    uv run python pai-gepa-prompt-optimization/run_optimization.py optimize
-
-    # Run optimization with custom settings
-    uv run python pai-gepa-prompt-optimization/run_optimization.py optimize --max-calls 100
+    uv run -m main eval
+    uv run -m main eval --expert
+    uv run -m main compare
+    uv run -m main optimize --max-calls 50
 """
 
 from __future__ import annotations
@@ -26,8 +19,8 @@ import logfire
 from gepa.api import optimize  # pyright: ignore[reportUnknownVariableType]
 
 from adapter import create_adapter
-from evals import contact_dataset
-from task import contact_agent, extract_contact_info
+from evals import relations_dataset
+from task import relations_agent, extract_relations
 
 # Configure logfire for observability
 logfire.configure(
@@ -38,24 +31,28 @@ logfire.configure(
 logfire.instrument_pydantic_ai()
 
 
-# Initial weak instructions (what we're trying to improve)
-INITIAL_INSTRUCTIONS = 'Extract contact information from the provided text.'
+INITIAL_INSTRUCTIONS = """\
+Your role is to inspect the contents the politician's wikipedia page and extract information
+about any family members who were either a member of parliament a local councilor, or otherwise a politician.
+"""
 
-# Expert instructions (for comparison - what good instructions look like)
-EXPERT_INSTRUCTIONS = """Extract contact information from the provided text with high precision.
+EXPERT_INSTRUCTIONS = """\
+Extract information about political family members from a UK MP's Wikipedia page.
 
 Guidelines:
-1. NAME: Look for full names (first + last). Ignore titles like Dr., Mr., etc. in the extracted name.
-2. EMAIL: Extract any valid email address format (user@domain.tld).
-3. PHONE: Extract phone numbers in any format (with or without country codes, parentheses, dashes).
-4. COMPANY: Look for organization names, often near titles or after "at" or "from".
-5. TITLE: Extract job titles/roles, usually appearing near names or before company names.
+1. RELATIONS: Only include family members who held political roles (MPs, councillors, MEPs, \
+government ministers, party leaders, etc.)
+2. RELATION TYPE: Use the exact relationship to the MP (father, mother, wife, husband, brother, \
+sister, uncle, aunt, grandparent etc.)
+3. ROLE: Describe their most notable political role(s) concisely.
+4. PARTY: Include party affiliation if mentioned.
+5. If no family members with political roles are found, return an empty list.
 
 Important:
-- If multiple contacts appear, focus on the PRIMARY contact being introduced or highlighted.
-- If information is missing, leave the field as null rather than guessing.
-- Normalize phone numbers by preserving the original format.
-- For names, extract just the name without titles or credentials (Ph.D., Jr., etc.)."""
+- Do NOT include the MP themselves, only their family members.
+- Do NOT include non-political family members.
+- Focus on clearly stated relationships, not speculation.
+"""
 
 
 def run_evaluation(instructions: str = INITIAL_INSTRUCTIONS) -> None:
@@ -64,9 +61,9 @@ def run_evaluation(instructions: str = INITIAL_INSTRUCTIONS) -> None:
     print('-' * 60)
 
     async def evaluate():
-        with contact_agent.override(instructions=instructions):
-            report = await contact_dataset.evaluate(
-                extract_contact_info,
+        with relations_agent.override(instructions=instructions):
+            report = await relations_dataset.evaluate(
+                extract_relations,
                 max_concurrency=5,
                 progress=True,
             )
@@ -74,7 +71,6 @@ def run_evaluation(instructions: str = INITIAL_INSTRUCTIONS) -> None:
 
     report = asyncio.run(evaluate())
 
-    # Print summary
     print('\nEvaluation Results:')
     print('=' * 60)
 
@@ -96,43 +92,31 @@ def run_optimization(
     max_metric_calls: int = 50,
     output_file: str | None = None,
 ) -> str:
-    """Run GEPA optimization to improve instructions.
-
-    Args:
-        max_metric_calls: Maximum number of evaluation calls
-        output_file: Optional file to save optimized instructions
-
-    Returns:
-        The optimized instructions string
-    """
+    """Run GEPA optimization to improve instructions."""
     print('\nStarting prompt optimization...')
     print(f'Max metric calls: {max_metric_calls}')
     print('-' * 60)
 
-    # Create the adapter
     adapter = create_adapter(
-        dataset=contact_dataset,
-        task=extract_contact_info,
-        agent=contact_agent,
+        dataset=relations_dataset,
+        task=extract_relations,
+        agent=relations_agent,
         proposer_model='openai:gpt-4o',
         max_concurrency=5,
     )
 
-    # Create seed candidate
     seed_candidate = {'instructions': json.dumps(INITIAL_INSTRUCTIONS)}
 
-    # Run optimization
     result = optimize(  # pyright: ignore[reportUnknownVariableType]
         seed_candidate=seed_candidate,
-        trainset=contact_dataset.cases,
-        valset=contact_dataset.cases,  # Using same set for this example
+        trainset=relations_dataset.cases,
+        valset=relations_dataset.cases,
         adapter=adapter,
         max_metric_calls=max_metric_calls,
         display_progress_bar=True,
     )
 
     assert isinstance(result.best_candidate, dict)
-    # Extract best instructions
     best_instructions = json.loads(result.best_candidate['instructions'])
 
     print('\n' + '=' * 60)
@@ -141,7 +125,6 @@ def run_optimization(
     print(f'\nBest validation score: {result.val_aggregate_scores[result.best_idx]:.2%}')
     print(f'\nOptimized Instructions:\n{best_instructions}')
 
-    # Save if requested
     if output_file:
         Path(output_file).write_text(best_instructions)
         print(f'\nSaved to: {output_file}')
@@ -150,7 +133,7 @@ def run_optimization(
 
 
 def compare_instructions() -> None:
-    """Compare initial, expert, and optimized instructions."""
+    """Compare initial vs expert instructions."""
     print('\n' + '=' * 60)
     print('Comparison: Initial vs Expert Instructions')
     print('=' * 60)
@@ -164,19 +147,16 @@ def compare_instructions() -> None:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Prompt optimization example using GEPA with pydantic-ai')
+    parser = argparse.ArgumentParser(description='Prompt optimization for political relations extraction')
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
-    # Eval command
     eval_parser = subparsers.add_parser('eval', help='Run evaluation only')
     eval_parser.add_argument('--expert', action='store_true', help='Use expert instructions')
 
-    # Optimize command
     opt_parser = subparsers.add_parser('optimize', help='Run optimization')
     opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
     opt_parser.add_argument('--output', type=str, help='File to save optimized instructions')
 
-    # Compare command
     subparsers.add_parser('compare', help='Compare initial vs expert instructions')
 
     args = parser.parse_args()
