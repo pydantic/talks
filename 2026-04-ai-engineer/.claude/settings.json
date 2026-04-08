@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)",
+      "Bash(uv add:*)",
+      "WebFetch(domain:pydantic.dev)"
+    ]
+  }
+}
