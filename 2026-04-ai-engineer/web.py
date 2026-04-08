@@ -43,7 +43,7 @@ agent_config = logfire.var(
             'You are a helpful assistant that answers questions about UK Members of Parliament. '
             'Use the mp_search tool to find information. Provide concise, factual answers based on the search results.'
         ),
-        model='gateway/openai-responses:gpt-5.1-codex-mini',
+        model='gateway/anthropic:claude-sonnet-4-5',
         max_tokens=1024,
     ),
 )
