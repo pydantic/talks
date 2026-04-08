@@ -18,6 +18,7 @@ from typing import Any, cast
 
 import logfire
 from gepa.api import optimize  # pyright: ignore[reportUnknownVariableType]
+from logfire.variables import LocalVariablesOptions
 
 from adapter import create_adapter
 from cases import DEFAULT_CASES_PATH, SplitFilter, generate_golden_dataset, summarize_splits
@@ -28,9 +29,11 @@ from task import (
     DEFAULT_TASK_MODEL,
     InstructionStyle,
     RelationFocus,
+    build_local_variables_config,
     extract_relations,
     get_instructions,
     relations_agent,
+    use_managed_instructions,
 )
 
 # Configure logfire for observability
@@ -38,6 +41,7 @@ logfire.configure(
     send_to_logfire='if-token-present',
     environment='development',
     service_name='prompt-optimization-example',
+    variables=LocalVariablesOptions(config=build_local_variables_config()),
 )
 logfire.instrument_pydantic_ai()
 
@@ -81,12 +85,13 @@ def run_evaluation(
     print('-' * 60)
 
     async def evaluate() -> Any:
-        with relations_agent.override(instructions=instructions, model=model):
-            return await dataset.evaluate(
-                extract_relations,
-                max_concurrency=5,
-                progress=True,
-            )
+        with use_managed_instructions(instructions):
+            with relations_agent.override(model=model):
+                return await dataset.evaluate(
+                    extract_relations,
+                    max_concurrency=5,
+                    progress=True,
+                )
 
     report = asyncio.run(evaluate())
 

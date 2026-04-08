@@ -18,6 +18,7 @@ from task import (
     get_instructions,
     get_mps,
     relations_agent,
+    use_managed_instructions,
 )
 
 SplitName = Literal['train', 'val', 'test']
@@ -158,20 +159,21 @@ async def generate_golden_dataset(
                     generated_at=datetime.now(timezone.utc),
                 )
 
-        with relations_agent.override(model=model, instructions=instructions):
-            tasks = [asyncio.create_task(run_one(mp)) for mp in pending]
-            for completed_count, task in enumerate(asyncio.as_completed(tasks), start=1):
-                record = await task
-                current_records.append(record)
-                current_records.sort(key=lambda item: item.ordinal)
-                dataset = GoldenDatasetFile(
-                    source_model=model,
-                    source_instructions=instructions,
-                    updated_at=datetime.now(timezone.utc),
-                    cases=current_records,
-                )
-                save_golden_dataset(dataset, output_path)
-                print(f'  [{completed_count}/{len(tasks)}] {record.mp.name}: {len(record.expected_output)} relations')
+        with use_managed_instructions(instructions):
+            with relations_agent.override(model=model):
+                tasks = [asyncio.create_task(run_one(mp)) for mp in pending]
+                for completed_count, task in enumerate(asyncio.as_completed(tasks), start=1):
+                    record = await task
+                    current_records.append(record)
+                    current_records.sort(key=lambda item: item.ordinal)
+                    dataset = GoldenDatasetFile(
+                        source_model=model,
+                        source_instructions=instructions,
+                        updated_at=datetime.now(timezone.utc),
+                        cases=current_records,
+                    )
+                    save_golden_dataset(dataset, output_path)
+                    print(f'  [{completed_count}/{len(tasks)}] {record.mp.name}: {len(record.expected_output)} relations')
 
         finished_at = datetime.now(timezone.utc)
         print(f'Generation window: {started_at.isoformat()} to {finished_at.isoformat()}')
