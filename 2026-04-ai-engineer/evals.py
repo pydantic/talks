@@ -25,6 +25,157 @@ class RelationsCaseMetadata:
     raw_expected_count: int
 
 
+def load_relations_dataset(
+    *,
+    cases_file: str | None = None,
+    split: SplitFilter = 'all',
+    focus: RelationFocus = 'all',
+    max_cases: int | None = None,
+) -> Dataset[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]:
+    """Load a dataset from the persisted golden cases file."""
+    records = load_case_records(
+        DEFAULT_CASES_PATH if cases_file is None else Path(cases_file),
+        split=split,
+        max_cases=max_cases,
+    )
+
+    cases: list[Case[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]] = []
+    for record in records:
+        expected_output = [
+            relation.model_copy(deep=True)
+            for relation in record.expected_output
+            if relation_in_focus(relation.relation, focus)
+        ]
+        cases.append(
+            Case(
+                name=record.name,
+                inputs=TaskInput(mp=record.mp),
+                expected_output=expected_output,
+                metadata=RelationsCaseMetadata(
+                    split=record.split,
+                    focus=focus,
+                    description=f'{record.mp.name} ({record.mp.party})',
+                    expected_count=len(expected_output),
+                    raw_expected_count=len(record.expected_output),
+                ),
+            )
+        )
+
+    return Dataset(
+        name=f'political_relations_extraction_{focus}_{split}',
+        cases=cases,
+        evaluators=[RelationsAccuracyEvaluator()],
+    )
+
+
+@dataclass
+class RelationsAccuracyEvaluator(Evaluator[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]):
+    """Evaluates how accurately political relations were extracted.
+
+    Compares extracted relations against expected ones by matching on name.
+    Returns a score between 0.0 and 1.0.
+    """
+
+    def evaluate(
+        self, ctx: EvaluatorContext[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]
+    ) -> dict[str, Any]:
+        if ctx.expected_output is None:
+            return {'accuracy': 1.0}
+
+        expected = ctx.expected_output
+        output = ctx.output
+
+        if not expected and not output:
+            return {'accuracy': 1.0, 'expected_count': 0, 'output_count': 0, 'matched': 0}
+
+        if not expected:
+            # Expected no relations but got some — penalise
+            return {'accuracy': 0.0, 'expected_count': 0, 'output_count': len(output), 'matched': 0}
+
+        remaining_outputs = list(output)
+        matched_score = 0.0
+        matched_pairs = 0
+        relation_matches = 0
+        role_matches = 0
+        party_matches = 0
+
+        for exp in expected:
+            best_index = -1
+            best_match = MatchDetails(total=0.0, relation_score=0.0, role_score=0.0, party_score=0.0)
+            for index, out in enumerate(remaining_outputs):
+                candidate = score_pair(exp, out)
+                if candidate.total > best_match.total:
+                    best_index = index
+                    best_match = candidate
+
+            if best_index >= 0 and best_match.total > 0:
+                matched_score += best_match.total
+                matched_pairs += 1
+                relation_matches += int(best_match.relation_score >= 0.85)
+                role_matches += int(best_match.role_score >= 0.45)
+                party_matches += int(best_match.party_score == 1.0 and exp.party is not None)
+                remaining_outputs.pop(best_index)
+
+        precision = matched_score / len(output) if output else 0.0
+        recall = matched_score / len(expected)
+        if precision + recall == 0:
+            accuracy = 0.0
+        else:
+            accuracy = 2 * precision * recall / (precision + recall)
+
+        off_focus_output_count = 0
+        if ctx.metadata is not None and ctx.metadata.focus == 'ancestors':
+            off_focus_output_count = sum(
+                1 for relation in output if not relation_in_focus(relation.relation, ctx.metadata.focus)
+            )
+        focus_compliance = 1.0 if not output else (len(output) - off_focus_output_count) / len(output)
+
+        return {
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'expected_count': len(expected),
+            'output_count': len(output),
+            'matched_pairs': matched_pairs,
+            'matched_score': matched_score,
+            'relation_matches': relation_matches,
+            'role_matches': role_matches,
+            'party_matches': party_matches,
+            'focus_compliance': focus_compliance,
+            'off_focus_output_count': off_focus_output_count,
+        }
+
+
+# --- Scoring utilities ---
+
+
+@dataclass
+class MatchDetails:
+    """Detailed match information for one expected/output pair."""
+
+    total: float
+    relation_score: float
+    role_score: float
+    party_score: float
+
+
+def score_pair(expected: PoliticalRelation, actual: PoliticalRelation) -> MatchDetails:
+    """Produce a weighted score for an expected/output relation pair."""
+    if not names_match(expected.name, actual.name):
+        return MatchDetails(total=0.0, relation_score=0.0, role_score=0.0, party_score=0.0)
+
+    relation_score = relation_match_score(expected.relation, actual.relation)
+    role_score = role_match_score(expected.role, actual.role)
+    party_score = party_match_score(expected.party, actual.party)
+    total = 0.5 + 0.3 * relation_score + 0.15 * role_score + 0.05 * party_score
+    return MatchDetails(
+        total=total,
+        relation_score=relation_score,
+        role_score=role_score,
+        party_score=party_score,
+    )
+
+
 def normalize_text(value: str) -> str:
     """Normalize free text for matching."""
     value = value.casefold().replace('–', '-').replace('—', '-')
@@ -122,151 +273,3 @@ def party_match_score(expected: str | None, actual: str | None) -> float:
     if actual is None:
         return 0.0
     return 1.0 if normalize_text(expected) == normalize_text(actual) else 0.0
-
-
-@dataclass
-class MatchDetails:
-    """Detailed match information for one expected/output pair."""
-
-    total: float
-    relation_score: float
-    role_score: float
-    party_score: float
-
-
-def score_pair(expected: PoliticalRelation, actual: PoliticalRelation) -> MatchDetails:
-    """Produce a weighted score for an expected/output relation pair."""
-    if not names_match(expected.name, actual.name):
-        return MatchDetails(total=0.0, relation_score=0.0, role_score=0.0, party_score=0.0)
-
-    relation_score = relation_match_score(expected.relation, actual.relation)
-    role_score = role_match_score(expected.role, actual.role)
-    party_score = party_match_score(expected.party, actual.party)
-    total = 0.5 + 0.3 * relation_score + 0.15 * role_score + 0.05 * party_score
-    return MatchDetails(
-        total=total,
-        relation_score=relation_score,
-        role_score=role_score,
-        party_score=party_score,
-    )
-
-
-@dataclass
-class RelationsAccuracyEvaluator(Evaluator[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]):
-    """Evaluates how accurately political relations were extracted.
-
-    Compares extracted relations against expected ones by matching on name.
-    Returns a score between 0.0 and 1.0.
-    """
-
-    def evaluate(
-        self, ctx: EvaluatorContext[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]
-    ) -> dict[str, Any]:
-        if ctx.expected_output is None:
-            return {'accuracy': 1.0}
-
-        expected = ctx.expected_output
-        output = ctx.output
-
-        if not expected and not output:
-            return {'accuracy': 1.0, 'expected_count': 0, 'output_count': 0, 'matched': 0}
-
-        if not expected:
-            # Expected no relations but got some — penalise
-            return {'accuracy': 0.0, 'expected_count': 0, 'output_count': len(output), 'matched': 0}
-
-        remaining_outputs = list(output)
-        matched_score = 0.0
-        matched_pairs = 0
-        relation_matches = 0
-        role_matches = 0
-        party_matches = 0
-
-        for exp in expected:
-            best_index = -1
-            best_match = MatchDetails(total=0.0, relation_score=0.0, role_score=0.0, party_score=0.0)
-            for index, out in enumerate(remaining_outputs):
-                candidate = score_pair(exp, out)
-                if candidate.total > best_match.total:
-                    best_index = index
-                    best_match = candidate
-
-            if best_index >= 0 and best_match.total > 0:
-                matched_score += best_match.total
-                matched_pairs += 1
-                relation_matches += int(best_match.relation_score >= 0.85)
-                role_matches += int(best_match.role_score >= 0.45)
-                party_matches += int(best_match.party_score == 1.0 and exp.party is not None)
-                remaining_outputs.pop(best_index)
-
-        precision = matched_score / len(output) if output else 0.0
-        recall = matched_score / len(expected)
-        if precision + recall == 0:
-            accuracy = 0.0
-        else:
-            accuracy = 2 * precision * recall / (precision + recall)
-
-        off_focus_output_count = 0
-        if ctx.metadata is not None and ctx.metadata.focus == 'ancestors':
-            off_focus_output_count = sum(
-                1 for relation in output if not relation_in_focus(relation.relation, ctx.metadata.focus)
-            )
-        focus_compliance = 1.0 if not output else (len(output) - off_focus_output_count) / len(output)
-
-        return {
-            'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'expected_count': len(expected),
-            'output_count': len(output),
-            'matched_pairs': matched_pairs,
-            'matched_score': matched_score,
-            'relation_matches': relation_matches,
-            'role_matches': role_matches,
-            'party_matches': party_matches,
-            'focus_compliance': focus_compliance,
-            'off_focus_output_count': off_focus_output_count,
-        }
-
-
-def load_relations_dataset(
-    *,
-    cases_file: str | None = None,
-    split: SplitFilter = 'all',
-    focus: RelationFocus = 'all',
-    max_cases: int | None = None,
-) -> Dataset[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]:
-    """Load a dataset from the persisted golden cases file."""
-    records = load_case_records(
-        DEFAULT_CASES_PATH if cases_file is None else Path(cases_file),
-        split=split,
-        max_cases=max_cases,
-    )
-
-    cases: list[Case[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]] = []
-    for record in records:
-        expected_output = [
-            relation.model_copy(deep=True)
-            for relation in record.expected_output
-            if relation_in_focus(relation.relation, focus)
-        ]
-        cases.append(
-            Case(
-                name=record.name,
-                inputs=TaskInput(mp=record.mp),
-                expected_output=expected_output,
-                metadata=RelationsCaseMetadata(
-                    split=record.split,
-                    focus=focus,
-                    description=f'{record.mp.name} ({record.mp.party})',
-                    expected_count=len(expected_output),
-                    raw_expected_count=len(record.expected_output),
-                ),
-            )
-        )
-
-    return Dataset(
-        name=f'political_relations_extraction_{focus}_{split}',
-        cases=cases,
-        evaluators=[RelationsAccuracyEvaluator()],
-    )

@@ -49,61 +49,6 @@ class GoldenDatasetFile(BaseModel):
     cases: list[GoldenCaseRecord]
 
 
-def slugify_name(name: str) -> str:
-    """Convert a display name to a stable case name."""
-    return re.sub(r'[^a-z0-9]+', '_', name.casefold()).strip('_')
-
-
-def split_for_mp_id(mp_id: int) -> SplitName:
-    """Assign a deterministic split so datasets can be extended incrementally."""
-    remainder = mp_id % 10
-    if remainder == 0:
-        return 'test'
-    if remainder == 1:
-        return 'val'
-    return 'train'
-
-
-def load_golden_dataset(path: Path = DEFAULT_CASES_PATH) -> GoldenDatasetFile | None:
-    """Load the persisted golden dataset if it exists."""
-    if not path.exists():
-        return None
-    return GoldenDatasetFile.model_validate_json(path.read_text())
-
-
-def save_golden_dataset(dataset: GoldenDatasetFile, path: Path = DEFAULT_CASES_PATH) -> None:
-    """Persist the golden dataset as formatted JSON."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(dataset.model_dump_json(indent=2) + '\n')
-
-
-def load_case_records(
-    path: Path = DEFAULT_CASES_PATH,
-    *,
-    split: SplitFilter = 'all',
-    max_cases: int | None = None,
-) -> list[GoldenCaseRecord]:
-    """Load persisted case records with optional split and size filters."""
-    dataset = load_golden_dataset(path)
-    if dataset is None:
-        raise FileNotFoundError(f'Golden cases file not found at {path}. Run `uv run -m main generate-cases` first.')
-
-    records = sorted(dataset.cases, key=lambda case: case.ordinal)
-    if split != 'all':
-        records = [record for record in records if record.split == split]
-    if max_cases is not None:
-        records = records[:max_cases]
-    return records
-
-
-def summarize_splits(records: list[GoldenCaseRecord]) -> dict[SplitName, int]:
-    """Count cases per split."""
-    counts: dict[SplitName, int] = {'train': 0, 'val': 0, 'test': 0}
-    for record in records:
-        counts[record.split] += 1
-    return counts
-
-
 async def generate_golden_dataset(
     *,
     output_path: Path = DEFAULT_CASES_PATH,
@@ -184,3 +129,61 @@ async def generate_golden_dataset(
     )
     save_golden_dataset(dataset, output_path)
     return dataset
+
+
+def load_case_records(
+    path: Path = DEFAULT_CASES_PATH,
+    *,
+    split: SplitFilter = 'all',
+    max_cases: int | None = None,
+) -> list[GoldenCaseRecord]:
+    """Load persisted case records with optional split and size filters."""
+    dataset = load_golden_dataset(path)
+    if dataset is None:
+        raise FileNotFoundError(f'Golden cases file not found at {path}. Run `uv run -m main generate-cases` first.')
+
+    records = sorted(dataset.cases, key=lambda case: case.ordinal)
+    if split != 'all':
+        records = [record for record in records if record.split == split]
+    if max_cases is not None:
+        records = records[:max_cases]
+    return records
+
+
+def load_golden_dataset(path: Path = DEFAULT_CASES_PATH) -> GoldenDatasetFile | None:
+    """Load the persisted golden dataset if it exists."""
+    if not path.exists():
+        return None
+    return GoldenDatasetFile.model_validate_json(path.read_text())
+
+
+def save_golden_dataset(dataset: GoldenDatasetFile, path: Path = DEFAULT_CASES_PATH) -> None:
+    """Persist the golden dataset as formatted JSON."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(dataset.model_dump_json(indent=2) + '\n')
+
+
+# --- Utilities ---
+
+
+def slugify_name(name: str) -> str:
+    """Convert a display name to a stable case name."""
+    return re.sub(r'[^a-z0-9]+', '_', name.casefold()).strip('_')
+
+
+def split_for_mp_id(mp_id: int) -> SplitName:
+    """Assign a deterministic split so datasets can be extended incrementally."""
+    remainder = mp_id % 10
+    if remainder == 0:
+        return 'test'
+    if remainder == 1:
+        return 'val'
+    return 'train'
+
+
+def summarize_splits(records: list[GoldenCaseRecord]) -> dict[SplitName, int]:
+    """Count cases per split."""
+    counts: dict[SplitName, int] = {'train': 0, 'val': 0, 'test': 0}
+    for record in records:
+        counts[record.split] += 1
+    return counts

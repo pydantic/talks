@@ -42,6 +42,118 @@ logfire.configure(
 logfire.instrument_pydantic_ai()
 
 
+def main() -> int:
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description='Prompt optimization for political relations extraction')
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+
+    gen_parser = subparsers.add_parser('generate-cases', help='Generate or resume the golden dataset')
+    gen_parser.add_argument('--limit', type=int, default=100, help='Number of MPs to process from the current offset')
+    gen_parser.add_argument('--offset', type=int, default=0, help='Start position in the MP list')
+    gen_parser.add_argument('--all', action='store_true', help='Generate cases for all MPs')
+    gen_parser.add_argument('--output', type=str, default=str(DEFAULT_CASES_PATH), help='JSON output path')
+    gen_parser.add_argument('--model', type=str, default=DEFAULT_GENERATION_MODEL, help='Model for golden generation')
+    gen_parser.add_argument('--max-concurrency', type=int, default=5, help='Concurrent model calls during generation')
+    gen_parser.add_argument('--overwrite', action='store_true', help='Replace an existing output file')
+
+    eval_parser = subparsers.add_parser('eval', help='Run evaluation only')
+    eval_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
+    eval_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='all')
+    eval_parser.add_argument('--focus', choices=['all', 'ancestors'], default='all')
+    eval_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
+    eval_parser.add_argument('--instructions-file', type=str, help='Evaluate with custom instructions from a file')
+    eval_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for evaluation')
+    eval_parser.add_argument('--max-cases', type=int, help='Limit the number of evaluation cases')
+
+    opt_parser = subparsers.add_parser('optimize', help='Run optimization')
+    opt_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
+    opt_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
+    opt_parser.add_argument('--train-split', choices=['all', 'train', 'val', 'test'], default='train')
+    opt_parser.add_argument('--val-split', choices=['all', 'train', 'val', 'test'], default='val')
+    opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
+    opt_parser.add_argument(
+        '--proposer-model',
+        type=str,
+        default=DEFAULT_PROPOSER_MODEL,
+        help='Model used by GEPA to propose new instructions',
+    )
+    opt_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
+    opt_parser.add_argument('--seed-instructions-file', type=str, help='Seed prompt file for optimization')
+    opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
+    opt_parser.add_argument('--output', type=str, help='File to save optimized instructions')
+    opt_parser.add_argument('--max-train-cases', type=int, help='Limit training cases')
+    opt_parser.add_argument('--max-val-cases', type=int, help='Limit validation cases')
+
+    subparsers.add_parser('compare', help='Compare initial vs expert instructions')
+    compare_parser = subparsers.choices['compare']
+    compare_parser.add_argument(
+        '--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path'
+    )
+    compare_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='test')
+    compare_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
+    compare_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for both runs')
+    compare_parser.add_argument('--max-cases', type=int, help='Limit the number of comparison cases')
+
+    args = parser.parse_args()
+
+    if args.command == 'generate-cases':
+        output_path = Path(args.output)
+        limit = None if args.all else args.limit
+        dataset = asyncio.run(
+            generate_golden_dataset(
+                output_path=output_path,
+                limit=limit,
+                offset=args.offset,
+                model=args.model,
+                max_concurrency=args.max_concurrency,
+                overwrite=args.overwrite,
+            )
+        )
+        split_counts = summarize_splits(dataset.cases)
+        print('\nGolden dataset summary:')
+        print(f'  output={output_path}')
+        print(f'  cases={len(dataset.cases)} model={dataset.source_model}')
+        print(f'  train={split_counts["train"]} val={split_counts["val"]} test={split_counts["test"]}')
+    elif args.command == 'eval':
+        run_evaluation(
+            cases_file=args.cases_file,
+            split=cast(SplitFilter, args.split),
+            focus=cast(RelationFocus, args.focus),
+            prompt_style=cast(InstructionStyle, args.prompt_style),
+            instructions_file=args.instructions_file,
+            model=args.model,
+            max_cases=args.max_cases,
+        )
+    elif args.command == 'optimize':
+        run_optimization(
+            cases_file=args.cases_file,
+            focus=cast(RelationFocus, args.focus),
+            train_split=cast(SplitFilter, args.train_split),
+            val_split=cast(SplitFilter, args.val_split),
+            task_model=args.task_model,
+            proposer_model=args.proposer_model,
+            prompt_style=cast(InstructionStyle, args.prompt_style),
+            seed_instructions_file=args.seed_instructions_file,
+            max_metric_calls=args.max_calls,
+            output_file=args.output,
+            max_train_cases=args.max_train_cases,
+            max_val_cases=args.max_val_cases,
+        )
+    elif args.command == 'compare':
+        compare_instructions(
+            cases_file=args.cases_file,
+            split=cast(SplitFilter, args.split),
+            focus=cast(RelationFocus, args.focus),
+            model=args.model,
+            max_cases=args.max_cases,
+        )
+    else:
+        parser.print_help()
+        return 1
+
+    return 0
+
+
 def run_evaluation(
     *,
     cases_file: str,
@@ -109,12 +221,6 @@ def run_evaluation(
     print('-' * 60)
     print(f'Average accuracy: {avg_score:.2%}')
     return avg_score
-
-
-def print_case_summary(cases_file: str) -> None:
-    """Print a quick summary of persisted golden cases."""
-    records = load_relations_dataset(cases_file=cases_file, split='all', focus='all').cases
-    print(f'Loaded {len(records)} cases from {cases_file}')
 
 
 def run_optimization(
@@ -228,6 +334,15 @@ def compare_instructions(
     print(f'\nDelta: {expert_score - initial_score:+.2%}')
 
 
+def print_case_summary(cases_file: str) -> None:
+    """Print a quick summary of persisted golden cases."""
+    records = load_relations_dataset(cases_file=cases_file, split='all', focus='all').cases
+    print(f'Loaded {len(records)} cases from {cases_file}')
+
+
+# --- Utilities ---
+
+
 def load_instructions(
     *,
     focus: RelationFocus,
@@ -238,118 +353,6 @@ def load_instructions(
     if instructions_file is not None:
         return Path(instructions_file).read_text()
     return get_instructions(style=prompt_style, focus=focus)
-
-
-def main() -> int:
-    """Main entry point."""
-    parser = argparse.ArgumentParser(description='Prompt optimization for political relations extraction')
-    subparsers = parser.add_subparsers(dest='command', help='Command to run')
-
-    gen_parser = subparsers.add_parser('generate-cases', help='Generate or resume the golden dataset')
-    gen_parser.add_argument('--limit', type=int, default=100, help='Number of MPs to process from the current offset')
-    gen_parser.add_argument('--offset', type=int, default=0, help='Start position in the MP list')
-    gen_parser.add_argument('--all', action='store_true', help='Generate cases for all MPs')
-    gen_parser.add_argument('--output', type=str, default=str(DEFAULT_CASES_PATH), help='JSON output path')
-    gen_parser.add_argument('--model', type=str, default=DEFAULT_GENERATION_MODEL, help='Model for golden generation')
-    gen_parser.add_argument('--max-concurrency', type=int, default=5, help='Concurrent model calls during generation')
-    gen_parser.add_argument('--overwrite', action='store_true', help='Replace an existing output file')
-
-    eval_parser = subparsers.add_parser('eval', help='Run evaluation only')
-    eval_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
-    eval_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='all')
-    eval_parser.add_argument('--focus', choices=['all', 'ancestors'], default='all')
-    eval_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
-    eval_parser.add_argument('--instructions-file', type=str, help='Evaluate with custom instructions from a file')
-    eval_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for evaluation')
-    eval_parser.add_argument('--max-cases', type=int, help='Limit the number of evaluation cases')
-
-    opt_parser = subparsers.add_parser('optimize', help='Run optimization')
-    opt_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
-    opt_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
-    opt_parser.add_argument('--train-split', choices=['all', 'train', 'val', 'test'], default='train')
-    opt_parser.add_argument('--val-split', choices=['all', 'train', 'val', 'test'], default='val')
-    opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
-    opt_parser.add_argument(
-        '--proposer-model',
-        type=str,
-        default=DEFAULT_PROPOSER_MODEL,
-        help='Model used by GEPA to propose new instructions',
-    )
-    opt_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
-    opt_parser.add_argument('--seed-instructions-file', type=str, help='Seed prompt file for optimization')
-    opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
-    opt_parser.add_argument('--output', type=str, help='File to save optimized instructions')
-    opt_parser.add_argument('--max-train-cases', type=int, help='Limit training cases')
-    opt_parser.add_argument('--max-val-cases', type=int, help='Limit validation cases')
-
-    subparsers.add_parser('compare', help='Compare initial vs expert instructions')
-    compare_parser = subparsers.choices['compare']
-    compare_parser.add_argument(
-        '--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path'
-    )
-    compare_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='test')
-    compare_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
-    compare_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for both runs')
-    compare_parser.add_argument('--max-cases', type=int, help='Limit the number of comparison cases')
-
-    args = parser.parse_args()
-
-    if args.command == 'generate-cases':
-        output_path = Path(args.output)
-        limit = None if args.all else args.limit
-        dataset = asyncio.run(
-            generate_golden_dataset(
-                output_path=output_path,
-                limit=limit,
-                offset=args.offset,
-                model=args.model,
-                max_concurrency=args.max_concurrency,
-                overwrite=args.overwrite,
-            )
-        )
-        split_counts = summarize_splits(dataset.cases)
-        print('\nGolden dataset summary:')
-        print(f'  output={output_path}')
-        print(f'  cases={len(dataset.cases)} model={dataset.source_model}')
-        print(f'  train={split_counts["train"]} val={split_counts["val"]} test={split_counts["test"]}')
-    elif args.command == 'eval':
-        run_evaluation(
-            cases_file=args.cases_file,
-            split=cast(SplitFilter, args.split),
-            focus=cast(RelationFocus, args.focus),
-            prompt_style=cast(InstructionStyle, args.prompt_style),
-            instructions_file=args.instructions_file,
-            model=args.model,
-            max_cases=args.max_cases,
-        )
-    elif args.command == 'optimize':
-        run_optimization(
-            cases_file=args.cases_file,
-            focus=cast(RelationFocus, args.focus),
-            train_split=cast(SplitFilter, args.train_split),
-            val_split=cast(SplitFilter, args.val_split),
-            task_model=args.task_model,
-            proposer_model=args.proposer_model,
-            prompt_style=cast(InstructionStyle, args.prompt_style),
-            seed_instructions_file=args.seed_instructions_file,
-            max_metric_calls=args.max_calls,
-            output_file=args.output,
-            max_train_cases=args.max_train_cases,
-            max_val_cases=args.max_val_cases,
-        )
-    elif args.command == 'compare':
-        compare_instructions(
-            cases_file=args.cases_file,
-            split=cast(SplitFilter, args.split),
-            focus=cast(RelationFocus, args.focus),
-            model=args.model,
-            max_cases=args.max_cases,
-        )
-    else:
-        parser.print_help()
-        return 1
-
-    return 0
 
 
 if __name__ == '__main__':

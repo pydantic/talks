@@ -27,22 +27,6 @@ DEFAULT_GENERATION_MODEL = 'openai:gpt-5'
 DEFAULT_PROPOSER_MODEL = 'openai:gpt-4.1'
 
 
-def ensure_data() -> None:
-    """Download and extract the MP data archive if not already present."""
-    if data_dir.exists():
-        return
-    print('Downloading MP data...')
-    with Client() as client:
-        r = client.get(DATA_URL, follow_redirects=True)
-        r.raise_for_status()
-    archive_path = Path('mps.tar.gz')
-    archive_path.write_bytes(r.content)
-    with tarfile.open(archive_path, 'r:gz') as tar:
-        tar.extractall()
-    archive_path.unlink()
-    print('Download complete.')
-
-
 class MP(BaseModel):
     id: int
     name: str
@@ -79,61 +63,11 @@ class PoliticalRelation(BaseModel, use_attribute_docstrings=True):
     """Political party of the family member"""
 
 
-def normalize_text(value: str) -> str:
-    """Normalize free text for matching and classification."""
-    value = value.casefold().replace('–', '-').replace('—', '-')
-    value = re.sub(r'[^a-z0-9]+', ' ', value)
-    return re.sub(r'\s+', ' ', value).strip()
+@dataclass
+class TaskInput:
+    """Input to the political relations extraction task."""
 
-
-def classify_relation_scope(relation: str) -> RelationScope:
-    """Map a relation label to a coarse family-generation bucket."""
-    text = normalize_text(relation)
-    if not text:
-        return 'other'
-    if ' in law' in text:
-        return 'other'
-    if any(token in text for token in ('wife', 'husband', 'spouse', 'partner', 'civil partner')):
-        return 'spouse'
-    if any(
-        token in text
-        for token in (
-            'grandson',
-            'granddaughter',
-            'grandchild',
-            'son',
-            'daughter',
-            'child',
-            'children',
-        )
-    ):
-        return 'descendant'
-    if any(
-        token in text
-        for token in (
-            'great grandfather',
-            'great grandmother',
-            'grandfather',
-            'grandmother',
-            'grandparent',
-            'father',
-            'mother',
-            'parent',
-            'uncle',
-            'aunt',
-        )
-    ):
-        return 'ancestor'
-    if any(token in text for token in ('brother', 'sister', 'sibling', 'cousin', 'twin')):
-        return 'same_generation'
-    return 'other'
-
-
-def relation_in_focus(relation: str, focus: RelationFocus) -> bool:
-    """Return whether a relation should count for the selected evaluation focus."""
-    if focus == 'all':
-        return True
-    return classify_relation_scope(relation) == 'ancestor'
+    mp: MP
 
 
 FULL_INITIAL_INSTRUCTIONS = """
@@ -203,19 +137,6 @@ relations_agent = Agent(
 )
 
 
-@dataclass
-class TaskInput:
-    """Input to the political relations extraction task."""
-
-    mp: MP
-
-
-def get_mps() -> list[MP]:
-    """Load the list of MPs from the data directory."""
-    ensure_data()
-    return mps_ta.validate_json(mps_list_file.read_bytes())
-
-
 async def extract_relations(input: TaskInput) -> list[PoliticalRelation]:
     """Run the political relations extraction agent on an MP's Wikipedia page.
 
@@ -231,6 +152,88 @@ async def extract_relations(input: TaskInput) -> list[PoliticalRelation]:
     assert body is not None, f'Could not find body element for {input.mp.name}'
     result = await relations_agent.run(body.text)
     return result.output
+
+
+def get_mps() -> list[MP]:
+    """Load the list of MPs from the data directory."""
+    ensure_data()
+    return mps_ta.validate_json(mps_list_file.read_bytes())
+
+
+# --- Utilities ---
+
+
+def ensure_data() -> None:
+    """Download and extract the MP data archive if not already present."""
+    if data_dir.exists():
+        return
+    print('Downloading MP data...')
+    with Client() as client:
+        r = client.get(DATA_URL, follow_redirects=True)
+        r.raise_for_status()
+    archive_path = Path('mps.tar.gz')
+    archive_path.write_bytes(r.content)
+    with tarfile.open(archive_path, 'r:gz') as tar:
+        tar.extractall()
+    archive_path.unlink()
+    print('Download complete.')
+
+
+def normalize_text(value: str) -> str:
+    """Normalize free text for matching and classification."""
+    value = value.casefold().replace('–', '-').replace('—', '-')
+    value = re.sub(r'[^a-z0-9]+', ' ', value)
+    return re.sub(r'\s+', ' ', value).strip()
+
+
+def classify_relation_scope(relation: str) -> RelationScope:
+    """Map a relation label to a coarse family-generation bucket."""
+    text = normalize_text(relation)
+    if not text:
+        return 'other'
+    if ' in law' in text:
+        return 'other'
+    if any(token in text for token in ('wife', 'husband', 'spouse', 'partner', 'civil partner')):
+        return 'spouse'
+    if any(
+        token in text
+        for token in (
+            'grandson',
+            'granddaughter',
+            'grandchild',
+            'son',
+            'daughter',
+            'child',
+            'children',
+        )
+    ):
+        return 'descendant'
+    if any(
+        token in text
+        for token in (
+            'great grandfather',
+            'great grandmother',
+            'grandfather',
+            'grandmother',
+            'grandparent',
+            'father',
+            'mother',
+            'parent',
+            'uncle',
+            'aunt',
+        )
+    ):
+        return 'ancestor'
+    if any(token in text for token in ('brother', 'sister', 'sibling', 'cousin', 'twin')):
+        return 'same_generation'
+    return 'other'
+
+
+def relation_in_focus(relation: str, focus: RelationFocus) -> bool:
+    """Return whether a relation should count for the selected evaluation focus."""
+    if focus == 'all':
+        return True
+    return classify_relation_scope(relation) == 'ancestor'
 
 
 if __name__ == '__main__':
