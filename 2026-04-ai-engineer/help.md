@@ -20,9 +20,6 @@ The example shows how to:
 # Sync dependencies
 uv sync
 
-# Generate a golden dataset for the first 100 MPs
-uv run -m main generate-cases --limit 100 --model openai:gpt-5
-
 # Evaluate ancestor-only extraction on the test split
 uv run -m main eval --split test --prompt-style initial
 
