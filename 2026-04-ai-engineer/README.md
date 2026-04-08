@@ -1,14 +1,17 @@
-# Prompt Optimization with GEPA
+# Prompt Optimization with GEPA and Cached Wikipedia Pages
 
-This example demonstrates automated prompt optimization using GEPA (Genetic-Pareto Prompt Evolution) with pydantic-ai and pydantic-evals.
+This example demonstrates automated prompt optimization using GEPA (Genetic-Pareto Prompt Evolution)
+with pydantic-ai and pydantic-evals, using cached Wikipedia pages for all 650 UK MPs.
 
 ## Overview
 
 The example shows how to:
 
-- Define an evaluation dataset with test cases and custom evaluators
+- Generate a golden evaluation dataset from cached MP pages with a strong model
+- Load evaluation cases from JSON instead of hand-authoring them in code
+- Evaluate either all political relatives or just ancestor/parent-generation relatives
 - Build a GEPA adapter that integrates pydantic-evals with GEPA
-- Use `Agent.override()` to inject candidate prompts during optimization
+- Use `Agent.override()` to inject candidate prompts and task models during optimization
 - Run automated prompt optimization that improves based on evaluation feedback
 
 ## Running the Example
@@ -17,23 +20,30 @@ The example shows how to:
 # Sync dependencies
 uv sync
 
-# Run evaluation with initial instructions
-uv run -m main eval
+# Generate a golden dataset for the first 100 MPs
+uv run -m main generate-cases --limit 100 --model openai:gpt-5
 
-# Compare initial vs expert instructions
-uv run -m main compare
+# Evaluate ancestor-only extraction on the test split
+uv run -m main eval --split test --focus ancestors --prompt-style initial
 
-# Run optimization (this will take a while and use API credits)
-uv run -m main optimize --max-calls 50
+# Compare initial vs expert prompts on the same task/model
+uv run -m main compare --split test --focus ancestors
+
+# Run optimization using train/val splits from the generated file
+uv run -m main optimize --train-split train --val-split val --focus ancestors --max-calls 50
 ```
 
 ## Files
 
-- `task.py` - The contact extraction task and agent definition
-- `evals.py` - Evaluation dataset with test cases and custom evaluators
+- `task.py` - Extraction schema, page preprocessing, relation filtering, and agent definition
+- `cases.py` - Golden dataset generation and JSON persistence
+- `evals.py` - Dataset loading and evaluation metrics
 - `adapter.py` - GEPA adapter that bridges pydantic-evals with GEPA
 - `main.py` - CLI script for running evaluation and optimization
 
-## Related Blog Post
+## Notes
 
-See the full blog post: [Automated Prompt Optimization with GEPA, Pydantic AI, and Pydantic Evals](https://pydantic.dev/articles/prompt-optimization-with-gepa)
+- The MP pages are read from the local `mps/` archive, not from live Wikipedia requests.
+- `generate-cases` is resumable. Re-run it with a higher `--limit`, `--all`, or a different `--output`.
+- The generated file stores the full set of political relatives. Evaluation can then filter to
+  `--focus ancestors` without regenerating the golden data.

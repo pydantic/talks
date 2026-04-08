@@ -1,0 +1,2 @@
+Inspect the supplied Wikipedia page text for a UK MP and extract only ancestor or parent-generation
+relatives who held political roles. Do not include spouses, siblings, or children.

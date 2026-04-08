@@ -1,10 +1,10 @@
 """Run prompt optimization for political relations extraction.
 
 Usage:
-    uv run -m main eval
-    uv run -m main eval --expert
-    uv run -m main compare
-    uv run -m main optimize --max-calls 50
+    uv run -m main generate-cases --limit 100
+    uv run -m main eval --split test --focus ancestors
+    uv run -m main compare --split test
+    uv run -m main optimize --train-split train --val-split val --max-calls 50
 """
 
 from __future__ import annotations
@@ -14,13 +14,24 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 import logfire
 from gepa.api import optimize  # pyright: ignore[reportUnknownVariableType]
 
 from adapter import create_adapter
-from evals import relations_dataset
-from task import extract_relations, relations_agent
+from cases import DEFAULT_CASES_PATH, SplitFilter, generate_golden_dataset, summarize_splits
+from evals import load_relations_dataset
+from task import (
+    DEFAULT_GENERATION_MODEL,
+    DEFAULT_PROPOSER_MODEL,
+    DEFAULT_TASK_MODEL,
+    InstructionStyle,
+    RelationFocus,
+    extract_relations,
+    get_instructions,
+    relations_agent,
+)
 
 # Configure logfire for observability
 logfire.configure(
@@ -31,43 +42,51 @@ logfire.configure(
 logfire.instrument_pydantic_ai()
 
 
-INITIAL_INSTRUCTIONS = """\
-Your role is to inspect the contents the politician's wikipedia page and extract information
-about any family members who were either a member of parliament a local councilor, or otherwise a politician.
-"""
-
-EXPERT_INSTRUCTIONS = """\
-Extract information about political family members from a UK MP's Wikipedia page.
-
-Guidelines:
-1. RELATIONS: Only include family members who held political roles (MPs, councillors, MEPs, \
-government ministers, party leaders, etc.)
-2. RELATION TYPE: Use the exact relationship to the MP (father, mother, wife, husband, brother, \
-sister, uncle, aunt, grandparent etc.)
-3. ROLE: Describe their most notable political role(s) concisely.
-4. PARTY: Include party affiliation if mentioned.
-5. If no family members with political roles are found, return an empty list.
-
-Important:
-- Do NOT include the MP themselves, only their family members.
-- Do NOT include non-political family members.
-- Focus on clearly stated relationships, not speculation.
-"""
+def load_instructions(
+    *,
+    focus: RelationFocus,
+    prompt_style: InstructionStyle,
+    instructions_file: str | None,
+) -> str:
+    """Resolve prompt text from either a preset style or a file."""
+    if instructions_file is not None:
+        return Path(instructions_file).read_text()
+    return get_instructions(style=prompt_style, focus=focus)
 
 
-def run_evaluation(instructions: str = INITIAL_INSTRUCTIONS) -> None:
+def run_evaluation(
+    *,
+    cases_file: str,
+    split: 'SplitFilter',
+    focus: RelationFocus,
+    prompt_style: InstructionStyle,
+    instructions_file: str | None,
+    model: str,
+    max_cases: int | None,
+) -> float:
     """Run evaluation with the given instructions and print results."""
+    dataset = load_relations_dataset(cases_file=cases_file, split=split, focus=focus, max_cases=max_cases)
+    instructions = load_instructions(
+        focus=focus,
+        prompt_style=prompt_style,
+        instructions_file=instructions_file,
+    )
+
+    if not dataset.cases:
+        raise ValueError('Dataset is empty after applying split/max-case filters.')
+
     print(f'\nRunning evaluation with instructions:\n{instructions[:100]}...')
+    print(f'Model: {model}')
+    print(f'Dataset: {cases_file} split={split} focus={focus} cases={len(dataset.cases)}')
     print('-' * 60)
 
-    async def evaluate():
-        with relations_agent.override(instructions=instructions):
-            report = await relations_dataset.evaluate(
+    async def evaluate() -> Any:
+        with relations_agent.override(instructions=instructions, model=model):
+            return await dataset.evaluate(
                 extract_relations,
                 max_concurrency=5,
                 progress=True,
             )
-        return report
 
     report = asyncio.run(evaluate())
 
@@ -75,42 +94,99 @@ def run_evaluation(instructions: str = INITIAL_INSTRUCTIONS) -> None:
     print('=' * 60)
 
     total_score = 0.0
+    total_cases = len(report.cases) + len(report.failures)
     for case_report in report.cases:
-        case_name = case_report.name if hasattr(case_report, 'name') else 'unknown'
-        scores = case_report.scores if hasattr(case_report, 'scores') else {}
-        accuracy_result = scores.get('accuracy')
+        case_name = cast(str, getattr(case_report, 'name', 'unknown'))
+        scores = cast(dict[str, Any], getattr(case_report, 'scores', {}))
+        accuracy_result = cast(Any, scores.get('accuracy'))
+        focus_result = cast(Any, scores.get('focus_compliance'))
+        expected_count = cast(Any, scores.get('expected_count'))
+        output_count = cast(Any, scores.get('output_count'))
         accuracy = float(accuracy_result.value) if accuracy_result else 0.0
         total_score += accuracy
-        print(f'  {case_name}: accuracy={accuracy:.2f}')
+        focus_compliance = float(focus_result.value) if focus_result else 1.0
+        expected_value = int(expected_count.value) if expected_count else 0
+        output_value = int(output_count.value) if output_count else 0
+        print(
+            f'  {case_name}: accuracy={accuracy:.2f} focus={focus_compliance:.2f} '
+            f'expected={expected_value} output={output_value}'
+        )
 
-    avg_score = total_score / len(report.cases) if report.cases else 0.0
+    for failure in report.failures:
+        failure_name = cast(str, getattr(failure, 'name', 'unknown'))
+        print(f'  {failure_name}: failed')
+
+    avg_score = total_score / total_cases if total_cases else 0.0
     print('-' * 60)
     print(f'Average accuracy: {avg_score:.2%}')
+    return avg_score
+
+
+def print_case_summary(cases_file: str) -> None:
+    """Print a quick summary of persisted golden cases."""
+    records = load_relations_dataset(cases_file=cases_file, split='all', focus='all').cases
+    print(f'Loaded {len(records)} cases from {cases_file}')
 
 
 def run_optimization(
+    *,
+    cases_file: str,
+    focus: RelationFocus,
+    train_split: 'SplitFilter',
+    val_split: 'SplitFilter',
+    task_model: str,
+    proposer_model: str,
+    prompt_style: InstructionStyle,
+    seed_instructions_file: str | None,
     max_metric_calls: int = 50,
     output_file: str | None = None,
+    max_train_cases: int | None = None,
+    max_val_cases: int | None = None,
 ) -> str:
     """Run GEPA optimization to improve instructions."""
+    train_dataset = load_relations_dataset(
+        cases_file=cases_file,
+        split=train_split,
+        focus=focus,
+        max_cases=max_train_cases,
+    )
+    val_dataset = load_relations_dataset(
+        cases_file=cases_file,
+        split=val_split,
+        focus=focus,
+        max_cases=max_val_cases,
+    )
+    if not train_dataset.cases or not val_dataset.cases:
+        raise ValueError('Training and validation datasets must both contain at least one case.')
+
     print('\nStarting prompt optimization...')
     print(f'Max metric calls: {max_metric_calls}')
+    print(
+        f'Task model: {task_model} | proposer model: {proposer_model} | '
+        f'train cases: {len(train_dataset.cases)} | val cases: {len(val_dataset.cases)}'
+    )
     print('-' * 60)
 
     adapter = create_adapter(
-        dataset=relations_dataset,
+        dataset=train_dataset,
         task=extract_relations,
         agent=relations_agent,
-        proposer_model='openai:gpt-4o',
+        task_model=task_model,
+        proposer_model=proposer_model,
         max_concurrency=5,
     )
 
-    seed_candidate = {'instructions': json.dumps(INITIAL_INSTRUCTIONS)}
+    seed_instructions = load_instructions(
+        focus=focus,
+        prompt_style=prompt_style,
+        instructions_file=seed_instructions_file,
+    )
+    seed_candidate = {'instructions': json.dumps(seed_instructions)}
 
     result = optimize(  # pyright: ignore[reportUnknownVariableType]
         seed_candidate=seed_candidate,
-        trainset=relations_dataset.cases,
-        valset=relations_dataset.cases,
+        trainset=train_dataset.cases,
+        valset=val_dataset.cases,
         adapter=adapter,
         max_metric_calls=max_metric_calls,
         display_progress_bar=True,
@@ -132,17 +208,41 @@ def run_optimization(
     return best_instructions
 
 
-def compare_instructions() -> None:
+def compare_instructions(
+    *,
+    cases_file: str,
+    split: 'SplitFilter',
+    focus: RelationFocus,
+    model: str,
+    max_cases: int | None,
+) -> None:
     """Compare initial vs expert instructions."""
     print('\n' + '=' * 60)
     print('Comparison: Initial vs Expert Instructions')
     print('=' * 60)
 
     print('\n1. Evaluating INITIAL instructions:')
-    run_evaluation(INITIAL_INSTRUCTIONS)
+    initial_score = run_evaluation(
+        cases_file=cases_file,
+        split=split,
+        focus=focus,
+        prompt_style='initial',
+        instructions_file=None,
+        model=model,
+        max_cases=max_cases,
+    )
 
     print('\n2. Evaluating EXPERT instructions:')
-    run_evaluation(EXPERT_INSTRUCTIONS)
+    expert_score = run_evaluation(
+        cases_file=cases_file,
+        split=split,
+        focus=focus,
+        prompt_style='expert',
+        instructions_file=None,
+        model=model,
+        max_cases=max_cases,
+    )
+    print(f'\nDelta: {expert_score - initial_score:+.2%}')
 
 
 def main() -> int:
@@ -150,27 +250,106 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='Prompt optimization for political relations extraction')
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
+    gen_parser = subparsers.add_parser('generate-cases', help='Generate or resume the golden dataset')
+    gen_parser.add_argument('--limit', type=int, default=100, help='Number of MPs to process from the current offset')
+    gen_parser.add_argument('--offset', type=int, default=0, help='Start position in the MP list')
+    gen_parser.add_argument('--all', action='store_true', help='Generate cases for all MPs')
+    gen_parser.add_argument('--output', type=str, default=str(DEFAULT_CASES_PATH), help='JSON output path')
+    gen_parser.add_argument('--model', type=str, default=DEFAULT_GENERATION_MODEL, help='Model for golden generation')
+    gen_parser.add_argument('--max-concurrency', type=int, default=5, help='Concurrent model calls during generation')
+    gen_parser.add_argument('--overwrite', action='store_true', help='Replace an existing output file')
+
     eval_parser = subparsers.add_parser('eval', help='Run evaluation only')
-    eval_parser.add_argument('--expert', action='store_true', help='Use expert instructions')
+    eval_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
+    eval_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='all')
+    eval_parser.add_argument('--focus', choices=['all', 'ancestors'], default='all')
+    eval_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
+    eval_parser.add_argument('--instructions-file', type=str, help='Evaluate with custom instructions from a file')
+    eval_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for evaluation')
+    eval_parser.add_argument('--max-cases', type=int, help='Limit the number of evaluation cases')
 
     opt_parser = subparsers.add_parser('optimize', help='Run optimization')
+    opt_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
+    opt_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
+    opt_parser.add_argument('--train-split', choices=['all', 'train', 'val', 'test'], default='train')
+    opt_parser.add_argument('--val-split', choices=['all', 'train', 'val', 'test'], default='val')
+    opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
+    opt_parser.add_argument(
+        '--proposer-model',
+        type=str,
+        default=DEFAULT_PROPOSER_MODEL,
+        help='Model used by GEPA to propose new instructions',
+    )
+    opt_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
+    opt_parser.add_argument('--seed-instructions-file', type=str, help='Seed prompt file for optimization')
     opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
     opt_parser.add_argument('--output', type=str, help='File to save optimized instructions')
+    opt_parser.add_argument('--max-train-cases', type=int, help='Limit training cases')
+    opt_parser.add_argument('--max-val-cases', type=int, help='Limit validation cases')
 
     subparsers.add_parser('compare', help='Compare initial vs expert instructions')
+    compare_parser = subparsers.choices['compare']
+    compare_parser.add_argument(
+        '--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path'
+    )
+    compare_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='test')
+    compare_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
+    compare_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for both runs')
+    compare_parser.add_argument('--max-cases', type=int, help='Limit the number of comparison cases')
 
     args = parser.parse_args()
 
-    if args.command == 'eval':
-        instructions = EXPERT_INSTRUCTIONS if args.expert else INITIAL_INSTRUCTIONS
-        run_evaluation(instructions)
+    if args.command == 'generate-cases':
+        output_path = Path(args.output)
+        limit = None if args.all else args.limit
+        dataset = asyncio.run(
+            generate_golden_dataset(
+                output_path=output_path,
+                limit=limit,
+                offset=args.offset,
+                model=args.model,
+                max_concurrency=args.max_concurrency,
+                overwrite=args.overwrite,
+            )
+        )
+        split_counts = summarize_splits(dataset.cases)
+        print('\nGolden dataset summary:')
+        print(f'  output={output_path}')
+        print(f'  cases={len(dataset.cases)} model={dataset.source_model}')
+        print(f'  train={split_counts["train"]} val={split_counts["val"]} test={split_counts["test"]}')
+    elif args.command == 'eval':
+        run_evaluation(
+            cases_file=args.cases_file,
+            split=cast(SplitFilter, args.split),
+            focus=cast(RelationFocus, args.focus),
+            prompt_style=cast(InstructionStyle, args.prompt_style),
+            instructions_file=args.instructions_file,
+            model=args.model,
+            max_cases=args.max_cases,
+        )
     elif args.command == 'optimize':
         run_optimization(
+            cases_file=args.cases_file,
+            focus=cast(RelationFocus, args.focus),
+            train_split=cast(SplitFilter, args.train_split),
+            val_split=cast(SplitFilter, args.val_split),
+            task_model=args.task_model,
+            proposer_model=args.proposer_model,
+            prompt_style=cast(InstructionStyle, args.prompt_style),
+            seed_instructions_file=args.seed_instructions_file,
             max_metric_calls=args.max_calls,
             output_file=args.output,
+            max_train_cases=args.max_train_cases,
+            max_val_cases=args.max_val_cases,
         )
     elif args.command == 'compare':
-        compare_instructions()
+        compare_instructions(
+            cases_file=args.cases_file,
+            split=cast(SplitFilter, args.split),
+            focus=cast(RelationFocus, args.focus),
+            model=args.model,
+            max_cases=args.max_cases,
+        )
     else:
         parser.print_help()
         return 1

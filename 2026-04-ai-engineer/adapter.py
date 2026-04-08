@@ -78,6 +78,9 @@ class EvalsGEPAAdapter(
     # Maximum concurrent evaluations
     max_concurrency: int = 5
 
+    # Model to use for the task during evaluation
+    task_model: str | None = None
+
     # Model to use for proposing new instructions
     proposer_model: str = 'openai:gpt-4o'
 
@@ -128,21 +131,38 @@ Return ONLY the improved instructions text, nothing else.""",
         # Parse the candidate instructions
         instructions = json.loads(candidate['instructions'])
 
+        temp_cases = [
+            Case(
+                name=f'{case.name or "case"}__{index}',
+                inputs=case.inputs,
+                metadata=case.metadata,
+                expected_output=case.expected_output,
+                evaluators=tuple(case.evaluators),
+            )
+            for index, case in enumerate(batch)
+        ]
+
         # Create a temporary dataset with just the batch cases
         temp_dataset: Dataset[InputsT, OutputT, MetadataT] = Dataset(
-            cases=batch,
+            name=f'{self.dataset.name or "relations"}_batch',
+            cases=temp_cases,
             evaluators=list(self.dataset.evaluators),
         )
 
-        # Run evaluation with overridden instructions
-        with self.agent.override(instructions=instructions):
-            report = asyncio.get_event_loop().run_until_complete(
-                temp_dataset.evaluate(
-                    self.task,
-                    max_concurrency=self.max_concurrency,
-                    progress=False,
-                )
+        async def evaluate_batch() -> Any:
+            return await temp_dataset.evaluate(
+                self.task,
+                max_concurrency=self.max_concurrency,
+                progress=False,
             )
+
+        # Run evaluation with overridden instructions
+        if self.task_model is not None:
+            with self.agent.override(instructions=instructions, model=self.task_model):
+                report = asyncio.run(evaluate_batch())
+        else:
+            with self.agent.override(instructions=instructions):
+                report = asyncio.run(evaluate_batch())
 
         # Extract results
         outputs: list[OutputT | None] = []
@@ -292,6 +312,7 @@ def create_adapter(
     task: Callable[[InputsT], Awaitable[OutputT]],
     agent: Agent[Any, Any],
     score_key: str = 'accuracy',
+    task_model: str | None = None,
     proposer_model: str = 'openai:gpt-4o',
     max_concurrency: int = 5,
 ) -> EvalsGEPAAdapter[InputsT, OutputT, MetadataT]:
@@ -303,6 +324,7 @@ def create_adapter(
         agent: The agent whose instructions will be optimized
         score_key: The key in the evaluator output to use as the optimization score.
             This should match the name of a score returned by your dataset's evaluators.
+        task_model: Model to use for the task during evaluation.
         proposer_model: Model for generating new instruction candidates
         max_concurrency: Maximum concurrent evaluations
 
@@ -314,6 +336,7 @@ def create_adapter(
         task=task,
         agent=agent,
         score_key=score_key,
+        task_model=task_model,
         max_concurrency=max_concurrency,
         proposer_model=proposer_model,
     )
