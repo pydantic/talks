@@ -8,7 +8,6 @@ import sys
 import tarfile
 from dataclasses import dataclass
 from pathlib import Path
-from textwrap import dedent
 from typing import Literal
 
 from bs4 import BeautifulSoup
@@ -26,35 +25,13 @@ RelationScope = Literal['ancestor', 'same_generation', 'descendant', 'spouse', '
 DEFAULT_TASK_MODEL = 'openai:gpt-4.1'
 DEFAULT_GENERATION_MODEL = 'openai:gpt-5'
 DEFAULT_PROPOSER_MODEL = 'openai:gpt-4.1'
-STOP_SECTION_TITLES = {
-    'See also',
-    'Notes',
-    'References',
-    'External links',
-    'Further reading',
-    'Sources',
-    'Bibliography',
-}
-NOISY_SELECTORS = (
-    'script',
-    'style',
-    'noscript',
-    'sup.reference',
-    '.mw-editsection',
-    '.navbox',
-    '.toc',
-    '.reflist',
-    '.metadata',
-    '.hatnote',
-    '.ambox',
-    '.sistersitebox',
-)
 
 
 def ensure_data() -> None:
     """Download and extract the MP data archive if not already present."""
     if data_dir.exists():
         return
+    print('Downloading MP data...')
     with Client() as client:
         r = client.get(DATA_URL, follow_redirects=True)
         r.raise_for_status()
@@ -63,6 +40,7 @@ def ensure_data() -> None:
     with tarfile.open(archive_path, 'r:gz') as tar:
         tar.extractall()
     archive_path.unlink()
+    print('Download complete.')
 
 
 class MP(BaseModel):
@@ -158,53 +136,53 @@ def relation_in_focus(relation: str, focus: RelationFocus) -> bool:
     return classify_relation_scope(relation) == 'ancestor'
 
 
-FULL_INITIAL_INSTRUCTIONS = dedent("""\
-    Inspect the supplied Wikipedia page text for a UK MP and extract family members who held political roles.
-    Include the relationship, the relative's political role, and party when available.
-    If there are no qualifying family members, return an empty list.
-""")
+FULL_INITIAL_INSTRUCTIONS = """
+Inspect the supplied Wikipedia page text for a UK MP and extract family members who held political roles.
+Include the relationship, the relative's political role, and party when available.
+If there are no qualifying family members, return an empty list.
+"""
 
-FULL_EXPERT_INSTRUCTIONS = dedent("""\
-    Extract political family relations from the supplied Wikipedia page text for a UK MP.
+FULL_EXPERT_INSTRUCTIONS = """
+Extract political family relations from the supplied Wikipedia page text for a UK MP.
 
-    Return every family member mentioned on the page who held an elected office, government office,
-    party leadership role, or another clearly political public role.
+Return every family member mentioned on the page who held an elected office, government office,
+party leadership role, or another clearly political public role.
 
-    Rules:
-    1. Include any generation if they are political: parents, grandparents, aunts/uncles, siblings,
-       spouses/partners, children, cousins, or other relatives.
-    2. Use the relationship stated on the page as the `relation` value. Prefer exact labels such as
-       `father`, `mother`, `wife`, `brother`, or `maternal grandfather`.
-    3. Keep `role` short and specific, focused on the relative's political role.
-    4. Include `party` only when the page states it or makes it clear.
-    5. Use only information supported by the provided text. If a relative is mentioned but their political
-       role is not supported by the text, omit them.
-    6. Never include the MP themselves.
-    7. If no qualifying relatives are found, return an empty list.
-""")
+Rules:
+1. Include any generation if they are political: parents, grandparents, aunts/uncles, siblings,
+    spouses/partners, children, cousins, or other relatives.
+2. Use the relationship stated on the page as the `relation` value. Prefer exact labels such as
+    `father`, `mother`, `wife`, `brother`, or `maternal grandfather`.
+3. Keep `role` short and specific, focused on the relative's political role.
+4. Include `party` only when the page states it or makes it clear.
+5. Use only information supported by the provided text. If a relative is mentioned but their political
+    role is not supported by the text, omit them.
+6. Never include the MP themselves.
+7. If no qualifying relatives are found, return an empty list.
+"""
 
-ANCESTORS_INITIAL_INSTRUCTIONS = dedent("""\
-    Inspect the supplied Wikipedia page text for a UK MP and extract only ancestor or parent-generation
-    relatives who held political roles. Do not include spouses, siblings, or children.
-""")
+ANCESTORS_INITIAL_INSTRUCTIONS = """
+Inspect the supplied Wikipedia page text for a UK MP and extract only ancestor or parent-generation
+relatives who held political roles. Do not include spouses, siblings, or children.
+"""
 
-ANCESTORS_EXPERT_INSTRUCTIONS = dedent("""\
-    Extract only political ancestors or parent-generation relatives from the supplied Wikipedia page text
-    for a UK MP.
+ANCESTORS_EXPERT_INSTRUCTIONS = """
+Extract only political ancestors or parent-generation relatives from the supplied Wikipedia page text
+for a UK MP.
 
-    Include parents, grandparents, great-grandparents, aunts, uncles, and similar older-generation relatives
-    when they held an elected office, government office, party leadership role, or another clearly political
-    public role.
+Include parents, grandparents, great-grandparents, aunts, uncles, and similar older-generation relatives
+when they held an elected office, government office, party leadership role, or another clearly political
+public role.
 
-    Rules:
-    1. Exclude spouses, partners, siblings, cousins, children, and grandchildren even if they are political.
-    2. Use the relationship stated on the page as the `relation` value.
-    3. Keep `role` short and specific, focused on the relative's political role.
-    4. Include `party` only when the page states it or makes it clear.
-    5. Use only information supported by the provided text. If uncertain, omit the relative.
-    6. Never include the MP themselves.
-    7. If no qualifying relatives are found, return an empty list.
-""")
+Rules:
+1. Exclude spouses, partners, siblings, cousins, children, and grandchildren even if they are political.
+2. Use the relationship stated on the page as the `relation` value.
+3. Keep `role` short and specific, focused on the relative's political role.
+4. Include `party` only when the page states it or makes it clear.
+5. Use only information supported by the provided text. If uncertain, omit the relative.
+6. Never include the MP themselves.
+7. If no qualifying relatives are found, return an empty list.
+"""
 
 
 def get_instructions(*, style: InstructionStyle, focus: RelationFocus) -> str:

@@ -42,18 +42,6 @@ logfire.configure(
 logfire.instrument_pydantic_ai()
 
 
-def load_instructions(
-    *,
-    focus: RelationFocus,
-    prompt_style: InstructionStyle,
-    instructions_file: str | None,
-) -> str:
-    """Resolve prompt text from either a preset style or a file."""
-    if instructions_file is not None:
-        return Path(instructions_file).read_text()
-    return get_instructions(style=prompt_style, focus=focus)
-
-
 def run_evaluation(
     *,
     cases_file: str,
@@ -86,6 +74,7 @@ def run_evaluation(
                 extract_relations,
                 max_concurrency=5,
                 progress=True,
+                name=f'prompt={prompt_style}',
             )
 
     report = asyncio.run(evaluate())
@@ -217,11 +206,6 @@ def compare_instructions(
     max_cases: int | None,
 ) -> None:
     """Compare initial vs expert instructions."""
-    print('\n' + '=' * 60)
-    print('Comparison: Initial vs Expert Instructions')
-    print('=' * 60)
-
-    print('\n1. Evaluating INITIAL instructions:')
     initial_score = run_evaluation(
         cases_file=cases_file,
         split=split,
@@ -232,7 +216,6 @@ def compare_instructions(
         max_cases=max_cases,
     )
 
-    print('\n2. Evaluating EXPERT instructions:')
     expert_score = run_evaluation(
         cases_file=cases_file,
         split=split,
@@ -243,6 +226,18 @@ def compare_instructions(
         max_cases=max_cases,
     )
     print(f'\nDelta: {expert_score - initial_score:+.2%}')
+
+
+def load_instructions(
+    *,
+    focus: RelationFocus,
+    prompt_style: InstructionStyle,
+    instructions_file: str | None,
+) -> str:
+    """Resolve prompt text from either a preset style or a file."""
+    if instructions_file is not None:
+        return Path(instructions_file).read_text()
+    return get_instructions(style=prompt_style, focus=focus)
 
 
 def main() -> int:
