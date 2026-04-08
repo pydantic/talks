@@ -31,10 +31,6 @@ class AgentConfig(BaseModel):
     max_tokens: int
 
 
-class FormInput(BaseModel):
-    query: str
-
-
 agent_config = logfire.var(
     name='mp_search_agent_config',
     type=AgentConfig,
@@ -111,6 +107,10 @@ async def extract_political_relations(mp_name: str) -> str:
 async def index() -> HTMLResponse:
     html = (Path(__file__).parent / 'index.html').read_text()
     return HTMLResponse(html)
+
+
+class FormInput(BaseModel):
+    query: str
 
 
 @app.post('/form')
