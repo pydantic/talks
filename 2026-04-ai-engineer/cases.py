@@ -2,23 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
-import re
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
-from task import (
-    MP,
-    PoliticalRelation,
-    TaskInput,
-    extract_relations,
-    get_instructions,
-    get_mps,
-    relations_agent,
-)
+from task import MP, PoliticalRelation
 
 SplitName = Literal['train', 'val', 'test']
 SplitFilter = Literal['all', 'train', 'val', 'test']
@@ -36,6 +26,11 @@ class GoldenCaseRecord(BaseModel):
     expected_output: list[PoliticalRelation]
     generated_at: datetime
 
+    @field_validator('expected_output')
+    @classmethod
+    def only_ancestors(cls, v: list[PoliticalRelation]) -> list[PoliticalRelation]:
+        return [rel for rel in v if is_ancestor(rel.relation)]
+
 
 class GoldenDatasetFile(BaseModel):
     """Persisted golden dataset metadata and cases."""
@@ -49,88 +44,6 @@ class GoldenDatasetFile(BaseModel):
     cases: list[GoldenCaseRecord]
 
 
-async def generate_golden_dataset(
-    *,
-    output_path: Path = DEFAULT_CASES_PATH,
-    limit: int | None = 100,
-    offset: int = 0,
-    model: str,
-    max_concurrency: int = 5,
-    overwrite: bool = False,
-) -> GoldenDatasetFile:
-    """Generate or resume a persisted golden dataset from cached MP pages."""
-    all_mps = get_mps()
-    instructions = get_instructions(style='expert', focus='all')
-    selected_mps = all_mps[offset : None if limit is None else offset + limit]
-    ordinal_by_id = {mp.id: ordinal for ordinal, mp in enumerate(all_mps, start=1)}
-
-    existing = None if overwrite else load_golden_dataset(output_path)
-    if existing is not None:
-        if existing.focus != 'all' or existing.prompt_style != 'expert':
-            raise ValueError(f'Existing dataset at {output_path} has incompatible metadata. Use --overwrite.')
-        if existing.source_model != model or existing.source_instructions != instructions:
-            raise ValueError(
-                f'Existing dataset at {output_path} was generated with a different model or instructions. '
-                'Use --overwrite or a different --output path.'
-            )
-
-    existing_records = [] if existing is None else list(existing.cases)
-    existing_ids = {record.mp.id for record in existing_records}
-    pending = [mp for mp in selected_mps if mp.id not in existing_ids]
-
-    if not selected_mps:
-        raise ValueError('No MPs selected. Check --offset and --limit.')
-
-    print(
-        f'Preparing golden dataset from cached MP pages: '
-        f'{len(selected_mps)} selected, {len(existing_records)} already present, {len(pending)} pending.'
-    )
-
-    current_records = list(existing_records)
-    if pending:
-        semaphore = asyncio.Semaphore(max_concurrency)
-        started_at = datetime.now(timezone.utc)
-
-        async def run_one(mp: MP) -> GoldenCaseRecord:
-            async with semaphore:
-                relations = await extract_relations(TaskInput(mp=mp))
-                return GoldenCaseRecord(
-                    name=slugify_name(mp.name),
-                    mp=mp,
-                    split=split_for_mp_id(mp.id),
-                    ordinal=ordinal_by_id[mp.id],
-                    expected_output=relations,
-                    generated_at=datetime.now(timezone.utc),
-                )
-
-        with relations_agent.override(model=model, instructions=instructions):
-            tasks = [asyncio.create_task(run_one(mp)) for mp in pending]
-            for completed_count, task in enumerate(asyncio.as_completed(tasks), start=1):
-                record = await task
-                current_records.append(record)
-                current_records.sort(key=lambda item: item.ordinal)
-                dataset = GoldenDatasetFile(
-                    source_model=model,
-                    source_instructions=instructions,
-                    updated_at=datetime.now(timezone.utc),
-                    cases=current_records,
-                )
-                save_golden_dataset(dataset, output_path)
-                print(f'  [{completed_count}/{len(tasks)}] {record.mp.name}: {len(record.expected_output)} relations')
-
-        finished_at = datetime.now(timezone.utc)
-        print(f'Generation window: {started_at.isoformat()} to {finished_at.isoformat()}')
-
-    dataset = GoldenDatasetFile(
-        source_model=model,
-        source_instructions=instructions,
-        updated_at=datetime.now(timezone.utc),
-        cases=sorted(current_records, key=lambda item: item.ordinal),
-    )
-    save_golden_dataset(dataset, output_path)
-    return dataset
-
-
 def load_case_records(
     path: Path = DEFAULT_CASES_PATH,
     *,
@@ -138,9 +51,9 @@ def load_case_records(
     max_cases: int | None = None,
 ) -> list[GoldenCaseRecord]:
     """Load persisted case records with optional split and size filters."""
-    dataset = load_golden_dataset(path)
-    if dataset is None:
-        raise FileNotFoundError(f'Golden cases file not found at {path}. Run `uv run -m main generate-cases` first.')
+    if not path.exists():
+        raise FileNotFoundError(f'Golden cases file not found at {path}.')
+    dataset = GoldenDatasetFile.model_validate_json(path.read_bytes())
 
     records = sorted(dataset.cases, key=lambda case: case.ordinal)
     if split != 'all':
@@ -150,40 +63,57 @@ def load_case_records(
     return records
 
 
-def load_golden_dataset(path: Path = DEFAULT_CASES_PATH) -> GoldenDatasetFile | None:
-    """Load the persisted golden dataset if it exists."""
-    if not path.exists():
-        return None
-    return GoldenDatasetFile.model_validate_json(path.read_text())
+RELATION_IS_ANCESTOR: dict[str, bool] = {
+    'ancestor': True,
+    'aunt': True,
+    'brother': False,
+    'brother-in-law': False,
+    'brother-in-law (brother of current wife Amy Richards)': False,
+    'cousin': False,
+    'daughter': False,
+    'distant cousin': False,
+    'distant relative': False,
+    'domestic partner': False,
+    'father': True,
+    'father-in-law': True,
+    'first cousin once removed': True,
+    'first wife': False,
+    'former employer (parliamentary assistant role)': False,
+    'former wife': False,
+    'grandfather': True,
+    'great uncle': True,
+    'great-aunt': True,
+    'great-grandfather': True,
+    "great-grandfather (wife's paternal great-grandfather)": True,
+    'great-great-grandfather': True,
+    'great-great-great-grandfather': True,
+    'great-great-great-uncle': True,
+    "great-great-uncle (maternal grandfather's uncle)": True,
+    'great-uncle': True,
+    "great-uncle's son-in-law": True,
+    'half-brother': False,
+    'husband': False,
+    'husband/spouse': False,
+    'maternal aunt': True,
+    'maternal grandfather': True,
+    'maternal grandmother': True,
+    'mother': True,
+    'niece': False,
+    'partner': False,
+    'paternal grandfather': True,
+    "paternal grandmother's family member": True,
+    'paternal great-grandfather': True,
+    'self': False,
+    'sister': False,
+    'son': False,
+    'spouse': False,
+    'stepfather': True,
+    'twin sister': False,
+    'uncle': True,
+    'wife': False,
+}
 
 
-def save_golden_dataset(dataset: GoldenDatasetFile, path: Path = DEFAULT_CASES_PATH) -> None:
-    """Persist the golden dataset as formatted JSON."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(dataset.model_dump_json(indent=2) + '\n')
-
-
-# --- Utilities ---
-
-
-def slugify_name(name: str) -> str:
-    """Convert a display name to a stable case name."""
-    return re.sub(r'[^a-z0-9]+', '_', name.casefold()).strip('_')
-
-
-def split_for_mp_id(mp_id: int) -> SplitName:
-    """Assign a deterministic split so datasets can be extended incrementally."""
-    remainder = mp_id % 10
-    if remainder == 0:
-        return 'test'
-    if remainder == 1:
-        return 'val'
-    return 'train'
-
-
-def summarize_splits(records: list[GoldenCaseRecord]) -> dict[SplitName, int]:
-    """Count cases per split."""
-    counts: dict[SplitName, int] = {'train': 0, 'val': 0, 'test': 0}
-    for record in records:
-        counts[record.split] += 1
-    return counts
+def is_ancestor(relation: str) -> bool:
+    """Return whether a relation should count as an ancestor (parent generation or older)."""
+    return RELATION_IS_ANCESTOR[relation]

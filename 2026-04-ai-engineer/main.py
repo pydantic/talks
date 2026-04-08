@@ -2,7 +2,7 @@
 
 Usage:
     uv run -m main generate-cases --limit 100
-    uv run -m main eval --split test --focus ancestors
+    uv run -m main eval --split test
     uv run -m main compare --split test
     uv run -m main optimize --train-split train --val-split val --max-calls 50
 """
@@ -20,14 +20,12 @@ import logfire
 from gepa.api import optimize  # pyright: ignore[reportUnknownVariableType]
 
 from adapter import create_adapter
-from cases import DEFAULT_CASES_PATH, SplitFilter, generate_golden_dataset, summarize_splits
+from cases import DEFAULT_CASES_PATH, SplitFilter
 from evals import load_relations_dataset
 from task import (
-    DEFAULT_GENERATION_MODEL,
     DEFAULT_PROPOSER_MODEL,
     DEFAULT_TASK_MODEL,
     InstructionStyle,
-    RelationFocus,
     extract_relations,
     get_instructions,
     relations_agent,
@@ -47,19 +45,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='Prompt optimization for political relations extraction')
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
-    gen_parser = subparsers.add_parser('generate-cases', help='Generate or resume the golden dataset')
-    gen_parser.add_argument('--limit', type=int, default=100, help='Number of MPs to process from the current offset')
-    gen_parser.add_argument('--offset', type=int, default=0, help='Start position in the MP list')
-    gen_parser.add_argument('--all', action='store_true', help='Generate cases for all MPs')
-    gen_parser.add_argument('--output', type=str, default=str(DEFAULT_CASES_PATH), help='JSON output path')
-    gen_parser.add_argument('--model', type=str, default=DEFAULT_GENERATION_MODEL, help='Model for golden generation')
-    gen_parser.add_argument('--max-concurrency', type=int, default=5, help='Concurrent model calls during generation')
-    gen_parser.add_argument('--overwrite', action='store_true', help='Replace an existing output file')
-
     eval_parser = subparsers.add_parser('eval', help='Run evaluation only')
     eval_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
     eval_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='all')
-    eval_parser.add_argument('--focus', choices=['all', 'ancestors'], default='all')
     eval_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
     eval_parser.add_argument('--instructions-file', type=str, help='Evaluate with custom instructions from a file')
     eval_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for evaluation')
@@ -67,7 +55,6 @@ def main() -> int:
 
     opt_parser = subparsers.add_parser('optimize', help='Run optimization')
     opt_parser.add_argument('--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path')
-    opt_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
     opt_parser.add_argument('--train-split', choices=['all', 'train', 'val', 'test'], default='train')
     opt_parser.add_argument('--val-split', choices=['all', 'train', 'val', 'test'], default='val')
     opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
@@ -90,35 +77,15 @@ def main() -> int:
         '--cases-file', type=str, default=str(DEFAULT_CASES_PATH), help='Golden cases JSON path'
     )
     compare_parser.add_argument('--split', choices=['all', 'train', 'val', 'test'], default='test')
-    compare_parser.add_argument('--focus', choices=['all', 'ancestors'], default='ancestors')
     compare_parser.add_argument('--model', type=str, default=DEFAULT_TASK_MODEL, help='Model used for both runs')
     compare_parser.add_argument('--max-cases', type=int, help='Limit the number of comparison cases')
 
     args = parser.parse_args()
 
-    if args.command == 'generate-cases':
-        output_path = Path(args.output)
-        limit = None if args.all else args.limit
-        dataset = asyncio.run(
-            generate_golden_dataset(
-                output_path=output_path,
-                limit=limit,
-                offset=args.offset,
-                model=args.model,
-                max_concurrency=args.max_concurrency,
-                overwrite=args.overwrite,
-            )
-        )
-        split_counts = summarize_splits(dataset.cases)
-        print('\nGolden dataset summary:')
-        print(f'  output={output_path}')
-        print(f'  cases={len(dataset.cases)} model={dataset.source_model}')
-        print(f'  train={split_counts["train"]} val={split_counts["val"]} test={split_counts["test"]}')
-    elif args.command == 'eval':
+    if args.command == 'eval':
         run_evaluation(
             cases_file=args.cases_file,
             split=cast(SplitFilter, args.split),
-            focus=cast(RelationFocus, args.focus),
             prompt_style=cast(InstructionStyle, args.prompt_style),
             instructions_file=args.instructions_file,
             model=args.model,
@@ -127,7 +94,6 @@ def main() -> int:
     elif args.command == 'optimize':
         run_optimization(
             cases_file=args.cases_file,
-            focus=cast(RelationFocus, args.focus),
             train_split=cast(SplitFilter, args.train_split),
             val_split=cast(SplitFilter, args.val_split),
             task_model=args.task_model,
@@ -143,7 +109,6 @@ def main() -> int:
         compare_instructions(
             cases_file=args.cases_file,
             split=cast(SplitFilter, args.split),
-            focus=cast(RelationFocus, args.focus),
             model=args.model,
             max_cases=args.max_cases,
         )
@@ -158,26 +123,21 @@ def run_evaluation(
     *,
     cases_file: str,
     split: 'SplitFilter',
-    focus: RelationFocus,
     prompt_style: InstructionStyle,
     instructions_file: str | None,
     model: str,
     max_cases: int | None,
 ) -> float:
     """Run evaluation with the given instructions and print results."""
-    dataset = load_relations_dataset(cases_file=cases_file, split=split, focus=focus, max_cases=max_cases)
-    instructions = load_instructions(
-        focus=focus,
-        prompt_style=prompt_style,
-        instructions_file=instructions_file,
-    )
+    dataset = load_relations_dataset(cases_file=cases_file, split=split, max_cases=max_cases)
+    instructions = load_instructions(prompt_style=prompt_style, instructions_file=instructions_file)
 
     if not dataset.cases:
         raise ValueError('Dataset is empty after applying split/max-case filters.')
 
     print(f'\nRunning evaluation with instructions:\n{instructions[:100]}...')
     print(f'Model: {model}')
-    print(f'Dataset: {cases_file} split={split} focus={focus} cases={len(dataset.cases)}')
+    print(f'Dataset: {cases_file} split={split} cases={len(dataset.cases)}')
     print('-' * 60)
 
     async def evaluate() -> Any:
@@ -200,18 +160,13 @@ def run_evaluation(
         case_name = cast(str, getattr(case_report, 'name', 'unknown'))
         scores = cast(dict[str, Any], getattr(case_report, 'scores', {}))
         accuracy_result = cast(Any, scores.get('accuracy'))
-        focus_result = cast(Any, scores.get('focus_compliance'))
         expected_count = cast(Any, scores.get('expected_count'))
         output_count = cast(Any, scores.get('output_count'))
         accuracy = float(accuracy_result.value) if accuracy_result else 0.0
         total_score += accuracy
-        focus_compliance = float(focus_result.value) if focus_result else 1.0
         expected_value = int(expected_count.value) if expected_count else 0
         output_value = int(output_count.value) if output_count else 0
-        print(
-            f'  {case_name}: accuracy={accuracy:.2f} focus={focus_compliance:.2f} '
-            f'expected={expected_value} output={output_value}'
-        )
+        print(f'  {case_name}: accuracy={accuracy:.2f} expected={expected_value} output={output_value}')
 
     for failure in report.failures:
         failure_name = cast(str, getattr(failure, 'name', 'unknown'))
@@ -226,7 +181,6 @@ def run_evaluation(
 def run_optimization(
     *,
     cases_file: str,
-    focus: RelationFocus,
     train_split: 'SplitFilter',
     val_split: 'SplitFilter',
     task_model: str,
@@ -239,18 +193,8 @@ def run_optimization(
     max_val_cases: int | None = None,
 ) -> str:
     """Run GEPA optimization to improve instructions."""
-    train_dataset = load_relations_dataset(
-        cases_file=cases_file,
-        split=train_split,
-        focus=focus,
-        max_cases=max_train_cases,
-    )
-    val_dataset = load_relations_dataset(
-        cases_file=cases_file,
-        split=val_split,
-        focus=focus,
-        max_cases=max_val_cases,
-    )
+    train_dataset = load_relations_dataset(cases_file=cases_file, split=train_split, max_cases=max_train_cases)
+    val_dataset = load_relations_dataset(cases_file=cases_file, split=val_split, max_cases=max_val_cases)
     if not train_dataset.cases or not val_dataset.cases:
         raise ValueError('Training and validation datasets must both contain at least one case.')
 
@@ -271,11 +215,7 @@ def run_optimization(
         max_concurrency=5,
     )
 
-    seed_instructions = load_instructions(
-        focus=focus,
-        prompt_style=prompt_style,
-        instructions_file=seed_instructions_file,
-    )
+    seed_instructions = load_instructions(prompt_style=prompt_style, instructions_file=seed_instructions_file)
     seed_candidate = {'instructions': json.dumps(seed_instructions)}
 
     result = optimize(  # pyright: ignore[reportUnknownVariableType]
@@ -307,7 +247,6 @@ def compare_instructions(
     *,
     cases_file: str,
     split: 'SplitFilter',
-    focus: RelationFocus,
     model: str,
     max_cases: int | None,
 ) -> None:
@@ -315,7 +254,6 @@ def compare_instructions(
     initial_score = run_evaluation(
         cases_file=cases_file,
         split=split,
-        focus=focus,
         prompt_style='initial',
         instructions_file=None,
         model=model,
@@ -325,7 +263,6 @@ def compare_instructions(
     expert_score = run_evaluation(
         cases_file=cases_file,
         split=split,
-        focus=focus,
         prompt_style='expert',
         instructions_file=None,
         model=model,
@@ -336,7 +273,7 @@ def compare_instructions(
 
 def print_case_summary(cases_file: str) -> None:
     """Print a quick summary of persisted golden cases."""
-    records = load_relations_dataset(cases_file=cases_file, split='all', focus='all').cases
+    records = load_relations_dataset(cases_file=cases_file, split='all').cases
     print(f'Loaded {len(records)} cases from {cases_file}')
 
 
@@ -345,14 +282,13 @@ def print_case_summary(cases_file: str) -> None:
 
 def load_instructions(
     *,
-    focus: RelationFocus,
     prompt_style: InstructionStyle,
     instructions_file: str | None,
 ) -> str:
     """Resolve prompt text from either a preset style or a file."""
     if instructions_file is not None:
         return Path(instructions_file).read_text()
-    return get_instructions(style=prompt_style, focus=focus)
+    return get_instructions(style=prompt_style)
 
 
 if __name__ == '__main__':

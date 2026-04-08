@@ -24,13 +24,13 @@ uv sync
 uv run -m main generate-cases --limit 100 --model openai:gpt-5
 
 # Evaluate ancestor-only extraction on the test split
-uv run -m main eval --split test --focus ancestors --prompt-style initial
+uv run -m main eval --split test --prompt-style initial
 
 # Compare initial vs expert prompts on the same task/model
-uv run -m main compare --split test --focus ancestors
+uv run -m main compare --split test
 
 # Run optimization using train/val splits from the generated file
-uv run -m main optimize --train-split train --val-split val --focus ancestors --max-calls 50
+uv run -m main optimize --max-calls 50
 ```
 
 ## Files

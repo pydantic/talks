@@ -11,7 +11,7 @@ from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import Evaluator, EvaluatorContext
 
 from cases import DEFAULT_CASES_PATH, SplitFilter, load_case_records
-from task import PoliticalRelation, RelationFocus, TaskInput, classify_relation_scope, relation_in_focus
+from task import PoliticalRelation, TaskInput
 
 
 @dataclass
@@ -19,7 +19,6 @@ class RelationsCaseMetadata:
     """Metadata for political relations extraction test cases."""
 
     split: Literal['train', 'val', 'test']
-    focus: RelationFocus
     description: str
     expected_count: int
     raw_expected_count: int
@@ -29,7 +28,6 @@ def load_relations_dataset(
     *,
     cases_file: str | None = None,
     split: SplitFilter = 'all',
-    focus: RelationFocus = 'all',
     max_cases: int | None = None,
 ) -> Dataset[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]:
     """Load a dataset from the persisted golden cases file."""
@@ -41,11 +39,7 @@ def load_relations_dataset(
 
     cases: list[Case[TaskInput, list[PoliticalRelation], RelationsCaseMetadata]] = []
     for record in records:
-        expected_output = [
-            relation.model_copy(deep=True)
-            for relation in record.expected_output
-            if relation_in_focus(relation.relation, focus)
-        ]
+        expected_output = [relation.model_copy(deep=True) for relation in record.expected_output]
         cases.append(
             Case(
                 name=record.name,
@@ -53,7 +47,6 @@ def load_relations_dataset(
                 expected_output=expected_output,
                 metadata=RelationsCaseMetadata(
                     split=record.split,
-                    focus=focus,
                     description=f'{record.mp.name} ({record.mp.party})',
                     expected_count=len(expected_output),
                     raw_expected_count=len(record.expected_output),
@@ -62,7 +55,7 @@ def load_relations_dataset(
         )
 
     return Dataset(
-        name=f'political_relations_extraction_{focus}_{split}',
+        name=f'political_relations_extraction_{split}',
         cases=cases,
         evaluators=[RelationsAccuracyEvaluator()],
     )
@@ -123,13 +116,6 @@ class RelationsAccuracyEvaluator(Evaluator[TaskInput, list[PoliticalRelation], R
         else:
             accuracy = 2 * precision * recall / (precision + recall)
 
-        off_focus_output_count = 0
-        if ctx.metadata is not None and ctx.metadata.focus == 'ancestors':
-            off_focus_output_count = sum(
-                1 for relation in output if not relation_in_focus(relation.relation, ctx.metadata.focus)
-            )
-        focus_compliance = 1.0 if not output else (len(output) - off_focus_output_count) / len(output)
-
         return {
             'accuracy': accuracy,
             'precision': precision,
@@ -141,8 +127,6 @@ class RelationsAccuracyEvaluator(Evaluator[TaskInput, list[PoliticalRelation], R
             'relation_matches': relation_matches,
             'role_matches': role_matches,
             'party_matches': party_matches,
-            'focus_compliance': focus_compliance,
-            'off_focus_output_count': off_focus_output_count,
         }
 
 
@@ -237,8 +221,6 @@ def relation_match_score(expected: str, actual: str) -> float:
         return 1.0
     if expected_relation in actual_relation or actual_relation in expected_relation:
         return 0.85
-    if classify_relation_scope(expected) == classify_relation_scope(actual):
-        return 0.45
     return 0.0
 
 
