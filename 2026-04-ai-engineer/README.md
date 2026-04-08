@@ -11,7 +11,8 @@ The example shows how to:
 - Load evaluation cases from JSON instead of hand-authoring them in code
 - Evaluate either all political relatives or just ancestor/parent-generation relatives
 - Build a GEPA adapter that integrates pydantic-evals with GEPA
-- Use `Agent.override()` to inject candidate prompts and task models during optimization
+- Resolve agent instructions from a Logfire managed variable
+- Use a local Logfire variable provider so GEPA can optimize the same runtime-configurable value
 - Run automated prompt optimization that improves based on evaluation feedback
 
 ## Running the Example
@@ -47,3 +48,6 @@ uv run -m main optimize --train-split train --val-split val --focus ancestors --
 - `generate-cases` is resumable. Re-run it with a higher `--limit`, `--all`, or a different `--output`.
 - The generated file stores the full set of political relatives. Evaluation can then filter to
   `--focus ancestors` without regenerating the golden data.
+- The CLI configures Logfire with a local managed-variable provider. The agent reads its
+  instructions from `relations_instructions`, so the same code path can use a remote managed
+  variable in a deployed server and a local provider during GEPA optimization.

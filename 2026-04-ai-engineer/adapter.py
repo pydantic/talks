@@ -2,11 +2,7 @@
 
 This module provides:
 - EvalsGEPAAdapter: Bridges GEPA optimization with pydantic-evals evaluation
-- Uses pydantic_ai.Agent.override() to inject candidate instructions
-
-This approach demonstrates prompt optimization WITHOUT using Logfire managed
-variables (which are not yet released). Instead, we use the Agent.override()
-context manager to inject instructions during evaluation.
+- Uses a local Logfire managed variable to inject candidate instructions
 """
 
 from __future__ import annotations
@@ -22,6 +18,8 @@ from pydantic_ai import Agent
 from pydantic_core import to_jsonable_python
 from pydantic_evals import Case, Dataset
 from pydantic_evals.reporting import ReportCase, ReportCaseFailure
+
+from task import use_managed_instructions
 
 InputsT = TypeVar('InputsT')
 OutputT = TypeVar('OutputT')
@@ -50,7 +48,7 @@ class EvalsGEPAAdapter(
     """GEPA adapter that uses pydantic-evals for evaluation.
 
     This adapter:
-    - Uses Agent.override(instructions=...) to inject candidate prompts
+    - Updates a local Logfire managed variable with candidate prompts
     - Runs evaluation via pydantic-evals Dataset.evaluate()
     - Extracts scores and trajectories for GEPA optimization
 
@@ -69,7 +67,7 @@ class EvalsGEPAAdapter(
     # The task function to evaluate
     task: Callable[[InputsT], Awaitable[OutputT]]
 
-    # The agent whose instructions will be overridden
+    # The agent whose model may be overridden during evaluation
     agent: Agent[Any, Any]
 
     # The score key to use from evaluator results (e.g., 'accuracy')
@@ -158,12 +156,12 @@ Return ONLY the improved instructions text, nothing else.""",
                 progress=False,
             )
 
-        # Run evaluation with overridden instructions
-        if self.task_model is not None:
-            with self.agent.override(instructions=instructions, model=self.task_model):
-                report = asyncio.run(evaluate_batch())
-        else:
-            with self.agent.override(instructions=instructions):
+        # Run evaluation with the candidate stored in the local managed variable.
+        with use_managed_instructions(instructions):
+            if self.task_model is not None:
+                with self.agent.override(model=self.task_model):
+                    report = asyncio.run(evaluate_batch())
+            else:
                 report = asyncio.run(evaluate_batch())
 
         # Extract results
