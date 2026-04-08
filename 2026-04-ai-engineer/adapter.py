@@ -17,8 +17,11 @@ from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
+import httpx
 from gepa.core.adapter import EvaluationBatch, GEPAAdapter
 from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_core import to_jsonable_python
 from pydantic_evals import Case, Dataset
 from pydantic_evals.reporting import ReportCase, ReportCaseFailure
@@ -81,9 +84,6 @@ class EvalsGEPAAdapter(
     # Model to use for the task during evaluation
     task_model: str | None = None
 
-    # Model to use for proposing new instructions
-    proposer_model: str = 'openai:gpt-4o'
-
     def __post_init__(self) -> None:
         """Initialize GEPA protocol hooks."""
         # Required by GEPA protocol
@@ -92,13 +92,16 @@ class EvalsGEPAAdapter(
     def _build_proposer_agent(self) -> Agent[Any, str]:
         """Create a fresh proposer agent.
 
-        A new agent instance avoids reusing HTTP clients across event loops during
-        repeated asyncio.run() calls inside GEPA optimization.
+        A new agent instance with a fresh httpx client avoids reusing HTTP
+        connections across event loops during repeated asyncio.run() calls
+        inside GEPA optimization.
         """
+        model = OpenAIChatModel('gpt-4.1', provider=OpenAIProvider(http_client=httpx.AsyncClient()))
         return Agent(
-            self.proposer_model,
+            model,
             output_type=str,
             defer_model_check=True,
+            name='proposer-agent',
             instructions="""You are an expert prompt engineer. Your task is to improve system prompts
 for AI agents based on evaluation feedback.
 
@@ -317,7 +320,6 @@ def create_adapter(
     agent: Agent[Any, Any],
     score_key: str = 'accuracy',
     task_model: str | None = None,
-    proposer_model: str = 'openai:gpt-4o',
     max_concurrency: int = 5,
 ) -> EvalsGEPAAdapter[InputsT, OutputT, MetadataT]:
     """Create an EvalsGEPAAdapter for prompt optimization.
@@ -329,7 +331,6 @@ def create_adapter(
         score_key: The key in the evaluator output to use as the optimization score.
             This should match the name of a score returned by your dataset's evaluators.
         task_model: Model to use for the task during evaluation.
-        proposer_model: Model for generating new instruction candidates
         max_concurrency: Maximum concurrent evaluations
 
     Returns:
@@ -342,5 +343,4 @@ def create_adapter(
         score_key=score_key,
         task_model=task_model,
         max_concurrency=max_concurrency,
-        proposer_model=proposer_model,
     )

@@ -20,9 +20,7 @@ pages_dir = data_dir / 'pages'
 DATA_URL = 'https://files.scolvin.com/mps.tar.gz'
 InstructionStyle = Literal['initial', 'expert']
 RelationScope = Literal['ancestor', 'same_generation', 'descendant', 'spouse', 'other']
-DEFAULT_TASK_MODEL = 'openai:gpt-4.1'
-DEFAULT_GENERATION_MODEL = 'openai:gpt-5'
-DEFAULT_PROPOSER_MODEL = 'openai:gpt-4.1'
+DEFAULT_TASK_MODEL = 'gateway/anthropic:claude-haiku-4-5'
 
 
 class MP(BaseModel):

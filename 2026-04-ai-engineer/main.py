@@ -23,7 +23,6 @@ from adapter import create_adapter
 from cases import DEFAULT_CASES_PATH, SplitFilter
 from evals import load_relations_dataset
 from task import (
-    DEFAULT_PROPOSER_MODEL,
     DEFAULT_TASK_MODEL,
     InstructionStyle,
     extract_relations,
@@ -36,8 +35,10 @@ logfire.configure(
     send_to_logfire='if-token-present',
     environment='development',
     service_name='prompt-optimization-example',
+    console=False,
 )
 logfire.instrument_pydantic_ai()
+logfire.instrument_print()
 
 
 def main() -> int:
@@ -58,12 +59,6 @@ def main() -> int:
     opt_parser.add_argument('--train-split', choices=['all', 'train', 'val', 'test'], default='train')
     opt_parser.add_argument('--val-split', choices=['all', 'train', 'val', 'test'], default='val')
     opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
-    opt_parser.add_argument(
-        '--proposer-model',
-        type=str,
-        default=DEFAULT_PROPOSER_MODEL,
-        help='Model used by GEPA to propose new instructions',
-    )
     opt_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
     opt_parser.add_argument('--seed-instructions-file', type=str, help='Seed prompt file for optimization')
     opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
@@ -97,7 +92,6 @@ def main() -> int:
             train_split=cast(SplitFilter, args.train_split),
             val_split=cast(SplitFilter, args.val_split),
             task_model=args.task_model,
-            proposer_model=args.proposer_model,
             prompt_style=cast(InstructionStyle, args.prompt_style),
             seed_instructions_file=args.seed_instructions_file,
             max_metric_calls=args.max_calls,
@@ -184,7 +178,6 @@ def run_optimization(
     train_split: 'SplitFilter',
     val_split: 'SplitFilter',
     task_model: str,
-    proposer_model: str,
     prompt_style: InstructionStyle,
     seed_instructions_file: str | None,
     max_metric_calls: int = 50,
@@ -198,43 +191,44 @@ def run_optimization(
     if not train_dataset.cases or not val_dataset.cases:
         raise ValueError('Training and validation datasets must both contain at least one case.')
 
-    print('\nStarting prompt optimization...')
-    print(f'Max metric calls: {max_metric_calls}')
-    print(
-        f'Task model: {task_model} | proposer model: {proposer_model} | '
-        f'train cases: {len(train_dataset.cases)} | val cases: {len(val_dataset.cases)}'
-    )
-    print('-' * 60)
-
-    adapter = create_adapter(
-        dataset=train_dataset,
-        task=extract_relations,
-        agent=relations_agent,
-        task_model=task_model,
-        proposer_model=proposer_model,
-        max_concurrency=5,
-    )
-
-    seed_instructions = load_instructions(prompt_style=prompt_style, instructions_file=seed_instructions_file)
-    seed_candidate = {'instructions': json.dumps(seed_instructions)}
-
-    result = optimize(  # pyright: ignore[reportUnknownVariableType]
-        seed_candidate=seed_candidate,
-        trainset=train_dataset.cases,
-        valset=val_dataset.cases,
-        adapter=adapter,
+    with logfire.span(
+        'optimization {max_metric_calls=}',
         max_metric_calls=max_metric_calls,
-        display_progress_bar=True,
+        task_model=task_model,
+        training_cases=len(train_dataset.cases),
+        val_cases=len(val_dataset.cases),
+    ):
+        adapter = create_adapter(
+            dataset=train_dataset,
+            task=extract_relations,
+            agent=relations_agent,
+            task_model=task_model,
+            max_concurrency=5,
+        )
+
+        seed_instructions = load_instructions(prompt_style=prompt_style, instructions_file=seed_instructions_file)
+        seed_candidate = {'instructions': json.dumps(seed_instructions)}
+
+        result = optimize(  # pyright: ignore[reportUnknownVariableType]
+            seed_candidate=seed_candidate,
+            trainset=train_dataset.cases,
+            valset=val_dataset.cases,
+            adapter=adapter,
+            max_metric_calls=max_metric_calls,
+            display_progress_bar=True,
+        )
+
+        assert isinstance(result.best_candidate, dict)
+        best_instructions = json.loads(result.best_candidate['instructions'])
+
+    print(f'Optimization Complete! Best validation score: {result.val_aggregate_scores[result.best_idx]:.2%}')
+    print(f'Optimized Instructions:\n{best_instructions}')
+
+    logfire.info(
+        'optimization_complete best score {score:.2%}',
+        score=result.val_aggregate_scores[result.best_idx],
+        best_instructions=best_instructions,
     )
-
-    assert isinstance(result.best_candidate, dict)
-    best_instructions = json.loads(result.best_candidate['instructions'])
-
-    print('\n' + '=' * 60)
-    print('Optimization Complete!')
-    print('=' * 60)
-    print(f'\nBest validation score: {result.val_aggregate_scores[result.best_idx]:.2%}')
-    print(f'\nOptimized Instructions:\n{best_instructions}')
 
     if output_file:
         Path(output_file).write_text(best_instructions)
