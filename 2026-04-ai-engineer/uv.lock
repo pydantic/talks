@@ -12,6 +12,7 @@ dependencies = [
     { name = "gepa" },
     { name = "logfire", extra = ["fastapi"] },
     { name = "pydantic-ai" },
+    { name = "watchfiles" },
 ]
 
 [package.dev-dependencies]
@@ -27,6 +28,7 @@ requires-dist = [
     { name = "gepa", specifier = ">=0.1.1" },
     { name = "logfire", extras = ["fastapi"], specifier = ">=4.31.0" },
     { name = "pydantic-ai", specifier = ">=1.77.0" },
+    { name = "watchfiles", specifier = ">=1.1.1" },
 ]
 
 [package.metadata.requires-dev]

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP Search</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 640px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 24px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: #555; }
+    button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover { background: #555; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    .spinner {
+      display: none;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .spinner.active { display: block; }
+    .spinner::after {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid #ccc;
+      border-top-color: #333;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #result {
+      margin-top: 24px;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.6;
+    }
+    #result.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MP Search</h1>
+    <form id="search-form">
+      <textarea id="query" placeholder="Ask a question about UK Members of Parliament..." required></textarea>
+      <button type="submit">Search</button>
+    </form>
+    <div id="spinner" class="spinner"></div>
+    <div id="result"></div>
+  </div>
+  <script>
+    const form = document.getElementById('search-form');
+    const spinner = document.getElementById('spinner');
+    const result = document.getElementById('result');
+    const btn = form.querySelector('button');
+
+    document.getElementById('query').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = document.getElementById('query').value.trim();
+      if (!query) return;
+
+      btn.disabled = true;
+      spinner.classList.add('active');
+      result.classList.remove('visible');
+
+      try {
+        const res = await fetch('/form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `Server error (${res.status})`);
+        }
+        const data = await res.json();
+        result.innerHTML = marked.parse(data.result);
+        result.classList.add('visible');
+      } catch (err) {
+        result.innerHTML = marked.parse('**Error:** ' + err.message);
+        result.classList.add('visible');
+      } finally {
+        spinner.classList.remove('active');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
