@@ -13,7 +13,9 @@ from pydantic_ai import Agent
 
 from task import MP, TaskInput, ensure_data, extract_relations, get_mps
 
-logfire.configure()
+# from task_man_var import extract_relations
+
+logfire.configure(variables=logfire.VariablesOptions())
 
 app = FastAPI()
 logfire.instrument_fastapi(app)
