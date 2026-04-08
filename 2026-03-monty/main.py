@@ -75,7 +75,10 @@ agent = Agent(
     model_settings=AnthropicModelSettings(anthropic_cache_messages=True),
 )
 
-prompt = 'Investigate why downloads increased recently, is this real usage or something else.'
+prompt = """
+Investigate why downloads increased recently, is this real usage or something else.
+Check what file extensions are downloaded.
+"""
 
 
 async def main():
