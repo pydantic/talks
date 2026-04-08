@@ -14,7 +14,7 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import Awaitable, Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
 from gepa.core.adapter import EvaluationBatch, GEPAAdapter
@@ -84,13 +84,18 @@ class EvalsGEPAAdapter(
     # Model to use for proposing new instructions
     proposer_model: str = 'openai:gpt-4o'
 
-    # The proposer agent for generating new instruction candidates
-    _proposer_agent: Agent[Any, str] = field(init=False, repr=False)
-
     def __post_init__(self) -> None:
-        """Initialize the proposer agent."""
-        # Create proposer agent
-        self._proposer_agent = Agent(
+        """Initialize GEPA protocol hooks."""
+        # Required by GEPA protocol
+        self.propose_new_texts = self._propose_new_texts_impl
+
+    def _build_proposer_agent(self) -> Agent[Any, str]:
+        """Create a fresh proposer agent.
+
+        A new agent instance avoids reusing HTTP clients across event loops during
+        repeated asyncio.run() calls inside GEPA optimization.
+        """
+        return Agent(
             self.proposer_model,
             output_type=str,
             defer_model_check=True,
@@ -108,9 +113,6 @@ Analyze what went wrong and propose improved instructions that will:
 
 Return ONLY the improved instructions text, nothing else.""",
         )
-
-        # Required by GEPA protocol
-        self.propose_new_texts = self._propose_new_texts_impl
 
     def evaluate(
         self,
@@ -300,8 +302,10 @@ Focus on:
 
 Respond with ONLY the new instructions text."""
 
-        # Run the proposer agent
-        result = self._proposer_agent.run_sync(prompt)
+        # Run the proposer agent on a fresh event loop to avoid reusing a loop
+        # that may have been closed by prior asyncio.run() evaluation calls.
+        proposer_agent = self._build_proposer_agent()
+        result = asyncio.run(proposer_agent.run(prompt))
         new_instructions = result.output
 
         return {'instructions': json.dumps(new_instructions)}
