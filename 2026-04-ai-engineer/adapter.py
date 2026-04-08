@@ -21,7 +21,7 @@ import httpx
 from gepa.core.adapter import EvaluationBatch, GEPAAdapter
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.providers.gateway import gateway_provider
 from pydantic_core import to_jsonable_python
 from pydantic_evals import Case, Dataset
 from pydantic_evals.reporting import ReportCase, ReportCaseFailure
@@ -96,9 +96,8 @@ class EvalsGEPAAdapter(
         connections across event loops during repeated asyncio.run() calls
         inside GEPA optimization.
         """
-        model = OpenAIChatModel('gpt-4.1', provider=OpenAIProvider(http_client=httpx.AsyncClient()))
         return Agent(
-            model,
+            OpenAIChatModel('gpt-4.1', provider=gateway_provider('openai', http_client=httpx.AsyncClient())),
             output_type=str,
             defer_model_check=True,
             name='proposer-agent',

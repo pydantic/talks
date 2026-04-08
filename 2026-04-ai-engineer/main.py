@@ -36,6 +36,7 @@ logfire.configure(
     environment='development',
     service_name='prompt-optimization-example',
     console=False,
+    scrubbing=False,
 )
 logfire.instrument_pydantic_ai()
 logfire.instrument_print()
@@ -61,7 +62,7 @@ def main() -> int:
     opt_parser.add_argument('--task-model', type=str, default=DEFAULT_TASK_MODEL, help='Model being optimized')
     opt_parser.add_argument('--prompt-style', choices=['initial', 'expert'], default='initial')
     opt_parser.add_argument('--seed-instructions-file', type=str, help='Seed prompt file for optimization')
-    opt_parser.add_argument('--max-calls', type=int, default=50, help='Maximum metric calls')
+    opt_parser.add_argument('--max-calls', type=int, default=400, help='Maximum metric calls')
     opt_parser.add_argument('--output', type=str, help='File to save optimized instructions')
     opt_parser.add_argument('--max-train-cases', type=int, help='Limit training cases')
     opt_parser.add_argument('--max-val-cases', type=int, help='Limit validation cases')
