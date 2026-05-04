@@ -9,13 +9,16 @@ logfire.instrument_pydantic_ai()
 weather_agent = Agent(
     'gateway/openai:gpt-5.4-mini',
     capabilities=[CodeMode()],
-    instructions='Combine tool calls into a single code execution when possible',
+    instructions='Combine tool calls into a single code execution call',
 )
 
 
 @weather_agent.tool_plain
 def get_lat_long(location: str) -> tuple[float, float]:
-    """Get current weather for a city."""
+    """Get current weather for a city.
+
+    Returns: A tuple of `(latitude, longitude)`.
+    """
     return 0.0, 0.0
 
 
