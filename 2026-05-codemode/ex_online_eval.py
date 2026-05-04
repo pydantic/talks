@@ -16,7 +16,6 @@ logfire.instrument_pydantic_ai()
 class Event(BaseModel, use_attribute_docstrings=True):
     title: str
     timestamp: AwareDatetime
-    """Must be timezone aware."""
     guests: list[str]
     location: str | None = None
 

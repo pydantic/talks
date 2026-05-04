@@ -2,16 +2,16 @@ import logfire
 from pydantic_ai import Agent
 from pydantic_ai_harness import CodeMode
 
-logfire.configure(service_name="codemode-examples")
+logfire.configure(service_name='codemode-examples')
 logfire.instrument_pydantic_ai()
 
-weather_agent = Agent("gateway/anthropic:claude-sonnet-4-6", capabilities=[CodeMode()])
+weather_agent = Agent('gateway/anthropic:claude-sonnet-4-6', capabilities=[CodeMode()])
 
 
 @weather_agent.tool_plain
 def get_weather(city: str) -> dict[str, str | int]:
     """Get current weather for a city."""
-    return {"city": city, "temp_f": 72, "condition": "sunny"}
+    return {'city': city, 'temp_f': 72, 'condition': 'sunny'}
 
 
 @weather_agent.tool_plain
