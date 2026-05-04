@@ -1,0 +1,139 @@
+import { Slide } from "deckx";
+import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ToolUniverseCompare from "./components/ToolUniverseCompare.tsx";
+import SandboxContinuum from "./components/SandboxContinuum.tsx";
+import AdvantagesChart from "./components/AdvantagesChart.tsx";
+import InstallLine from "./components/InstallLine.tsx";
+
+<Slide layout="title">
+
+### AgentCon / May 2026
+
+# Your agent needs a sandbox, not a desert
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel COlvin
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</Slide>
+
+<Slide tab="codemode">
+
+# What is "codemode"?
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- aka "Programatic code execution"
+- The model writes Python (or js); the Python calls tools
+- Tool composition, branching, looping - all happen in **code**, not round-trips
+- Intermediate state stays in the runtime, not in the context window
+- The agent only ever sees **two** tools: `run_code` and `find_tools`
+- "1000 tools in 1000 tokens" is the promise
+
+</div>
+
+<CodemodeDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode" layout="statement">
+
+# But how do we run it?
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# Sandbox, not a desert
+
+- A **curated list** beats the kitchen sink
+- Most agents don't need a whole Linux box - they need ~5 tools used well
+- "Analyse BI data to find efficiencies" sounds broad - the actual surface is tiny
+- Full sandboxes solve a problem most embedded agents don't have
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# The sandbox vs. the desert
+
+<ToolUniverseCompare />
+
+</Slide>
+
+<Slide tab="sandbox" id="tradeoff-slide">
+
+#### Yes, this is a tradeoff
+
+<SandboxContinuum />
+
+</Slide>
+
+<Slide tab="monty">
+
+# Introducing Monty
+
+- A **minimal Python interpreter, written in Rust**, for code written by AI
+- Safe by default: no filesystem, env, or network unless you grant it
+- Pass in your own functions - the model calls them as ordinary Python
+- **Type-checks** code (via `ty`) before it runs
+- **Snapshottable** - pause at an external call, resume later, anywhere
+- Callable from **Rust, Python, or JavaScript**
+
+**Tradeoff:** Monty will not run your existing Python app - it's a Python *subset*.
+
+<InstallLine />
+
+</Slide>
+
+<Slide tab="monty">
+
+# The advantages
+
+<AdvantagesChart />
+
+</Slide>
+
+<Slide tab="security">
+
+# Hack Monty
+
+- Public bounty at **hackmonty.com** - try to escape Monty's sandbox
+- Submit Python via `POST /run/` and read `/app/secret.txt` or the `SECRET` env var
+- First person to report each vulnerability wins; partial bounties for other flaws
+- No DoS, no submitting malicious patches to the Monty codebase
+- <strong style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - $10,000</strong>
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+🤞
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+Find Monty at **github.com/pydantic/monty**
+
+`@samuelcolvin` · `@pydantic`
+
+</Slide>
