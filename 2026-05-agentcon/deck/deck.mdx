@@ -4,6 +4,7 @@ import ToolUniverseCompare from "./components/ToolUniverseCompare.tsx";
 import SandboxContinuum from "./components/SandboxContinuum.tsx";
 import AdvantagesChart from "./components/AdvantagesChart.tsx";
 import InstallLine from "./components/InstallLine.tsx";
+import hackmontyImg from "./assets/hackmonty.png";
 
 <Slide layout="title">
 
@@ -35,7 +36,7 @@ import InstallLine from "./components/InstallLine.tsx";
 
 <div>
 
-- aka "Programatic code execution"
+- aka "Programatic tool calling", CodeAct, and RLM (Recursive Language Models)
 - The model writes Python (or js); the Python calls tools
 - Tool composition, branching, looping - all happen in **code**, not round-trips
 - Intermediate state stays in the runtime, not in the context window
@@ -112,11 +113,13 @@ import InstallLine from "./components/InstallLine.tsx";
 
 # Hack Monty
 
-- Public bounty at **hackmonty.com** - try to escape Monty's sandbox
-- Submit Python via `POST /run/` and read `/app/secret.txt` or the `SECRET` env var
-- First person to report each vulnerability wins; partial bounties for other flaws
-- No DoS, no submitting malicious patches to the Monty codebase
-- <strong style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - $10,000</strong>
+- Public bounty at **[hackmonty.com](https://hackmonty.com)**
+- Scape the sandbox, read the secret and we'll pay **$5,000**
+- Launched 2 weeks ago
+- Vulnerability found via use-after-free bug, and lots of less severe issues
+- <div style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - <b>$10,000</b></div>
+
+<img src={hackmontyImg} alt="hackmonty.com screenshot" style={{display: 'block', margin: '0 auto', maxHeight: '14rem', width: 'auto', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.10)'}} />
 
 </Slide>
 
