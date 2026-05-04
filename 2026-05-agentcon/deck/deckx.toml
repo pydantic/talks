@@ -1,0 +1,13 @@
+title = "Your agent needs a sandbox, not a desert - AgentCon May 2026"
+theme = "dark"
+footer = "AgentCon - May 2026 - @samuelcolvin"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",    label = "Intro" },
+  { id = "codemode", label = "Codemode" },
+  { id = "sandbox",  label = "Sandbox" },
+  { id = "monty",    label = "Monty" },
+  { id = "security", label = "Security" },
+  { id = "demo",     label = "Demo" },
+]
