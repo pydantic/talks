@@ -43,9 +43,9 @@ class Deps:
 
 
 auditor = Agent(
-    'gateway/openai:gpt-5.4-mini',
+    'gateway/openai-responses:gpt-5.4-mini',
     deps_type=Deps,
-    # capabilities=[CodeMode(max_retries=10)],
+    capabilities=[CodeMode(max_retries=10)],
     instructions=(Path(__file__).parent / 'lighthouse_instructions.md').read_text(),
 )
 

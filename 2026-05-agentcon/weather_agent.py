@@ -3,7 +3,7 @@ from pydantic_ai import Agent
 from pydantic_ai_harness import CodeMode
 from typing_extensions import TypedDict
 
-logfire.configure()
+logfire.configure(service_name='weather-agent')
 logfire.instrument_pydantic_ai()
 
 weather_agent = Agent(
