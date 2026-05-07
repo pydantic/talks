@@ -10,7 +10,7 @@ const STEPS: Step[] = [
   { label: 'Structured Output', cx: 16, cy: 86 },
   { label: 'Observability', cx: 33, cy: 68 },
   { label: 'Durable Execution', cx: 50, cy: 50 },
-  { label: 'Online & offline Evals', cx: 67, cy: 32 },
+  { label: 'Offline & online Evals', cx: 67, cy: 32 },
   { label: 'Continuous Learning', cx: 84, cy: 14 },
 ]
 

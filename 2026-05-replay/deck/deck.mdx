@@ -65,7 +65,7 @@ import qrTemporal from "./assets/qr-temporal.svg";
 Structured, type-safe output with Pydantic AI.
 
 ```py
-from datetime import date, datetime
+from datetime import datetime
 from pydantic import BaseModel
 from pydantic_ai import Agent
 
@@ -75,9 +75,9 @@ class ConferenceTalk(BaseModel):
     room: str | None = None
 
 conference_talk_agent = Agent(
-    "gateway/anthropic:claude-haiku-4-5",
+    'gateway/anthropic:claude-haiku-4-5',
     output_type=list[ConferenceTalk],
-    instructions="Extract information about conference talks",
+    instructions='Extract information about conference talks',
 )
 ```
 
@@ -142,7 +142,6 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
   - `@agent.tool` functions
   - MCP server calls
 - One `TemporalAgent` wraps your agent and wires it all up
-- If the worker dies mid-run, Temporal replays the workflow and resumes - without re-paying for the model calls already done.
 
 </Slide>
 

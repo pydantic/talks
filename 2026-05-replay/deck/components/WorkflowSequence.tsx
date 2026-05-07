@@ -12,7 +12,7 @@
 
 import { Fragment } from 'react'
 
-type StepKind = 'llm' | 'decision' | 'tool' | 'return'
+type StepKind = 'llm' | 'decision' | 'tool' | 'return' | 'ellipsis'
 type ActivityKind = 'model' | 'tool' | 'mcp'
 
 interface Step {
@@ -60,17 +60,7 @@ const STEPS: Step[] = [
     },
   },
   { kind: 'decision', label: 'decision' },
-  {
-    kind: 'tool',
-    label: 'Tool',
-    activity: {
-      kind: 'mcp',
-      name: 'MCP server',
-      detail: 'github.fetch_repo',
-      meta: '1.32s · retried ×2',
-    },
-  },
-  { kind: 'decision', label: 'decision' },
+  { kind: 'ellipsis', label: '⋮' },
   { kind: 'return', label: 'return result' },
 ]
 
@@ -95,6 +85,26 @@ const KIND_LABEL: Record<ActivityKind, string> = {
 const TEMPORAL_COLOR = 'var(--accent)'
 
 function StepBox({ step }: { step: Step }) {
+  if (step.kind === 'ellipsis') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '1.6em',
+          lineHeight: 1,
+          color: 'color-mix(in srgb, var(--color-heading) 50%, transparent)',
+          background: 'var(--bg-slide)',
+          padding: '0.2em 0',
+        }}
+      >
+        ⋮
+      </div>
+    )
+  }
   if (step.kind === 'decision') {
     return (
       <div
@@ -277,11 +287,15 @@ function ActivityCard({ activity }: { activity: NonNullable<Step['activity']> })
 }
 
 export default function WorkflowSequence() {
+  // Temporal range covers all activity rows AND the ellipsis (which stands in
+  // for "more activities" continuing the loop).
   const lastActivityIdx = STEPS.reduce(
-    (last, s, i) => (s.activity ? i : last),
+    (last, s, i) => (s.activity || s.kind === 'ellipsis' ? i : last),
     -1,
   )
-  const firstActivityIdx = STEPS.findIndex((s) => s.activity !== undefined)
+  const firstActivityIdx = STEPS.findIndex(
+    (s) => s.activity !== undefined || s.kind === 'ellipsis',
+  )
 
   return (
     <div
@@ -296,25 +310,59 @@ export default function WorkflowSequence() {
         columnGap: 0,
       }}
     >
-      {/* Spine: continuous vertical line behind the workflow column */}
+      {/* Column headers */}
+      <div
+        style={{
+          gridColumn: 1,
+          gridRow: 1,
+          textAlign: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.85em',
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'color-mix(in srgb, var(--color-heading) 65%, transparent)',
+          paddingBottom: '0.4em',
+          zIndex: 2,
+        }}
+      >
+        Workflow
+      </div>
+      <div
+        style={{
+          gridColumn: 5,
+          gridRow: 1,
+          textAlign: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.85em',
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'color-mix(in srgb, var(--color-heading) 65%, transparent)',
+          paddingBottom: '0.4em',
+          zIndex: 2,
+        }}
+      >
+        Activities
+      </div>
+
+      {/* Spine: continuous vertical line behind the workflow column,
+          starting below the headers */}
       <div
         aria-hidden
         style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: `calc(${STEP_WIDTH} / 2 - 1px)`,
+          gridColumn: 1,
+          gridRow: `2 / ${STEPS.length + 2}`,
+          justifySelf: 'center',
           width: '2px',
           background: 'color-mix(in srgb, var(--color-heading) 30%, transparent)',
           zIndex: 0,
         }}
       />
 
-      {/* Temporal box: spans first activity row to last activity row */}
+      {/* Temporal box: spans first activity row to last activity row (rows shifted by 1 for header) */}
       <div
         style={{
           gridColumn: 3,
-          gridRow: `${firstActivityIdx + 1} / ${lastActivityIdx + 2}`,
+          gridRow: `${firstActivityIdx + 2} / ${lastActivityIdx + 3}`,
           width: '100%',
           height: '100%',
           borderRadius: '0.6em',
@@ -348,7 +396,7 @@ export default function WorkflowSequence() {
             <div
               style={{
                 gridColumn: 1,
-                gridRow: i + 1,
+                gridRow: i + 2,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -359,13 +407,31 @@ export default function WorkflowSequence() {
               <StepBox step={step} />
             </div>
 
+            {step.kind === 'ellipsis' && (
+              <div
+                style={{
+                  gridColumn: 5,
+                  gridRow: i + 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '1.4em',
+                  lineHeight: 1,
+                  color: 'color-mix(in srgb, var(--color-heading) 50%, transparent)',
+                  zIndex: 2,
+                }}
+              >
+                ⋮
+              </div>
+            )}
             {step.activity && color && (
               <>
                 {/* Col 2: outgoing arrows, vertically centered against the step */}
                 <div
                   style={{
                     gridColumn: 2,
-                    gridRow: i + 1,
+                    gridRow: i + 2,
                     display: 'flex',
                     alignItems: 'center',
                     paddingLeft: '0.3em',
@@ -380,7 +446,7 @@ export default function WorkflowSequence() {
                 <div
                   style={{
                     gridColumn: 4,
-                    gridRow: i + 1,
+                    gridRow: i + 2,
                     display: 'flex',
                     alignItems: 'center',
                     paddingLeft: '0.3em',
@@ -395,7 +461,7 @@ export default function WorkflowSequence() {
                 <div
                   style={{
                     gridColumn: 5,
-                    gridRow: i + 1,
+                    gridRow: i + 2,
                     display: 'flex',
                     alignItems: 'center',
                     width: '100%',
