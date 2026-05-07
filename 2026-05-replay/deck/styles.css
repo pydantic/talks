@@ -1,0 +1,49 @@
+:root {
+    --bg-deck: #080b10;
+    --bg-slide: #10151d;
+    --bg-light: #fbffea;
+    --surface: #49353f;
+
+    --color-heading: #fbffea;
+    --color-text: rgba(251, 255, 234, 0.86);
+    --color-muted: #8f888e;
+    --color-heading-light: #36182d;
+    --color-text-light: #2a1222;
+
+    --accent: #e520e9;
+    --accent-secondary: #ff6550;
+    --accent-tertiary: #9b77ff;
+    --accent-aqua: #77ffd8;
+}
+
+.topbar-title {
+    font-size: 0.9rem;
+}
+
+.small-code pre {
+    font-size: 0.8rem;
+}
+
+@media print {
+    div {
+        box-shadow: none !important;
+    }
+}
+
+.slide-content {
+    padding-bottom: 1rem;
+}
+
+.slide#tradeoff-slide .slide-content {
+    padding: 1rem 1.5rem 1rem !important;
+}
+
+.slide#tradeoff-slide h4 {
+    font-size: 1.2rem;
+    margin: 0 0 0.4rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+}

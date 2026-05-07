@@ -1,0 +1,177 @@
+import { Slide } from "deckx";
+import DurableAgentDiagram from "./components/DurableAgentDiagram.tsx";
+import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
+import TraceObservability from "./components/TraceObservability.tsx";
+import qrTemporal from "./assets/qr-temporal.svg";
+
+<Slide layout="title">
+
+### Replay / May 2026
+
+# Durable Agents
+
+## Long-running AI workflows in a flaky world
+
+### Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</Slide>
+
+<Slide tab="intro">
+
+# The Pydantic stack
+
+- **Pydantic Validation** - contracts for data
+- **Pydantic AI** - production grade agent framework, **with durable execution**
+- **Pydantic Logfire** - observability, evals, prompt management, LLMOps
+- **Pydantic AI Gateway** - one endpoint, every model
+- **Pydantic Monty** - Sandboxed Python interpretter
+
+</Slide>
+
+<Slide layout="statement" tab="reliable-ai">
+
+# AI is still Engineering
+
+## AI doesn't run in a vacuum, isolated from the practical challenges of the cloud.
+
+## The advent of AI makes good engineering practices more important, not less.
+
+</Slide>
+
+<Slide tab="reliable-ai">
+
+# Reliable AI
+
+<LLMOpsSteps />
+
+</Slide>
+
+<Slide tab="structure">
+
+# An agent
+
+Structured, type-safe output with Pydantic AI.
+
+```py
+from datetime import date, datetime
+from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class ConferenceTalk(BaseModel):
+    title: str
+    start_time: datetime
+    room: str | None = None
+
+conference_talk_agent = Agent(
+    "gateway/anthropic:claude-haiku-4-5",
+    output_type=list[ConferenceTalk],
+    instructions="Extract information about upcoming meetings",
+)
+```
+
+</Slide>
+
+<Slide tab="observability">
+
+# Make the agent observable
+
+Two lines (and an import) to make the agent observable.
+
+```py
+import logfire
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
+
+...
+```
+
+</Slide>
+
+<Slide tab="observability">
+
+# Trace Observability
+
+<TraceObservability />
+
+</Slide>
+
+<Slide tab="durable" layout="statement">
+
+# What happens when it runs for hours?
+
+</Slide>
+
+<Slide tab="durable">
+
+# Make the agent durable
+
+One line (and an import) to make the agent durable.
+
+```py
+...
+
+from pydantic_ai.durable_exec.temporal import TemporalAgent
+
+durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
+```
+
+**No need to manually wrap your tool calls as activities.**
+
+</Slide>
+
+<Slide tab="durable">
+
+# How this works
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- The **agent loop** lives in the workflow - completely deterministic
+- **Every external call** becomes an activity:
+  - model requests
+  - `@agent.tool` functions
+  - MCP server calls
+- One `TemporalAgent` wraps your agent and wires it all up
+- If the worker dies mid-run, Temporal replays the workflow and resumes - without re-paying for the model calls already done.
+
+</div>
+<DurableAgentDiagram />
+</div>
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+🤞
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+<div>
+
+<img src={qrTemporal} alt="QR code linking to the Pydantic AI Temporal docs" style={{ display: 'block', margin: '1.5rem auto 1rem', width: '18rem', height: '18rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a style={{ fontSize: '1.2rem' }} href="pydantic.dev/docs/ai/integrations/durable_execution/temporal/">pydantic.dev/docs/ai/integrations/durable_execution/temporal/</a>
+
+</div>
+
+</Slide>
