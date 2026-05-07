@@ -1,0 +1,294 @@
+import { Slide } from "deckx";
+import DurableAgentDiagram from "./components/DurableAgentDiagram.tsx";
+import PydanticStackPills from "./components/PydanticStackPills.tsx";
+
+<Slide layout="title">
+
+### Replay / May 2026
+
+# Durable Agents
+
+## Long-running AI workflows in a flaky world
+
+### Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</Slide>
+
+<Slide tab="intro">
+
+# AI is still Engineering
+
+- Lots of people seem to argue otherwise. I think they're wrong.
+- AI doesn't run in a vacuum, isolated from the practical challenges of the cloud.
+- The advent of AI makes good engineering practices **more** important, not less.
+- System design, type safety, observability, **durable execution** - these matter more than ever.
+
+</Slide>
+
+<Slide tab="pydantic-ai">
+
+# The Pydantic stack
+
+<PydanticStackPills />
+
+- **Pydantic** - the validation library you already know
+- **Pydantic AI** - typed, model-agnostic agent framework
+- **Logfire** - OpenTelemetry-native observability for AI workloads
+- **AI Gateway** - one URL, every provider, with guardrails
+
+</Slide>
+
+<Slide tab="pydantic-ai">
+
+# A simple agent
+
+```py {title="city.py"}
+from datetime import date
+from typing import TypedDict
+from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class City(BaseModel):
+    name: str
+    founded: date
+    location: TypedDict('Location', {'lat': float, 'lng': float})
+
+agent = Agent(
+    'openai:gpt-5.2',
+    output_type=City,
+    instructions='Extract information about the city',
+)
+result = agent.run_sync("London was founded in 50AD at 51.5074, 0.1278")
+print(repr(result.output))
+```
+
+</Slide>
+
+<Slide tab="pydantic-ai">
+
+# Agents are loops, not chats
+
+- An agent is a `while` loop around a model + a set of tools
+- Each iteration: model picks a tool, we run it, feed the result back
+- A non-trivial agent makes **dozens** of model calls and **hundreds** of tool calls per task
+- Each one of those calls is a chance for something to go wrong
+
+</Slide>
+
+<Slide tab="durable" layout="statement">
+
+# What happens when this runs for 6 hours?
+
+</Slide>
+
+<Slide tab="durable">
+
+# Where agents go to die
+
+- Models rate-limit, time out, return 500s
+- Tools call third-party APIs that flake
+- MCP servers go down
+- Pods get restarted, deploys roll, spot instances vanish
+- The chat paradigm hides all of this - for production agents, you can't.
+
+</Slide>
+
+<Slide tab="durable">
+
+# Durable execution - you know this bit
+
+- Networks are unreliable, nodes die - *things* are unreliable.
+- Durable execution lets us:
+  - recover from intermittent network failures
+  - recover from a host dying mid-task
+  - write procedural code that runs over hours, weeks, or years
+- **Workflows** = deterministic orchestration · **Activities** = anything with side-effects
+- Pydantic AI ships first-class integrations with **Temporal**, **DBOS**, and **Prefect**
+
+</Slide>
+
+<Slide tab="integration" layout="statement">
+
+# Every tool call must be an activity
+
+</Slide>
+
+<Slide tab="integration">
+
+# Pydantic AI ↔ Temporal: the mapping
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- The **agent loop** lives in the workflow - deterministic, replayable
+- **Every external call** becomes an activity:
+  - model requests
+  - `@agent.tool` functions
+  - MCP server calls
+- One `TemporalAgent` wraps your agent and wires it all up
+- If the worker dies mid-run, Temporal replays the workflow and resumes - without re-paying for the model calls already done.
+
+</div>
+
+<DurableAgentDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="integration">
+
+# `TemporalAgent`
+
+```py {title="agent.py"}
+from pydantic_ai import Agent
+from pydantic_ai.durable_exec.temporal import TemporalAgent
+
+agent = Agent(
+    'anthropic:claude-sonnet-4-5',
+    instructions='You are a research assistant.',
+    name='researcher',  # required - and immutable in production
+)
+
+# Wraps the agent; freezes the model + toolsets;
+# auto-creates activities for every tool and model call.
+temporal_agent = TemporalAgent(agent)
+```
+
+- Wrap any `Agent` with `TemporalAgent` - that's the entire integration surface
+- Model and toolsets are frozen so replays are deterministic
+- Activities are created automatically - no manual `@activity.defn` boilerplate
+
+</Slide>
+
+<Slide tab="integration">
+
+# The workflow
+
+```py {title="workflow.py"}
+from temporalio import workflow
+from temporalio.client import Client
+from temporalio.worker import Worker
+from pydantic_ai.durable_exec.temporal import (
+    AgentPlugin, PydanticAIPlugin,
+)
+
+@workflow.defn
+class ResearchWorkflow:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        result = await temporal_agent.run(prompt)
+        return result.output
+
+client = await Client.connect(
+    'localhost:7233', plugins=[PydanticAIPlugin()],
+)
+async with Worker(
+    client, task_queue='research',
+    workflows=[ResearchWorkflow],
+    plugins=[AgentPlugin(temporal_agent)],
+):
+    await client.execute_workflow(
+        ResearchWorkflow.run, 'Compare CO2 capture options',
+        id='r-1', task_queue='research',
+    )
+```
+
+</Slide>
+
+<Slide tab="integration">
+
+# Tools are just activities
+
+```py {title="tools.py"}
+from dataclasses import dataclass
+from pydantic_ai import Agent, RunContext
+
+@dataclass
+class Deps:
+    http_client: object  # injected by the workflow
+
+agent = Agent('anthropic:claude-sonnet-4-5', deps_type=Deps, name='r')
+
+@agent.tool
+async def search(ctx: RunContext[Deps], query: str) -> list[str]:
+    # Runs in an activity. Temporal handles retries, timeouts,
+    # and resumption if the worker dies here.
+    return await ctx.deps.http_client.search(query)
+```
+
+- Each `@agent.tool` becomes a Temporal activity
+- Retry policies, timeouts, heartbeats - all configurable per tool
+- `RunContext` inside activities exposes `deps`, `run_id`, `metadata`, `retries`, tool info
+
+</Slide>
+
+<Slide tab="integration">
+
+# Production gotchas
+
+- **Agent name + toolset IDs are immutable** - change them and active workflows break
+- **`RunContext` in activities is limited** - no `model`, `prompt`, `messages`, or `tracer`
+- **No `run_stream` / `iter`** - use `event_stream_handler` for incremental output
+- **2 MB payload limit** - workflow state is versioned in Temporal's history; keep `deps` Pydantic-serialisable and lean
+- **Disable provider HTTP retries** - let Temporal own the retry layer, don't double-retry
+
+</Slide>
+
+<Slide tab="integration">
+
+# Observability
+
+```py {title="logfire_setup.py"}
+import logfire
+from pydantic_ai.durable_exec.temporal import (
+    LogfirePlugin, PydanticAIPlugin,
+)
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
+
+client = await Client.connect(
+    'localhost:7233',
+    plugins=[PydanticAIPlugin(), LogfirePlugin()],
+)
+```
+
+- One plugin - every activity, every model call, every tool gets a span
+- See in Logfire what was **replayed** vs what actually re-executed
+- Pair with the Temporal Web UI for the full picture
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+🤞
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+Find Pydantic AI at **github.com/pydantic/pydantic-ai**
+
+Docs: **pydantic.dev/docs/ai/integrations/durable_execution/temporal**
+
+`@samuelcolvin` · `@pydantic`
+
+</Slide>

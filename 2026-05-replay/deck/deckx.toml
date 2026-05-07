@@ -1,0 +1,12 @@
+title = "Durable Agents: Long-running AI workflows in a flaky world"
+theme = "dark"
+# footer = "Replay - May 2026 - @samuelcolvin"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",       label = "Intro" },
+  { id = "pydantic-ai", label = "Pydantic AI" },
+  { id = "durable",     label = "Durable" },
+  { id = "integration", label = "Integration" },
+  { id = "demo",        label = "Demo" },
+]
