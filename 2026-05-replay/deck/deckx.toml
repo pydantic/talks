@@ -4,9 +4,10 @@ theme = "dark"
 favicon = "assets/favicon.png"
 
 tabs = [
-  { id = "intro",       label = "Intro" },
-  { id = "pydantic-ai", label = "Pydantic AI" },
-  { id = "durable",     label = "Durable" },
-  { id = "integration", label = "Integration" },
-  { id = "demo",        label = "Demo" },
+  { id = "intro",         label = "Intro" },
+  { id = "reliable-ai",   label = "Reliable AI" },
+  { id = "structure",     label = "Structured Output" },
+  { id = "observability", label = "Observability" },
+  { id = "durable",       label = "Durable Execution" },
+  { id = "demo",          label = "Demo" },
 ]

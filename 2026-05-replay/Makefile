@@ -27,7 +27,7 @@ dev: ## Start the dev server with live reload
 .PHONY: html
 html: ## Build the deck to deck-v$(VERSION).html
 	rm -f deck-v*
-	cd deck && bunx deckx html ../deck-v$(VERSION).html
+	cd deck && bun run typecheck && bunx deckx html ../deck-v$(VERSION).html
 	@echo "Slides written to deck-v$(VERSION).html"
 
 .PHONY: pdf
