@@ -1,7 +1,7 @@
 import { Slide } from "deckx";
-import DurableAgentDiagram from "./components/DurableAgentDiagram.tsx";
 import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
 import TraceObservability from "./components/TraceObservability.tsx";
+import WorkflowSequence from "./components/WorkflowSequence.tsx";
 import qrTemporal from "./assets/qr-temporal.svg";
 
 <Slide layout="title">
@@ -46,7 +46,7 @@ import qrTemporal from "./assets/qr-temporal.svg";
 
 ## AI doesn't run in a vacuum, isolated from the practical challenges of the cloud.
 
-## The advent of AI makes good engineering practices more important, not less.
+## <span style={{ color: 'var(--accent-secondary)' }}>The advent of AI makes good engineering practices more important, not less.</span>
 
 </Slide>
 
@@ -77,7 +77,7 @@ class ConferenceTalk(BaseModel):
 conference_talk_agent = Agent(
     "gateway/anthropic:claude-haiku-4-5",
     output_type=list[ConferenceTalk],
-    instructions="Extract information about upcoming meetings",
+    instructions="Extract information about conference talks",
 )
 ```
 
@@ -136,10 +136,6 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 
 # How this works
 
-<div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2rem', alignItems: 'start' }}>
-
-<div>
-
 - The **agent loop** lives in the workflow - completely deterministic
 - **Every external call** becomes an activity:
   - model requests
@@ -148,9 +144,24 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 - One `TemporalAgent` wraps your agent and wires it all up
 - If the worker dies mid-run, Temporal replays the workflow and resumes - without re-paying for the model calls already done.
 
-</div>
-<DurableAgentDiagram />
-</div>
+</Slide>
+
+<Slide tab="durable">
+
+# How this works
+
+<WorkflowSequence />
+
+</Slide>
+
+<Slide tab="durable">
+
+# What this gets you
+
+- **Resume mid-run** - agents resume after a worker dies - from where it left off
+- **Automatic retries** - flaky tools, rate-limited models, etc
+- **Long-running by default** - `workflow.sleep(timedelta(days=7))` just works
+- **No bespoke orchestration** - no queues, no checkpoint tables, no state machines you have to write yourself
 
 </Slide>
 
