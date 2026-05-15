@@ -5,10 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "devtools>=0.12.2",
     "logfire>=4.32.1",
     "pydantic-ai>=1.89.1",
-    "pydantic-ai-harness[code-code,code-mode]>=0.2.0",
+    "pydantic-ai-harness[code-mode]>=0.2.0",
     "rich>=15.0.0",
+    "uvicorn>=0.46.0",
 ]
 
 [dependency-groups]

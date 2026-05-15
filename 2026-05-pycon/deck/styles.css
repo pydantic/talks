@@ -32,3 +32,8 @@
 .bigger ul {
     font-size: 1.5rem;
 }
+
+.slide-footer {
+    right: auto !important;
+    left: 20px !important;
+}
