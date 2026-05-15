@@ -1,0 +1,14 @@
+title = "Your agent needs a sandbox, not a desert - Pycon May 2026"
+theme = "dark"
+footer = "Pycon - May 2026 - @samuelcolvin"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",    label = "Intro" },
+  { id = "codemode", label = "Codemode" },
+  { id = "sandbox",  label = "Sandbox" },
+  { id = "monty",    label = "Monty" },
+  { id = "how",      label = "How" },
+  { id = "security", label = "Security" },
+  { id = "demo",     label = "Demo" },
+]

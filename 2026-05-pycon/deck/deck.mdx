@@ -1,0 +1,292 @@
+import { Slide } from "deckx";
+import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ToolUniverseCompare from "./components/ToolUniverseCompare.tsx";
+import SandboxContinuum from "./components/SandboxContinuum.tsx";
+import AdvantagesChart from "./components/AdvantagesChart.tsx";
+import InstallLine from "./components/InstallLine.tsx";
+import HowOverview from "./components/HowOverview.tsx";
+import AstExample from "./components/AstExample.tsx";
+import ResolveExample from "./components/ResolveExample.tsx";
+import BytecodeExample from "./components/BytecodeExample.tsx";
+import HeapVmDiagram from "./components/HeapVmDiagram.tsx";
+import HostLoopCode from "./components/HostLoopCode.tsx";
+import hackmontyImg from "./assets/hackmonty.png";
+
+<Slide layout="title">
+
+### Pycon 2026 / May 2026
+
+# Pydantic Monty: Wild LLMs, from tool calling to computer
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+<div class="bigger">
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode">
+
+# What is "codemode"?
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- aka "Programatic tool calling", CodeAct, and RLM (Recursive Language Models)
+- The model writes Python (or js); the Python calls tools
+- Tool composition, branching, looping - all happen in **code**, not round-trips
+- Intermediate state stays in the runtime, not in the context window
+- The agent only ever sees **two** tools: `run_code` and `find_tools`
+- "1000 tools in 1000 tokens" is the promise
+
+</div>
+
+<CodemodeDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode" layout="statement">
+
+# But how do we run it?
+
+</Slide>
+
+<Slide tab="sandbox" id="tradeoff-slide">
+
+#### There are multiple options
+
+<SandboxContinuum />
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# The tradeoff
+
+<div class="bigger">
+
+- A **curated list** beats the kitchen sink
+- Most agents don't need a whole Linux box - they need ~5 tools used well
+- "Analyse BI data to find efficiencies" sounds broad - the actual surface is tiny
+- Full sandboxes solve a problem most embedded agents don't have
+
+</div>
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# The sandbox vs. the desert
+
+<ToolUniverseCompare />
+
+</Slide>
+
+<Slide tab="monty">
+
+# Introducing Monty
+
+- A **minimal Python interpreter, written in Rust**, for code written by AI
+- Safe by default: no filesystem, env, or network unless you grant it
+- Pass in your own functions - the model calls them as ordinary Python
+- **Type-checks** code (via `ty`) before it runs
+- **Snapshottable** - pause at an external call, resume later, anywhere
+- Callable from **Rust, Python, or JavaScript**
+
+**Tradeoff:** Monty will not run your existing Python app - it's a Python *subset*.
+
+<InstallLine />
+
+</Slide>
+
+<Slide tab="monty">
+
+# The advantages
+
+<AdvantagesChart />
+
+</Slide>
+
+<Slide tab="how">
+
+# How Monty works
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
+
+<div>
+
+- Five phases
+- First 3 phases can be reused
+- The pause/resume protocol is what makes Monty unusual
+- Source code → snapshot bytes, fully serializable
+
+</div>
+
+<HowOverview />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 1 · Parse to AST
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- **ruff** parses the source — same AST as Python tooling
+- Monty walks the AST eagerly into its own `ParseNode` / `Expr`
+- Exit early if we encounter a syntax error, or syntax we don't yet support
+
+</div>
+
+<AstExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 2 · Resolve names
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Second pass classifies every name: **global**, **local**, **free** (closure), or **`LocalUnassigned`**
+- `LocalUnassigned` = name read but never bound → host-provided external function
+- String keys become integer `NamespaceId` slot indices
+- Closure-cell capture decided here so nested functions can reach enclosing locals
+
+</div>
+
+<ResolveExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 3 · Compile to bytecode
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Convert the AST into **bytecode** instructions
+- Effectively a `list[int]` - where each `int` is an opcode and its operands
+- This compile step is similar to cpython - why we have `.pyc` files
+
+</div>
+
+<BytecodeExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 4 · Run on a heap + stack VM
+
+<div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.5fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Execute the bytecode - iterate over the `list[int]` "doing each thing"
+- much like other interpreters
+- Two stacks: an **operand stack** for values and a **`CallFrame` stack** for activations
+
+<div style={{
+  marginTop: '1.5rem',
+  background: 'var(--surface)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '8px',
+  padding: '0.7rem 1rem',
+}}>
+  <div style={{color: 'var(--color-muted)', fontSize: '0.65rem', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)'}}>running</div>
+  <div style={{fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--color-heading)'}}>
+    x = (<span style={{color: 'var(--accent-secondary)'}}>1</span> + <span style={{color: 'var(--accent-secondary)'}}>1</span>) * <span style={{color: 'var(--accent-secondary)'}}>2</span>
+  </div>
+</div>
+
+</div>
+
+<HeapVmDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 5 · Pause for the host, resume, repeat
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- The VM **never** does I/O directly
+- On external work it returns a `RunProgress`: `ExternalCall`, `OsCall`, `MethodCall`, `ResolveFutures`, `NameLookup`, or `Return`
+- Each carries a `Snapshot<T>` — heap + VM state, serializable to `postcard` bytes
+- Host calls `.resume(result)` to wake the VM up — **anywhere, any time**
+
+</div>
+
+<HostLoopCode />
+
+</div>
+
+</Slide>
+
+<Slide tab="security">
+
+# Hack Monty
+
+- Public bounty at **[hackmonty.com](https://hackmonty.com)**
+- Scape the sandbox, read the secret and we'll pay **$5,000**
+- Launched 2 weeks ago
+- Vulnerability found via use-after-free bug, and lots of less severe issues
+- <div style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - <b>$10,000</b></div>
+
+<img src={hackmontyImg} alt="hackmonty.com screenshot" style={{display: 'block', margin: '0 auto', maxHeight: '14rem', width: 'auto', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.10)'}} />
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+🤞
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+Find Monty at **github.com/pydantic/monty**
+
+`@samuelcolvin` · `@pydantic`
+
+</Slide>
