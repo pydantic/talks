@@ -9,8 +9,8 @@ import AstExample from "./components/AstExample.tsx";
 import ResolveExample from "./components/ResolveExample.tsx";
 import BytecodeExample from "./components/BytecodeExample.tsx";
 import HeapVmDiagram from "./components/HeapVmDiagram.tsx";
-import HostLoopCode from "./components/HostLoopCode.tsx";
 import hackmontyImg from "./assets/hackmonty.png";
+import qrPycon from "./assets/qr-pycon.svg";
 
 <Slide layout="title">
 
@@ -123,6 +123,14 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 </Slide>
 
+<Slide tab="monty" layout="statement">
+
+# Mini Demo
+
+🤞
+
+</Slide>
+
 <Slide tab="how">
 
 # How Monty works
@@ -134,7 +142,6 @@ import hackmontyImg from "./assets/hackmonty.png";
 - Five phases
 - First 3 phases can be reused
 - The pause/resume protocol is what makes Monty unusual
-- Source code → snapshot bytes, fully serializable
 
 </div>
 
@@ -173,8 +180,8 @@ import hackmontyImg from "./assets/hackmonty.png";
 <div>
 
 - Second pass classifies every name: **global**, **local**, **free** (closure), or **`LocalUnassigned`**
-- `LocalUnassigned` = name read but never bound → host-provided external function
 - String keys become integer `NamespaceId` slot indices
+- `LocalUnassigned` = name read but never bound → host-provided external function
 - Closure-cell capture decided here so nested functions can reach enclosing locals
 
 </div>
@@ -196,6 +203,12 @@ import hackmontyImg from "./assets/hackmonty.png";
 - Convert the AST into **bytecode** instructions
 - Effectively a `list[int]` - where each `int` is an opcode and its operands
 - This compile step is similar to cpython - why we have `.pyc` files
+
+```python
+greeting = 'Hello'
+who = get_who(greeting)
+f'{greeting} {who}'
+```
 
 </div>
 
@@ -242,18 +255,36 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 # Step 5 · Pause for the host, resume, repeat
 
-<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', alignItems: 'start' }}>
 
 <div>
 
-- The VM **never** does I/O directly
-- On external work it returns a `RunProgress`: `ExternalCall`, `OsCall`, `MethodCall`, `ResolveFutures`, `NameLookup`, or `Return`
-- Each carries a `Snapshot<T>` — heap + VM state, serializable to `postcard` bytes
-- Host calls `.resume(result)` to wake the VM up — **anywhere, any time**
+- Run the code until we hit an external call
+- Then return to the host
+- Ask it to call the function
 
 </div>
 
-<HostLoopCode />
+<div>
+```python
+
+class Monty:
+    def start(self) -> CallTool | Done: ...
+    def resume(self, result: ReturnValue | Exception) -> RunProgress: ...
+
+run = Monty(code)
+progress = run.start()
+
+while isinstance(progress, CallTool):
+    # e.g. CallTool("get_who", ("Hello",))
+    # we could call run.dump() here if we wanted to
+    result = call_tool(progress.name, progress.args)
+    progress = run.resume(result)
+
+print(progress)
+```
+
+</div>
 
 </div>
 
@@ -265,7 +296,7 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 - Public bounty at **[hackmonty.com](https://hackmonty.com)**
 - Scape the sandbox, read the secret and we'll pay **$5,000**
-- Launched 2 weeks ago
+- Launched 3 weeks ago
 - Vulnerability found via use-after-free bug, and lots of less severe issues
 - <div style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - <b>$10,000</b></div>
 
@@ -285,7 +316,9 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 # Thank you
 
-Find Monty at **github.com/pydantic/monty**
+Find more at [github.com/pydantic/talks/tree/main/2026-05-pycon](https://github.com/pydantic/talks/tree/main/2026-05-pycon#readme)
+
+<img src={qrPycon} alt="QR code linking to the talk repo" style={{ display: 'block', margin: '1rem auto', width: '14rem', height: '14rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
 
 `@samuelcolvin` · `@pydantic`
 

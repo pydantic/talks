@@ -2,6 +2,7 @@
 
 Palo Alto, 2026-05-15
 
-https://us.pycon.org/2026/schedule/presentation/27/
-
-See [deck-v1.pdf](deck-v1.pdf) for slides.
+* [Talk schedule](https://us.pycon.org/2026/schedule/presentation/27/)
+* [Deck PDF](deck-v1.pdf)
+* Monty repo: [github.com/pydantic/monty](https://github.com/pydantic/monty)
+* [Pydantic AI + CodeMoe](https://pydantic.dev/docs/ai/harness/code-mode/)
