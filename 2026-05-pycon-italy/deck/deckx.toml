@@ -5,6 +5,7 @@ favicon = "assets/favicon.png"
 
 tabs = [
   { id = "intro",         label = "Intro" },
+  { id = "monty",         label = "Monty" },
   { id = "reliable-ai",   label = "Reliable AI" },
   { id = "structure",     label = "Structured Output" },
   { id = "observability", label = "Observability" },
