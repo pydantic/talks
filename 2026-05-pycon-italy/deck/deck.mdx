@@ -3,6 +3,10 @@ import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
 import TraceObservability from "./components/TraceObservability.tsx";
 import WorkflowSequence from "./components/WorkflowSequence.tsx";
 import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ArchitectureDiagram from "./components/ArchitectureDiagram.tsx";
+import FeatureGrid from "./components/FeatureGrid.tsx";
+import PromptRound from "./components/PromptRound.tsx";
+import ProposalExplanation from "./components/ProposalExplanation.tsx";
 import qrTemporal from "./assets/qr-temporal.svg";
 import pydanticLogo from "./assets/pydantic-logo.svg";
 import prefectLogo from "./assets/prefect-logo.svg";
@@ -219,6 +223,226 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 # Demo
 
 🤞
+
+</Slide>
+
+<Slide layout="title" tab="production">
+
+### Taking Agents to Production
+
+# Agents → Production
+
+## in 8 not-so-easy steps
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# In <span style={{ color: 'var(--accent)' }}>3 easy steps</span>.
+
+1. Build your TemporalAgent
+2. Connect your TemporalAgent to your application
+3. Provide Agent access to your users
+
+<ArchitectureDiagram stage="temporal" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# In <span style={{ textDecoration: 'line-through' }}>3</span> <span style={{ color: 'var(--accent)' }}>6 steps</span>.
+
+<ArchitectureDiagram stage="six" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# In <span style={{ textDecoration: 'line-through' }}>6</span> <span style={{ color: 'var(--accent)' }}>8 steps</span>.
+
+<ArchitectureDiagram stage="eight" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# With <span style={{ color: 'var(--accent)' }}>Logfire</span>.
+
+<ArchitectureDiagram stage="logfire" />
+
+</Slide>
+
+<Slide title="Logfire Free Tier" space="tight" tab="production">
+
+# Optimization is free.
+# Guardrails are free.
+# <span style={{ color: 'var(--accent)' }}>So is everything else.</span>
+
+<FeatureGrid features={[
+  { number: '01', title: '10M LLM spans per month', description: 'Full OpenTelemetry-native traces of every prompt, tool call covering every token.' },
+  { number: '02', title: 'AI Gateway with BYOK', description: 'Route to any provider, with active DLP on every request. Bring your own key.' },
+  { number: '03', title: '30 days of audit logs', description: 'Review any user-to-agent conversation. Review every tool call. Compliance gets what they need without a ticket.' },
+  { number: '04', title: 'Prompt & tool optimization', description: 'Evals, datasets, agent tuning. The same loop we use on Monty, available the day you sign up.' },
+]} />
+
+</Slide>
+
+<Slide title="Free at pydantic.dev/logfire" tab="production">
+
+# What you get, without paying us anything.
+
+<FeatureGrid features={[
+  { number: '01', title: '10M LLM spans / month', description: 'OpenTelemetry-native traces of every prompt, tool call and token. Not a sample - every one.' },
+  { number: '02', title: '30 days of audit logs', description: 'Replay any user-to-agent conversation. Replay any tool call. Compliance gets what they need without a ticket.' },
+  { number: '03', title: 'AI Gateway with BYOK', description: "Route to any provider, with active DLP on every request. Bring your own key. We don't see your tokens." },
+  { number: '04', title: 'Prompt & tool optimization', description: 'Evals, datasets, agent tuning. The same loop we use on Monty, available the day you sign up.' },
+]} />
+
+</Slide>
+
+<Slide theme="light" title="Enterprise" tab="production">
+
+## 10M spans on a Tuesday?
+# <span style={{ color: 'var(--accent-secondary)' }}>Let's talk Enterprise.</span>
+
+<div style={{ display: 'flex', gap: '3rem', marginTop: '0.5rem' }}>
+<div>
+
+- Unlimited LLM spans
+- Volume pricing
+- Self-hosted Logfire + AI Gateway
+
+</div>
+<div>
+
+- Advanced Data Loss Protection
+- Custom audit-log retention
+- Dedicated support
+
+</div>
+</div>
+
+<p style={{ marginTop: '1.5rem', fontSize: '1.1em' }}><strong style={{ color: 'var(--accent-secondary)' }}>sales@pydantic.dev</strong>{' · '}pydantic.dev/contact</p>
+
+</Slide>
+
+<Slide layout="statement" tab="production">
+
+# Demo. <span style={{ color: 'var(--accent)' }}>Demo.</span> Demo.
+
+</Slide>
+
+<Slide layout="title" tab="production">
+
+### Using audit-logged conversations (Traces)
+
+# Agents <span style={{ color: 'var(--accent)' }}>Optimization</span>
+
+## to improve Agent performance
+
+</Slide>
+
+<Slide title="20 Questions" theme="light" tab="production">
+
+## 20 Questions
+# <span style={{ color: 'var(--accent-secondary)' }}>LLM vs LLM</span>
+
+<div style={{ display: 'flex', gap: '3rem', marginTop: '0.5rem', alignItems: 'flex-start' }}>
+<div style={{ flex: '0 0 55%' }}>
+
+**Rules:**
+
+1. Player 1 thinks of a secret object, person, or place
+2. Player 2 tries to guess the object by asking yes/no questions
+3. Each question helps Player 2 narrow down the potential options
+4. If Player 2 guesses correctly within 20 questions, Player 2 wins
+
+</div>
+<div style={{ flex: 1, background: 'rgba(229,32,233,0.08)', border: '1px solid var(--accent)', borderRadius: '10px', padding: '1.2rem' }}>
+
+**Example:**
+
+Player 1 thinks of **"Elephant"**
+
+Player 2 asks yes/no questions...
+
+Player 2 guesses **"Is it an Elephant?"**
+
+→ **Player 2 Wins!**
+
+</div>
+</div>
+
+</Slide>
+
+<Slide title="20 Questions - Starting Prompt" tab="production">
+
+<PromptRound
+  round={0}
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions. Call make_guess once you are confident in your choice."
+  results={[
+    { item: 'Piano', outcome: 'Fail!', note: 'Cheated' },
+    { item: 'Sushi', outcome: 'Fail!', note: 'Cheated' },
+    { item: 'Tesla', outcome: 'Passed in 19 Questions', note: 'Cheated' },
+    { item: 'Photosynthesis', outcome: 'Fail!', note: 'Cheated' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="20 Questions - Round 1" tab="production">
+
+<PromptRound
+  round={1}
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions. All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice."
+  highlights={["All your questions must be answerable with a 'yes' or 'no'."]}
+  results={[
+    { item: 'Piano', outcome: 'Fail!' },
+    { item: 'Sushi', outcome: 'Passed in 12 Questions', note: 'was failing' },
+    { item: 'Tesla', outcome: 'Passed in 17 Questions', note: '2 fewer Questions' },
+    { item: 'Photosynthesis', outcome: 'Fail!' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="20 Questions - Round 2" tab="production">
+
+<PromptRound
+  round={2}
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions, aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down). All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice."
+  highlights={["aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down)."]}
+  results={[
+    { item: 'Piano', outcome: 'Fail!' },
+    { item: 'Sushi', outcome: 'Passed in 13 Questions' },
+    { item: 'Tesla', outcome: 'Passed in 17 Questions' },
+    { item: 'Photosynthesis', outcome: 'Passed in 13 Questions', note: 'was failing' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="Understanding Changes" tab="production">
+
+# Understanding Changes
+
+<ProposalExplanation />
+
+</Slide>
+
+<Slide title="20 Questions - Round 3" tab="production">
+
+<PromptRound
+  round={3}
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions, aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down). When starting broad, prioritize questions about fundamental properties or classifications (e.g. category, function, domain or era.). If a line of questioning becomes too specific or unproductive, pivot to a different set of broader questions to eliminate larger categories. All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice, ensuring your guess is concise and provides only the name of the item."
+  highlights={["When starting broad, prioritize questions about fundamental properties or classifications (e.g. category, function, domain or era.). If a line of questioning becomes too specific or unproductive, pivot to a different set of broader questions to eliminate larger categories.", "ensuring your guess is concise and provides only the name of the item."]}
+  results={[
+    { item: 'Piano', outcome: 'Passed in 19 Questions', note: 'was failing' },
+    { item: 'Sushi', outcome: 'Passed in 13 Questions' },
+    { item: 'Tesla', outcome: 'Passed in 15 Questions', note: '2 fewer questions' },
+    { item: 'Photosynthesis', outcome: 'Passed in 7 Questions', note: '6 fewer questions' },
+  ]}
+/>
 
 </Slide>
 

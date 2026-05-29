@@ -11,4 +11,5 @@ tabs = [
   { id = "observability", label = "Observability" },
   { id = "durable",       label = "Durable Execution" },
   { id = "demo",          label = "Demo" },
+  { id = "production",    label = "Agents → Production" },
 ]
