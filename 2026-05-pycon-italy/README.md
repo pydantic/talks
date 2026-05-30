@@ -96,4 +96,4 @@ uv run python twenty_questions_temporal_mv.py
   prompt is already performing well — try running more games with a deliberately
   weak prompt first, or adjust the optimizer settings.
 
-Both of these are waiting on a prod deployment as of 05/30 to resolve.
+Both of these are waiting on the next prod deployment as of 05/30 to resolve.
