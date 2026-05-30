@@ -10,6 +10,6 @@ tabs = [
   { id = "structure",     label = "Structured Output" },
   { id = "observability", label = "Observability" },
   { id = "durable",       label = "Durable Execution" },
+  { id = "production",    label = "Production" },
   { id = "demo",          label = "Demo" },
-  { id = "production",    label = "Agents → Production" },
 ]
