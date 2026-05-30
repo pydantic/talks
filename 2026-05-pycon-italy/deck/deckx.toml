@@ -1,0 +1,13 @@
+title = "Durable Agents: Long-running AI workflows in a flaky world"
+theme = "dark"
+# footer = "Replay - May 2026 - @samuelcolvin"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",         label = "Intro" },
+  { id = "monty",         label = "Monty" },
+  { id = "reliable-ai",   label = "Reliable AI" },
+  { id = "durable",       label = "Durable Execution" },
+  { id = "production",    label = "Production" },
+  { id = "demo",          label = "Demo" },
+]

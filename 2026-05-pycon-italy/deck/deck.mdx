@@ -1,0 +1,459 @@
+import { Slide } from "deckx";
+import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
+import TraceObservability from "./components/TraceObservability.tsx";
+import WorkflowSequence from "./components/WorkflowSequence.tsx";
+import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ArchitectureDiagram from "./components/ArchitectureDiagram.tsx";
+import FeatureGrid from "./components/FeatureGrid.tsx";
+import PromptRound from "./components/PromptRound.tsx";
+import ProposalExplanation from "./components/ProposalExplanation.tsx";
+import qr from "./assets/qr.svg";
+import pydanticLogo from "./assets/pydantic-logo.svg";
+import prefectLogo from "./assets/prefect-logo.svg";
+import huggingFaceLogo from "./assets/hugging-face-logo.svg";
+import guido from "./assets/guido.png";
+
+<Slide layout="title">
+
+### PyCon Italia / May 2026
+
+# Durable Agents
+
+## Durable Agents: long running AI workflows in a flakey world
+
+### Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</Slide>
+
+<Slide tab="intro">
+
+# The Pydantic stack
+
+- **Pydantic Validation** - contracts for data
+- **Pydantic AI** - production grade agent framework, **with durable execution**
+- **Pydantic Logfire** - observability, evals, prompt management, LLMOps
+- **Pydantic AI Gateway** - one endpoint, every model
+- **Pydantic Monty** - Sandboxed Python interpretter
+
+</Slide>
+
+<Slide tab="monty">
+
+# Monty (sorry for the digression)
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', alignItems: 'center' }}>
+
+<div>
+
+- aka "Programatic tool calling", CodeAct, and RLM (Recursive Language Models)
+- The model writes Python (or js); the Python calls tools
+- Tool composition, branching, looping - all happen in **code**, not round-trips
+- Intermediate state stays in the runtime, not in the context window
+- The agent only ever sees **two** tools: `run_code` and `find_tools`
+- "1000 tools in 1000 tokens" is the promise
+
+</div>
+
+<CodemodeDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="monty">
+
+# Hackmonty
+
+To harden Monty (and hopefully 🤞 prove it's hard), we're launching round 2 of **hackmonty**!
+
+The bounty has increased to **$10,000** - if you can extract the secret.
+
+Thanks to <b style={{ color: 'var(--accent-secondary)' }}>Pydantic</b>, <b style={{ color: 'var(--accent-secondary)' }}>Prefect Horizon</b> and <b style={{ color: 'var(--accent-secondary)' }}>Hugging Face</b> for sponsoring the bounty!
+
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3rem', margin: '1.5rem auto', flexWrap: 'wrap' }}>
+  <img src={pydanticLogo} alt="Pydantic" style={{ height: '3.5rem', width: 'auto' }} />
+  <img src={prefectLogo} alt="Prefect" style={{ height: '3.5rem', width: 'auto' }} />
+  <img src={huggingFaceLogo} alt="Hugging Face" style={{ height: '3.5rem', width: 'auto' }} />
+</div>
+
+<div style={{ textAlign: 'center', margin: '1.5rem auto 0' }}>
+  <div style={{ fontSize: '1.4rem', color: 'var(--accent-secondary)', marginBottom: '0.1rem' }}>Rules and instructions:</div>
+  <a href="https://hackmonty.com" style={{ fontSize: '2.8rem', fontWeight: 800, color: 'var(--accent)', textDecoration: 'none', letterSpacing: '-0.01em' }}>hackmonty.com</a>
+</div>
+
+</Slide>
+
+<Slide layout="statement" tab="reliable-ai">
+
+# AI is still Engineering
+
+## AI doesn't run in a vacuum, isolated from the practical challenges of the cloud.
+
+## <span style={{ color: 'var(--accent-secondary)' }}>The advent of AI makes good engineering practices more important, not less.</span>
+
+</Slide>
+
+<Slide tab="reliable-ai">
+
+# Reliable AI
+
+<LLMOpsSteps />
+
+</Slide>
+
+<Slide tab="reliable-ai">
+
+# An agent
+
+Structured, type-safe output with Pydantic AI.
+
+```py
+from datetime import datetime
+from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class ConferenceTalk(BaseModel):
+    title: str
+    start_time: datetime
+    room: str | None = None
+
+conference_talk_agent = Agent(
+    'gateway/anthropic:claude-haiku-4-5',
+    output_type=list[ConferenceTalk],
+    instructions='Extract information about conference talks',
+)
+```
+
+</Slide>
+
+<Slide tab="reliable-ai">
+
+# Make the agent observable
+
+Two lines (and an import) to make the agent observable.
+
+```py
+import logfire
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
+
+...
+```
+
+</Slide>
+
+<Slide tab="reliable-ai">
+
+# Trace Observability
+
+<TraceObservability />
+
+</Slide>
+
+<Slide tab="durable" layout="statement">
+
+# What happens when it runs for hours?
+
+</Slide>
+
+<Slide tab="durable">
+
+# Make the agent durable
+
+One line (and an import) to make the agent durable.
+
+```py
+...
+
+from pydantic_ai.durable_exec.temporal import TemporalAgent
+
+durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
+```
+
+**No need to manually wrap your tool calls as activities.**
+
+</Slide>
+
+<Slide tab="durable">
+
+# How this works
+
+- The **agent loop** lives in the workflow - completely deterministic
+- **Every external call** becomes an activity:
+  - model requests
+  - `@agent.tool` functions
+  - MCP server calls
+- One `TemporalAgent` wraps your agent and wires it all up
+
+</Slide>
+
+<Slide tab="durable">
+
+# How this works
+
+<WorkflowSequence />
+
+</Slide>
+
+<Slide tab="durable">
+
+# What this gets you
+
+- **Resume mid-run** - agents resume after a worker dies - from where it left off
+- **Automatic retries** - flaky tools, rate-limited models, etc
+- **Long-running by default** - `workflow.sleep(timedelta(days=7))` just works
+- **No bespoke orchestration** - no queues, no checkpoint tables, no state machines you have to write yourself
+
+</Slide>
+
+<Slide layout="statement" tab="production">
+
+# Long Running Agents → Production
+
+## in 3 easy steps
+
+</Slide>
+
+<Slide layout="statement" tab="production">
+
+<h1 style={{ fontSize: '5rem', textAlign: 'center', margin: 0 }}>Warning</h1>
+
+<h2 style={{ fontSize: '2.6rem', textAlign: 'center', color: 'var(--accent)', margin: '0.5rem 0 0' }}>Product Pitch alert!</h2>
+
+<img src={guido} alt="Guido" style={{ display: 'block', margin: '1.5rem auto 0', maxHeight: '34vh', width: 'auto', borderRadius: '0.5rem' }} />
+
+</Slide>
+
+<Slide tab="production">
+
+<div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flex: 1, minHeight: 0 }}>
+<div style={{ flex: '0 0 38%', paddingLeft: '0.25rem' }}>
+
+# In <span style={{ color: 'var(--accent)' }}>3 easy steps</span>.
+
+1. Build your TemporalAgent
+2. Connect your TemporalAgent to your application
+3. Provide Agent access to your users
+
+</div>
+<div style={{ flex: 1, minWidth: 0 }}>
+
+<ArchitectureDiagram stage="temporal" />
+
+</div>
+</div>
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# Actually, <span style={{ textDecoration: 'line-through' }}>3</span> <span style={{ color: 'var(--accent)' }}>6 steps</span>.
+
+<ArchitectureDiagram stage="six" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# Actually, <span style={{ textDecoration: 'line-through' }}>6</span> <span style={{ color: 'var(--accent)' }}>8 steps</span>.
+
+<ArchitectureDiagram stage="eight" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# With <span style={{ color: 'var(--accent)' }}>Logfire</span>.
+
+<ArchitectureDiagram stage="logfire" />
+
+</Slide>
+
+<Slide title="With Logfire. For Free." space="tight" tab="production">
+
+# With <span style={{ color: 'var(--accent)' }}>Logfire</span>. For Free.
+
+<FeatureGrid features={[
+  { number: '01', title: '10M spans / month', description: 'OpenTelemetry-native traces of every prompt, tool call and token. Not a sample - every one.' },
+  { number: '02', title: '30 days of audit logs', description: 'Replay any user-to-agent conversation. Replay any tool call. Compliance gets what they need without a ticket.' },
+  { number: '03', title: 'AI Gateway with BYOK', description: "Route to any provider, with active DLP on every request. Bring your own key." },
+  { number: '04', title: 'Prompt & tool optimization', description: 'Online and Offline evals, Hosted Datasets, Agent and Prompt tuning.' },
+]} />
+
+<hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.15)', margin: '3rem 0 0.75rem' }} />
+
+<h2 style={{ lineHeight: '1.3' }}><span style={{ color: '#ffffff' }}>Need more? Self Host?</span><br /><span style={{ color: 'var(--accent-secondary)' }}>Let's talk Enterprise.</span></h2>
+
+[sales@pydantic.dev](mailto:sales@pydantic.dev) · [pydantic.dev/contact](https://pydantic.dev/contact)
+
+</Slide>
+
+<Slide layout="statement" tab="demo">
+
+# Demo. <span style={{ color: 'var(--accent)' }}>Demo.</span> Demo.
+
+</Slide>
+
+<Slide tab="demo">
+
+<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, minHeight: 0 }}>
+
+# Agents <span style={{ color: 'var(--accent)' }}>Optimization</span>
+
+## Improve Long Running Agent performance with LLM traces
+
+</div>
+
+</Slide>
+
+<Slide title="20 Questions" tab="demo">
+
+## 20 Questions
+# <span style={{ color: 'var(--accent-secondary)' }}>LLM vs LLM</span>
+
+<div style={{ display: 'flex', gap: '3rem', marginTop: '0.5rem', alignItems: 'flex-start' }}>
+<div style={{ flex: '0 0 55%' }}>
+
+**Rules:**
+
+1. Player 1 thinks of a secret object, person, or place
+2. Player 2 tries to guess the object by asking yes/no questions
+3. Each question helps Player 2 narrow down the potential options
+4. If Player 2 guesses correctly within 20 questions, Player 2 wins
+
+</div>
+<div style={{ flex: 1, background: 'rgba(229,32,233,0.08)', border: '1px solid var(--accent)', borderRadius: '10px', padding: '1.2rem', marginTop: '-2.5rem' }}>
+
+**Example:**
+
+Player 1 thinks of **"Elephant"**
+
+Player 2: *"Is it man-made?"* → **"No"**
+
+...7 more questions later...
+
+Player 2 guesses **"Is it an Elephant?"**
+
+→ **Player 2 Wins!**
+
+</div>
+</div>
+
+<p style={{ marginTop: 'auto', paddingTop: '1rem', fontSize: '1em', color: 'var(--color-muted)' }}>In Temporal terms, each LLM call runs as an <strong>Activity Task</strong>.</p>
+
+</Slide>
+
+<Slide tab="demo">
+
+During the game, Player 2 will have an advantage. Player 2 will get help from:
+
+# <span style={{ color: 'var(--accent)' }}>Logfire</span> Agent Optimization
+
+<div style={{ marginTop: '1rem', fontSize: '1.1rem', lineHeight: 1.8 }}>
+
+- *Diagnoses before it prescribes.* Classifies each failure — confusing instructions, contradictory goals, ambiguous tools or prompt non-compliance — before drafting anything.
+- *An edit, not a re-write.* Your prompt remains yours, it's just tuned to perform better in the real world.
+- *Every suggestion is reviewable.* Each change comes with a problem → solution citation and the exact trace IDs that drove it. Approve, refine, or reject — you see the reasoning.
+- *Runs on the OTel traces you already send.* No new instrumentation. No separate eval pipeline. Launch sooner and optimize based on real usage, not artificial datasets.
+
+</div>
+
+</Slide>
+
+<Slide title="20 Questions - Starting Prompt" tab="demo">
+
+<PromptRound
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions. Call make_guess once you are confident in your choice."
+  optimizationTarget="Logfire observed the agent asking non-yes/no questions (e.g. 'What type of object is it?'), violating the game rules."
+  results={[
+    { item: 'Piano', outcome: 'Player 2 Loses', note: 'Cheated' },
+    { item: 'Sushi', outcome: 'Player 2 Loses', note: 'Cheated' },
+    { item: 'Tesla', outcome: 'Guessed in 19 Questions', note: 'Cheated' },
+    { item: 'Photosynthesis', outcome: 'Player 2 Loses', note: 'Cheated' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="20 Questions - Round 1" tab="demo">
+
+<PromptRound
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions. All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice."
+  highlights={["All your questions must be answerable with a 'yes' or 'no'."]}
+  optimizationTarget="Logfire identified the agent was still asking questions without a systematic approach, exhausting its questions on very specific guesses."
+  results={[
+    { item: 'Piano', outcome: 'Player 2 Loses' },
+    { item: 'Sushi', outcome: 'Guessed in 12 Questions', note: 'was failing' },
+    { item: 'Tesla', outcome: 'Guessed in 17 Questions', note: '2 fewer Questions' },
+    { item: 'Photosynthesis', outcome: 'Player 2 Loses' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="20 Questions - Round 2" tab="demo">
+
+<PromptRound
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions, aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down). All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice."
+  highlights={["aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down)."]}
+  optimizationTarget="Logfire found the agent over-specializing early and when it came time to guess, would guess multiple objects at the same time, which is not allowed by the rules."
+  results={[
+    { item: 'Piano', outcome: 'Player 2 Loses' },
+    { item: 'Sushi', outcome: 'Guessed in 13 Questions' },
+    { item: 'Tesla', outcome: 'Guessed in 17 Questions' },
+    { item: 'Photosynthesis', outcome: 'Guessed in 13 Questions', note: 'was failing' },
+  ]}
+/>
+
+</Slide>
+
+<Slide title="Logfire explains every change" tab="demo">
+
+# Logfire explains every change
+
+<ProposalExplanation />
+
+</Slide>
+
+<Slide title="20 Questions - Round 3" tab="demo">
+
+<PromptRound
+  prompt="You are playing 20 Questions. Your goal is to identify the secret item by asking strategic yes/no questions, aiming to narrow down the possibilities efficiently using a binary-search strategy (start broad, then narrow down). When starting broad, prioritize questions about fundamental properties or classifications (e.g. category, function, domain or era.). If a line of questioning becomes too specific or unproductive, pivot to a different set of broader questions to eliminate larger categories. All your questions must be answerable with a 'yes' or 'no'. Call make_guess once you are confident in your choice, ensuring your guess is concise and provides only the name of the item."
+  highlights={["When starting broad, prioritize questions about fundamental properties or classifications (e.g. category, function, domain or era.). If a line of questioning becomes too specific or unproductive, pivot to a different set of broader questions to eliminate larger categories.", "ensuring your guess is concise and provides only the name of the item."]}
+  results={[
+    { item: 'Piano', outcome: 'Guessed in 19 Questions', note: 'was failing' },
+    { item: 'Sushi', outcome: 'Guessed in 13 Questions' },
+    { item: 'Tesla', outcome: 'Guessed in 15 Questions', note: '2 fewer questions' },
+    { item: 'Photosynthesis', outcome: 'Guessed in 7 Questions', note: '6 fewer questions' },
+  ]}
+/>
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+<div>
+Slides, examples and docs link:
+
+<img src={qr} alt="QR code linking to the talk repo" style={{ display: 'block', margin: '1rem auto', width: '18rem', height: '18rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a style={{ fontSize: '1.2rem' }} href="https://github.com/pydantic/talks/tree/main/2026-05-pycon-italy">github.com/pydantic/talks/tree/main/2026-05-pycon-italy</a>
+
+</div>
+
+</Slide>
