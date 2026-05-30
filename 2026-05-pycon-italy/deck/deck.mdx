@@ -7,10 +7,11 @@ import ArchitectureDiagram from "./components/ArchitectureDiagram.tsx";
 import FeatureGrid from "./components/FeatureGrid.tsx";
 import PromptRound from "./components/PromptRound.tsx";
 import ProposalExplanation from "./components/ProposalExplanation.tsx";
-import qrTemporal from "./assets/qr-temporal.svg";
+import qr from "./assets/qr.svg";
 import pydanticLogo from "./assets/pydantic-logo.svg";
 import prefectLogo from "./assets/prefect-logo.svg";
 import huggingFaceLogo from "./assets/hugging-face-logo.svg";
+import guido from "./assets/guido.png";
 
 <Slide layout="title">
 
@@ -112,7 +113,7 @@ Thanks to <b style={{ color: 'var(--accent-secondary)' }}>Pydantic</b>, <b style
 
 </Slide>
 
-<Slide tab="structure">
+<Slide tab="reliable-ai">
 
 # An agent
 
@@ -137,7 +138,7 @@ conference_talk_agent = Agent(
 
 </Slide>
 
-<Slide tab="observability">
+<Slide tab="reliable-ai">
 
 # Make the agent observable
 
@@ -154,7 +155,7 @@ logfire.instrument_pydantic_ai()
 
 </Slide>
 
-<Slide tab="observability">
+<Slide tab="reliable-ai">
 
 # Trace Observability
 
@@ -226,6 +227,16 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 
 </Slide>
 
+<Slide layout="statement" tab="production">
+
+<h1 style={{ fontSize: '5rem', textAlign: 'center', margin: 0 }}>Warning</h1>
+
+<h2 style={{ fontSize: '2.6rem', textAlign: 'center', color: 'var(--accent)', margin: '0.5rem 0 0' }}>Product Pitch alert!</h2>
+
+<img src={guido} alt="Guido" style={{ display: 'block', margin: '1.5rem auto 0', maxHeight: '34vh', width: 'auto', borderRadius: '0.5rem' }} />
+
+</Slide>
+
 <Slide tab="production">
 
 <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flex: 1, minHeight: 0 }}>
@@ -276,7 +287,7 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 # With <span style={{ color: 'var(--accent)' }}>Logfire</span>. For Free.
 
 <FeatureGrid features={[
-  { number: '01', title: '10M LLM spans / month', description: 'OpenTelemetry-native traces of every prompt, tool call and token. Not a sample - every one.' },
+  { number: '01', title: '10M spans / month', description: 'OpenTelemetry-native traces of every prompt, tool call and token. Not a sample - every one.' },
   { number: '02', title: '30 days of audit logs', description: 'Replay any user-to-agent conversation. Replay any tool call. Compliance gets what they need without a ticket.' },
   { number: '03', title: 'AI Gateway with BYOK', description: "Route to any provider, with active DLP on every request. Bring your own key." },
   { number: '04', title: 'Prompt & tool optimization', description: 'Online and Offline evals, Hosted Datasets, Agent and Prompt tuning.' },
@@ -286,7 +297,7 @@ durable_conference_talk_agent = TemporalAgent(conference_talk_agent)
 
 <h2 style={{ lineHeight: '1.3' }}><span style={{ color: '#ffffff' }}>Need more? Self Host?</span><br /><span style={{ color: 'var(--accent-secondary)' }}>Let's talk Enterprise.</span></h2>
 
-<p style={{ marginTop: '0.75rem', fontSize: '1em' }}><strong style={{ color: 'var(--accent-secondary)' }}>sales@pydantic.dev</strong>{' · '}pydantic.dev/contact</p>
+[sales@pydantic.dev](mailto:sales@pydantic.dev) · [pydantic.dev/contact](https://pydantic.dev/contact)
 
 </Slide>
 
@@ -356,7 +367,7 @@ During the game, Player 2 will have an advantage. Player 2 will get help from:
 - *Diagnoses before it prescribes.* Classifies each failure — confusing instructions, contradictory goals, ambiguous tools or prompt non-compliance — before drafting anything.
 - *An edit, not a re-write.* Your prompt remains yours, it's just tuned to perform better in the real world.
 - *Every suggestion is reviewable.* Each change comes with a problem → solution citation and the exact trace IDs that drove it. Approve, refine, or reject — you see the reasoning.
-- *Runs on the OTel traces you already send.* No new instrumentation. No separate eval pipeline. Launch sooner and optimize based on real usage, not artificial datasets. 
+- *Runs on the OTel traces you already send.* No new instrumentation. No separate eval pipeline. Launch sooner and optimize based on real usage, not artificial datasets.
 
 </div>
 
@@ -439,7 +450,7 @@ During the game, Player 2 will have an advantage. Player 2 will get help from:
 <div>
 Slides, examples and docs link:
 
-<img src={qrTemporal} alt="QR code linking to the talk repo" style={{ display: 'block', margin: '1rem auto', width: '18rem', height: '18rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+<img src={qr} alt="QR code linking to the talk repo" style={{ display: 'block', margin: '1rem auto', width: '18rem', height: '18rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
 
 <a style={{ fontSize: '1.2rem' }} href="https://github.com/pydantic/talks/tree/main/2026-05-pycon-italy">github.com/pydantic/talks/tree/main/2026-05-pycon-italy</a>
 
