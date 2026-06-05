@@ -1,0 +1,15 @@
+title = "Pydantic Monty & Logfire: Wild LLMs, from tool calling to computer use - PyData London June 2026"
+theme = "dark"
+footer = "PyData London - June 2026 - @samuelcolvin"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",    label = "Intro" },
+  { id = "codemode", label = "Codemode" },
+  { id = "sandbox",  label = "Sandbox" },
+  { id = "monty",    label = "Monty" },
+  { id = "how",      label = "How" },
+  { id = "security", label = "Security" },
+  { id = "production", label = "Production" },
+  { id = "demo",     label = "Demo" },
+]

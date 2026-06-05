@@ -1,0 +1,453 @@
+import { Slide } from "deckx";
+import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ToolsJson from "./components/ToolsJson.tsx";
+import ToolUniverseCompare from "./components/ToolUniverseCompare.tsx";
+import SandboxContinuum from "./components/SandboxContinuum.tsx";
+import AdvantagesChart from "./components/AdvantagesChart.tsx";
+import InstallLine from "./components/InstallLine.tsx";
+import HowOverview from "./components/HowOverview.tsx";
+import AstExample from "./components/AstExample.tsx";
+import ResolveExample from "./components/ResolveExample.tsx";
+import BytecodeExample from "./components/BytecodeExample.tsx";
+import HeapVmDiagram from "./components/HeapVmDiagram.tsx";
+import ArchitectureDiagram from "./components/ArchitectureDiagram.tsx";
+import FeatureGrid from "./components/FeatureGrid.tsx";
+import hackmontyImg from "./assets/hackmonty.png";
+import qrPydata from "./assets/qr-pydata.svg";
+import guido from "./assets/guido.png";
+
+<Slide layout="title">
+
+### Keynote · PyData London 2026 / June 2026
+
+# Pydantic Monty & Logfire: Wild LLMs, from tool calling to computer use
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+<div class="bigger">
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+- Working on **Pydantic AI**, **Logfire**, and **Monty**
+- Writing Python and Rust developer
+- Now AI talking head (like everyone else)
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode">
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr', gap: '2rem', alignItems: 'stretch', height: '100%' }}>
+
+<div>
+
+# Agents & Tools
+
+Agents are easy to define in the abstract.
+
+```py
+env = Environment()
+tools = Tools(env)
+system_prompt = "Goals, constraints, and how to act"
+
+while True:
+    action = llm.run(system_prompt + env.state)
+    env.state = tools.run(action)
+```
+
+**Agents are models using tools in a loop**
+
+... but how many tools?
+
+</div>
+
+<ToolsJson />
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode">
+
+# Enter Codemode 🥁
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- aka "Programatic tool calling", CodeAct, and RLM (Recursive Language Models)
+- The model writes Python (or js); the Python calls tools
+- Tool composition, branching, looping - all happen in **code**, not round-trips
+- Intermediate state stays in the runtime, not in the context window
+- The agent only ever sees **two** tools: `run_code` and `find_tools`
+- "1000 tools in 1000 tokens" is the promise
+- Even better: "1000 tool calls with 1 LLM request"
+
+</div>
+
+<CodemodeDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode" layout="statement">
+
+# But how do we run it?
+
+</Slide>
+
+<Slide tab="sandbox" id="tradeoff-slide">
+
+#### There are multiple options
+
+<SandboxContinuum showMonty={false} />
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# The tradeoff
+
+<div class="bigger">
+
+- A **curated list** beats the kitchen sink
+- Most agents don't need a whole Linux box - they need ~5 tools used well
+- "Analyse BI data to find efficiencies" sounds broad - the actual surface is tiny
+- Full sandboxes solve a problem most embedded agents don't have
+
+</div>
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# The sandbox vs. the desert
+
+<ToolUniverseCompare />
+
+</Slide>
+
+<Slide tab="monty">
+
+# Introducing Monty
+
+- A **minimal Python interpreter, written in Rust**, for code written by AI
+- Safe by default: no filesystem, env, or network unless you grant it
+- Pass in your own functions - the model calls them as ordinary Python
+- **Type-checks** code (via `ty`) before it runs
+- **Snapshottable** - pause at an external call, resume later, anywhere
+- Callable from **Rust, Python, or JavaScript**
+
+**Tradeoff:** Monty will not run your existing Python app - it's a Python *subset*.
+
+<InstallLine />
+
+</Slide>
+
+<Slide tab="monty" id="tradeoff-slide-monty">
+
+#### Filling in the gap
+
+<SandboxContinuum />
+
+</Slide>
+
+<Slide tab="monty">
+
+# The advantages
+
+<AdvantagesChart />
+
+</Slide>
+
+<Slide tab="monty" layout="statement">
+
+# Mini Demo
+
+🤞
+
+</Slide>
+
+<Slide tab="how">
+
+# How Monty works
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center' }}>
+
+<div>
+
+- Five phases
+- First 3 phases can be reused
+- The pause/resume protocol is what makes Monty unusual
+
+</div>
+
+<HowOverview />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 1 · Parse to AST
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- **ruff** parses the source — same AST as Python tooling
+- Monty walks the AST eagerly into its own `ParseNode` / `Expr`
+- Exit early if we encounter a syntax error, or syntax we don't yet support
+
+</div>
+
+<AstExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 2 · Resolve names
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Second pass classifies every name: **global**, **local**, **free** (closure), or **`LocalUnassigned`**
+- String keys become integer `NamespaceId` slot indices
+- `LocalUnassigned` = name read but never bound → host-provided external function
+- Closure-cell capture decided here so nested functions can reach enclosing locals
+
+</div>
+
+<ResolveExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 3 · Compile to bytecode
+
+<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Convert the AST into **bytecode** instructions
+- Effectively a `list[int]` - where each `int` is an opcode and its operands
+- This compile step is similar to cpython - why we have `.pyc` files
+
+```python
+greeting = 'Hello'
+who = get_who(greeting)
+f'{greeting} {who}'
+```
+
+</div>
+
+<BytecodeExample />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 4 · Run on a heap + stack VM
+
+<div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.5fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Execute the bytecode - iterate over the `list[int]` "doing each thing"
+- much like other interpreters
+- Two stacks: an **operand stack** for values and a **`CallFrame` stack** for activations
+
+<div style={{
+  marginTop: '1.5rem',
+  background: 'var(--surface)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '8px',
+  padding: '0.7rem 1rem',
+}}>
+  <div style={{color: 'var(--color-muted)', fontSize: '0.65rem', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)'}}>running</div>
+  <div style={{fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--color-heading)'}}>
+    x = (<span style={{color: 'var(--accent-secondary)'}}>1</span> + <span style={{color: 'var(--accent-secondary)'}}>1</span>) * <span style={{color: 'var(--accent-aqua)'}}>"hello"</span>
+  </div>
+</div>
+
+</div>
+
+<HeapVmDiagram />
+
+</div>
+
+</Slide>
+
+<Slide tab="how">
+
+# Step 5 · Pause for the host, resume, repeat
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', alignItems: 'start' }}>
+
+<div>
+
+- Run the code until we hit an external call
+- Then return to the host
+- Ask it to call the function
+
+</div>
+
+<div>
+```python
+
+class Monty:
+    def start(self) -> CallTool | Result: ...
+    def resume(self, result: ReturnValue | Exc) -> CallTool | Result: ...
+
+run = Monty(code)
+progress = run.start()
+
+while isinstance(progress, CallTool):
+    # e.g. CallTool("get_who", ("Hello",))
+    # we could call run.dump() here if we wanted to
+    result = call_tool(progress.name, progress.args)
+    progress = run.resume(result)
+
+print(progress)
+```
+
+</div>
+
+</div>
+
+</Slide>
+
+<Slide tab="security">
+
+# Hack Monty
+
+- Public bounty at **[hackmonty.com](https://hackmonty.com)**
+- Scape the sandbox, read the secret and we'll pay **$10,000** (thank you to Prefect, Hugging Face and Pydantic)
+- Launched 4 weeks ago
+- Vulnerability found via use-after-free bug, and lots of less severe issues
+
+<img src={hackmontyImg} alt="hackmonty.com screenshot" style={{display: 'block', margin: '0 auto', maxHeight: '14rem', width: 'auto', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.10)'}} />
+
+</Slide>
+
+<Slide layout="statement" tab="production">
+
+# Agents in Production
+
+## in 3 easy steps
+
+</Slide>
+
+<Slide layout="statement" tab="production">
+
+<h1 style={{ fontSize: '5rem', textAlign: 'center', margin: 0 }}>Warning</h1>
+
+<h2 style={{ fontSize: '2.6rem', textAlign: 'center', color: 'var(--accent)', margin: '0.5rem 0 0' }}>Product Pitch alert!</h2>
+
+<img src={guido} alt="Guido" style={{ display: 'block', margin: '1.5rem auto 0', maxHeight: '34vh', width: 'auto', borderRadius: '0.5rem' }} />
+
+</Slide>
+
+<Slide tab="production">
+
+<div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flex: 1, minHeight: 0 }}>
+<div style={{ flex: '0 0 38%', paddingLeft: '0.25rem' }}>
+
+# In <span style={{ color: 'var(--accent)' }}>3 easy steps</span>.
+
+1. Build your Agent
+2. Add Codemode
+3. Provide Agent access to your users
+
+</div>
+<div style={{ flex: 1, minWidth: 0 }}>
+
+<ArchitectureDiagram stage="temporal" />
+
+</div>
+</div>
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# Actually, <span style={{ textDecoration: 'line-through' }}>3</span> <span style={{ color: 'var(--accent)' }}>6 steps</span>.
+
+<ArchitectureDiagram stage="six" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# Actually, <span style={{ textDecoration: 'line-through' }}>6</span> <span style={{ color: 'var(--accent)' }}>8 steps</span>.
+
+<ArchitectureDiagram stage="eight" />
+
+</Slide>
+
+<Slide title="Taking Agents to Production" tab="production">
+
+# With <span style={{ color: 'var(--accent)' }}>Logfire</span>.
+
+<ArchitectureDiagram stage="logfire" />
+
+</Slide>
+
+<Slide title="With Logfire. For Free." space="tight" tab="production">
+
+# With <span style={{ color: 'var(--accent)' }}>Logfire</span>. For Free.
+
+<FeatureGrid features={[
+  { number: '01', title: '10M spans / month', description: 'OpenTelemetry-native traces of every prompt, tool call and token. Not a sample - every one.' },
+  { number: '02', title: '30 days of audit logs', description: 'Replay any user-to-agent conversation. Replay any tool call. Compliance gets what they need without a ticket.' },
+  { number: '03', title: 'AI Gateway with BYOK', description: "Route to any provider, with active DLP on every request. Bring your own key." },
+  { number: '04', title: 'Prompt & tool optimization', description: 'Online and Offline evals, Hosted Datasets, Agent and Prompt tuning.' },
+]} />
+
+<hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.15)', margin: '3rem 0 0.75rem' }} />
+
+<h2 style={{ lineHeight: '1.3' }}><span style={{ color: '#ffffff' }}>Need more? Self Host?</span><br /><span style={{ color: 'var(--accent-secondary)' }}>Let's talk Enterprise.</span></h2>
+
+[sales@pydantic.dev](mailto:sales@pydantic.dev) · [pydantic.dev/contact](https://pydantic.dev/contact)
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+🤞
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+Slides and code:
+
+<img src={qrPydata} alt="QR code linking to the talk repo" style={{ display: 'block', margin: '0 auto 1rem', width: '14rem', height: '14rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a style={{marginBottom: '1rem'}} href="https://github.com/pydantic/talks/tree/main/2026-06-pydata-london#readme">github.com/pydantic/talks/tree/main/2026-06-pydata-london</a>
+
+`@samuelcolvin` · `@pydantic`
+
+</Slide>
