@@ -11,13 +11,13 @@ logfire.configure(service_name='ecommerce_example_optimized', variables=variable
 logfire.instrument_pydantic_ai()
 
 monty_ecommerce_agent_instructions = logfire.var(
-    'monty_ecommerce_agent_instructions',
+    'data_science_agent_prompt',
     default=(Path(__file__).parent / 'instructions.md').read_text(),
     description='Instructions for the Monty Ecommerce Agent.',
 )
 
 with monty_ecommerce_agent_instructions.get() as resolve:
-    logfire.info(f'managed prompt variable {resolve.label}')
+    logfire.info(f'managed prompt variable {resolve.label!r} {resolve.version!r}')
     result = agent.run_sync(
         'Which acquisition channel brings in the highest-value customers (by spend)?',
         instructions=resolve.value,

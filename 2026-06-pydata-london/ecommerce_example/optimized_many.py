@@ -11,7 +11,7 @@ logfire.configure(service_name='ecommerce_example_optimized_many', variables=var
 logfire.instrument_pydantic_ai()
 
 monty_ecommerce_agent_instructions = logfire.var(
-    'monty_ecommerce_agent_instructions',
+    'data_science_agent_prompt',
     default=(Path(__file__).parent / 'instructions.md').read_text(),
     description='Instructions for the Monty Ecommerce Agent.',
 )
