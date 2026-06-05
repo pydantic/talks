@@ -1,6 +1,6 @@
 title = "Pydantic Monty & Logfire: Wild LLMs, from tool calling to computer use - PyData London June 2026"
 theme = "dark"
-footer = "PyData London - June 2026 - @samuelcolvin"
+footer = "PyData London 2026 - @samuelcolvin"
 favicon = "assets/favicon.png"
 
 tabs = [
