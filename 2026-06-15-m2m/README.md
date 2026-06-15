@@ -31,9 +31,9 @@ Slides at <https://github.com/pydantic/talks>
 ## What he **** is Pydantic?
 
 * **Pydantic Validator** - open source validation library with 1B downloads
-* **Pydantic AI** - agent framework
+* **Pydantic AI** - Agent Framework
 * **Pydantic Logfire** - observability tool from AI
-* AI Gateway, prompt management, agent optimization, AI SRE
+* AI Gateway, prompt management, agent optimization, AI SRE, Agent governance
 
 
 
@@ -172,7 +172,6 @@ print(repr(result.output))
 Agent optimization with Pydantic Logfire agent optimization.
 
 ```py
-"""Run with `uv run -m ecommerce_example.optimized`."""
 from pathlib import Path
 import logfire
 
