@@ -32,8 +32,8 @@ Slides at <https://github.com/pydantic/talks>
 
 * **Pydantic Validator** - open source validation library with 1B downloads
 * **Pydantic AI** - Agent Framework
-* **Pydantic Logfire** - observability tool from AI
-* AI Gateway, prompt management, agent optimization, AI SRE, Agent governance
+* **Pydantic Logfire** - observability tool from AI ...
+* ... AI Gateway, prompt management, agent optimization, AI SRE, Agent governance
 
 
 
@@ -65,7 +65,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'anthropic:claude-sonnet-4-5',
+    'gateway/anthropic:claude-sonnet-4-5',
     output_type=City,
     instructions='Extract information about the city',
 )
@@ -106,7 +106,7 @@ class City(BaseModel):
     location: TypedDict('Location', {'lat': float, 'lng': float})
 
 agent = Agent(
-    'anthropic:claude-sonnet-4-5',
+    'gateway/anthropic:claude-sonnet-4-5',
     output_type=City,
     instructions='Extract information about the city',
 )
