@@ -28,45 +28,12 @@ Slides at <https://github.com/pydantic/talks>
 
 
 
-## What is the Pydantic Stack?
+## What he **** is Pydantic?
 
-**We do more than just validation.**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 1: Pydantic Validation
-
-Open source python tool with 1B million downloads.
-
-```py {title="pydantic-validation.py"}
-from datetime import date
-from pydantic import BaseModel
-
-
-class City(BaseModel):
-    name: str
-    founded: date
-    location: tuple[float, float]
-
-
-city = City(name='London', founded='0050-01-01', location=['51.5074', b'0.1278'])
-print(repr(city))
-```
+* **Pydantic Validator** - open source validation library with 1B downloads
+* **Pydantic AI** - agent framework
+* **Pydantic Logfire** - observability tool from AI
+* AI Gateway, prompt management, agent optimization, AI SRE
 
 
 
@@ -82,7 +49,7 @@ print(repr(city))
 
 
 
-## 2: Pydantic AI
+## 1: Pydantic AI
 
 Type-safe AI Agent orchestration.
 
@@ -119,7 +86,7 @@ print(repr(result.output))
 
 
 
-## 3: Pydantic Logfire
+## 2: Pydantic Logfire
 
 Observability tool from AI to API.
 
@@ -159,7 +126,7 @@ logfire.info(f'{result.output=}')
 
 
 
-## 4: Pydantic AI Gateway
+## 3: Pydantic AI Gateway
 AI model routing that simply works.
 
 ```py {title="pydantic-ai-gateway.py"}
@@ -200,19 +167,30 @@ print(repr(result.output))
 
 
 
+## 4: Prompt management and optimization
 
+Agent optimization with Pydantic Logfire agent optimization.
 
-## Let's look at an example
+```py
+"""Run with `uv run -m ecommerce_example.optimized`."""
+from pathlib import Path
+import logfire
 
-```bash
-uv run uvicorn src.server:app
+variables = logfire.VariablesOptions()
+logfire.configure(variables=variables)
+logfire.instrument_pydantic_ai()
+
+my_agent_instructions = logfire.var(
+    'my_agent_instructions',
+    default=default_value,
+)
+
+with my_agent_instructions.get() as resolve:
+    result = agent.run_sync(
+        '...',
+        instructions=resolve.value,
+    )
 ```
-
-
-
-
-
-
 
 
 
