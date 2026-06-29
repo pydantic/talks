@@ -1,7 +1,7 @@
-# AgentCon
+# AI Engineer World's Fair
 
-Palo Alto, 2026-04-04
+San Francisco, 2026-07-01
 
-https://globalai.community/chapters/san-francisco/events/agentcon-silicon-valley/
+Talk: "Your agent needs a sandbox, not a desert"
 
 See [deck-v1.pdf](deck-v1.pdf) for slides.
