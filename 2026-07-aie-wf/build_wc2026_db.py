@@ -29,7 +29,9 @@ import sqlite3
 import subprocess
 import sys
 import unicodedata
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).parent
 RAW_DIR = ROOT / "wc2026_raw_data"
@@ -37,7 +39,7 @@ JSON_DIR = RAW_DIR / "worldcup.json" / "2026"
 EVENTS_DIR = RAW_DIR / "wc2026-events" / "data"
 
 # Source repos, shallow-cloned into RAW_DIR if not already present.
-REPOS = [
+REPOS: list[tuple[str, str]] = [
     ("worldcup.json", "https://github.com/openfootball/worldcup.json"),
     ("wc2026-events", "https://github.com/nlbair/wc2026-events"),
 ]
@@ -49,7 +51,7 @@ csv.field_size_limit(1 << 24)
 # --------------------------------------------------------------------------- #
 # source repos
 # --------------------------------------------------------------------------- #
-def ensure_repos():
+def ensure_repos() -> None:
     """Shallow-clone (depth=1) each source repo into RAW_DIR if it's missing."""
     RAW_DIR.mkdir(exist_ok=True)
     for name, url in REPOS:
@@ -67,12 +69,12 @@ def ensure_repos():
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
-def load_json(path: Path):
+def load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def to_int(v):
+def to_int(v: Any) -> int | None:
     if v is None or v == "":
         return None
     try:
@@ -81,7 +83,7 @@ def to_int(v):
         return None
 
 
-def to_float(v):
+def to_float(v: Any) -> float | None:
     if v is None or v == "":
         return None
     try:
@@ -90,7 +92,7 @@ def to_float(v):
         return None
 
 
-def to_bool(v):
+def to_bool(v: Any) -> int:
     if isinstance(v, bool):
         return int(v)
     if v in ("True", "true", "1"):
@@ -100,21 +102,30 @@ def to_bool(v):
     return 0
 
 
-def split_score(score):
+def _pair(v: Any) -> tuple[Any, Any]:
+    """Split a 2-element score list into a pair, else (None, None)."""
+    try:
+        if v is not None and len(v) == 2:
+            return v[0], v[1]
+    except TypeError:
+        pass
+    return None, None
+
+
+def split_score(score: Any) -> tuple[Any, ...]:
     """Flatten an openfootball `score` into (ft1, ft2, ht1, ht2, et1, et2, p1, p2).
 
     `score` may be a dict with ft/ht/et/p keys, or a bare [a, b] list (quali),
     or missing entirely (fixture not yet played).
     """
-    out = {k: None for k in ("ft", "ht", "et", "p")}
+    out: dict[str, Any] = {k: None for k in ("ft", "ht", "et", "p")}
+    s: Any = score  # re-bind as Any so isinstance narrowing doesn't leak Unknown
     if isinstance(score, dict):
         for k in out:
-            if isinstance(score.get(k), list) and len(score[k]) == 2:
-                out[k] = score[k]
-    elif isinstance(score, list) and len(score) == 2:
-        out["ft"] = score
-    pair = lambda v: (v[0], v[1]) if v else (None, None)
-    return (*pair(out["ft"]), *pair(out["ht"]), *pair(out["et"]), *pair(out["p"]))
+            out[k] = s.get(k)
+    elif isinstance(score, list):
+        out["ft"] = s
+    return (*_pair(out["ft"]), *_pair(out["ht"]), *_pair(out["et"]), *_pair(out["p"]))
 
 
 def canon(name: str) -> str:
@@ -309,8 +320,8 @@ CREATE INDEX idx_events_goal     ON events(is_goal);
 # --------------------------------------------------------------------------- #
 # openfootball ingestion
 # --------------------------------------------------------------------------- #
-def load_teams(con):
-    rows = []
+def load_teams(con: sqlite3.Connection) -> int:
+    rows: list[tuple[Any, ...]] = []
     for t in load_json(JSON_DIR / "worldcup.teams.json"):
         rows.append((
             t["name"], t.get("name_normalised"), t.get("continent"),
@@ -321,8 +332,8 @@ def load_teams(con):
     return len(rows)
 
 
-def load_groups(con):
-    rows = []
+def load_groups(con: sqlite3.Connection) -> int:
+    rows: list[tuple[Any, ...]] = []
     for g in load_json(JSON_DIR / "worldcup.groups.json")["groups"]:
         for team in g["teams"]:
             rows.append((g["name"], team))
@@ -330,8 +341,8 @@ def load_groups(con):
     return len(rows)
 
 
-def load_stadiums(con):
-    rows = []
+def load_stadiums(con: sqlite3.Connection) -> int:
+    rows: list[tuple[Any, ...]] = []
     for s in load_json(JSON_DIR / "worldcup.stadiums.json")["stadiums"]:
         rows.append((
             s["name"], s.get("city"), s.get("cc"), s.get("timezone"),
@@ -341,11 +352,12 @@ def load_stadiums(con):
     return len(rows)
 
 
-def _insert_goals(con, table, fk_col, match_id, match):
-    rows = []
+def _insert_goals(con: sqlite3.Connection, table: str, fk_col: str, match_id: int, match: Any) -> int:
+    rows: list[tuple[Any, ...]] = []
     for side in (1, 2):
         team_name = match.get(f"team{side}")
-        for g in match.get(f"goals{side}", []) or []:
+        goals_list: Any = match.get(f"goals{side}") or []
+        for g in goals_list:
             rows.append((
                 match_id, side, team_name, g.get("name"), str(g.get("minute", "")),
                 to_bool(g.get("penalty")), to_bool(g.get("owngoal")),
@@ -359,7 +371,7 @@ def _insert_goals(con, table, fk_col, match_id, match):
     return len(rows)
 
 
-def load_matches(con):
+def load_matches(con: sqlite3.Connection) -> tuple[int, int]:
     data = load_json(JSON_DIR / "worldcup.json")
     n_goals = 0
     for i, m in enumerate(data["matches"], start=1):
@@ -375,7 +387,7 @@ def load_matches(con):
     return len(data["matches"]), n_goals
 
 
-def load_quali(con):
+def load_quali(con: sqlite3.Connection) -> tuple[int, int]:
     path = JSON_DIR / "worldcup.quali_playoffs.json"
     if not path.exists():
         return 0, 0
@@ -393,14 +405,15 @@ def load_quali(con):
     return len(data["matches"]), n_goals
 
 
-def load_squads(con):
+def load_squads(con: sqlite3.Connection) -> int:
     path = JSON_DIR / "worldcup.squads.json"
     if not path.exists():
         return 0
-    rows = []
+    rows: list[tuple[Any, ...]] = []
     for team in load_json(path):
-        for p in team.get("players", []):
-            club = p.get("club") or {}
+        players: Any = team.get("players") or []
+        for p in players:
+            club: Any = p.get("club") or {}
             rows.append((
                 team.get("name"), team.get("fifa_code"), team.get("group"),
                 to_int(p.get("number")), p.get("pos"), p.get("name"),
@@ -413,9 +426,10 @@ def load_squads(con):
 # --------------------------------------------------------------------------- #
 # events ingestion
 # --------------------------------------------------------------------------- #
-def load_team_meta(con):
+def load_team_meta(con: sqlite3.Connection) -> int:
     path = EVENTS_DIR / "metadata" / "team_meta.csv"
-    rows, seen = [], set()
+    rows: list[tuple[Any, ...]] = []
+    seen: set[Any] = set()
     with path.open(encoding="utf-8") as f:
         for r in csv.DictReader(f):
             key = r["whoscored_name"]
@@ -429,7 +443,7 @@ def load_team_meta(con):
 
 
 # Core event columns: CSV header name -> events table column.
-EVENT_CORE = {
+EVENT_CORE: dict[str, str] = {
     "id": "event_id",
     "eventId": "event_type_id",
     "minute": "minute",
@@ -471,7 +485,7 @@ EVENT_INSERT_COLS = [
 ]
 
 
-def _convert(col, value):
+def _convert(col: str, value: Any) -> Any:
     if col in INT_COLS:
         return to_int(value)
     if col in FLOAT_COLS:
@@ -481,7 +495,7 @@ def _convert(col, value):
     return value if value not in ("", None) else None
 
 
-def load_one_event_file(con, path: Path):
+def load_one_event_file(con: sqlite3.Connection, path: Path) -> tuple[tuple[Any, ...] | None, int]:
     with path.open(encoding="utf-8") as f:
         reader = csv.DictReader(f)
         header = reader.fieldnames or []
@@ -491,7 +505,7 @@ def load_one_event_file(con, path: Path):
         if first is None:
             return None, 0
 
-        meta = (
+        meta: tuple[Any, ...] = (
             to_int(first.get("match_id")),
             first.get("home_team"),
             first.get("away_team"),
@@ -501,15 +515,15 @@ def load_one_event_file(con, path: Path):
         )
         match_id = meta[0]
 
-        batch = []
+        batch: list[list[Any]] = []
         for row in _iter_rows(first, reader):
-            quals = {}
+            quals: dict[str, Any] = {}
             for qc in qual_cols:
                 v = row.get(qc)
                 if v in ("", None, "False"):
                     continue
                 quals[qc[len("qual_"):]] = True if v == "True" else v
-            values = [match_id]
+            values: list[Any] = [match_id]
             for csv_col, db_col in EVENT_CORE.items():
                 values.append(_convert(db_col, row.get(csv_col)))
             values.append(json.dumps(quals, ensure_ascii=False) if quals else None)
@@ -523,7 +537,7 @@ def load_one_event_file(con, path: Path):
     return meta, len(batch)
 
 
-def _iter_rows(first, reader):
+def _iter_rows(first: Any, reader: Iterator[Any]) -> Iterator[Any]:
     yield first
     yield from reader
 
@@ -540,14 +554,14 @@ def _date_diff(a: str, b: str) -> int:
         return 99
 
 
-def build_wc_link(con):
+def build_wc_link(con: sqlite3.Connection) -> dict[frozenset[str], list[tuple[Any, Any]]]:
     """Map team-pair -> list of (date, matches.id) for cross-linking.
 
     WhoScored stamps evening kickoffs with the US-local *next* day, so events
     and openfootball can differ by a day; we match on the team pair and pick the
     closest date (within 1 day).
     """
-    link: dict[frozenset, list[tuple[str, int]]] = {}
+    link: dict[frozenset[str], list[tuple[Any, Any]]] = {}
     for mid, date, t1, t2 in con.execute(
         "SELECT id, date, team1, team2 FROM matches"
     ):
@@ -555,7 +569,9 @@ def build_wc_link(con):
     return link
 
 
-def lookup_wc_match(link, home, away, date):
+def lookup_wc_match(
+    link: dict[frozenset[str], list[tuple[Any, Any]]], home: Any, away: Any, date: Any
+) -> int | None:
     candidates = link.get(frozenset({canon(home), canon(away)}))
     if not candidates:
         return None
@@ -563,7 +579,7 @@ def lookup_wc_match(link, home, away, date):
     return best_id if _date_diff(best_date, date) <= 1 else None
 
 
-def load_events(con):
+def load_events(con: sqlite3.Connection) -> tuple[int, int, int]:
     raw_dir = EVENTS_DIR / "raw"
     files = sorted(raw_dir.glob("wc2026_*_events.csv"))
     link = build_wc_link(con)
