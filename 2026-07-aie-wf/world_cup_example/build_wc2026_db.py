@@ -16,8 +16,8 @@ Two public datasets are combined (both cloned into wc2026_raw_data/ on first run
 The script is idempotent: it shallow-clones any missing source repo, then
 rebuilds every table from scratch.
 
-    uv run build_wc2026_db.py                 # -> worldcup2026.db
-    uv run build_wc2026_db.py --db wc.db
+    uv run world_cup_example/build_wc2026_db.py            # -> worldcup2026.db (alongside this script)
+    uv run world_cup_example/build_wc2026_db.py --db wc.db
 """
 
 from __future__ import annotations

@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "logfire>=4.32.1",
-    "pydantic-ai-slim[openai,anthropic]>=2",
+    "pydantic-ai-slim[openai,anthropic,cli]>=2",
     "pydantic-ai-harness[code-mode]>=0.4.0",
     "rich>=15.0.0",
 ]
@@ -44,3 +44,5 @@ pythonVersion = "3.14"
 typeCheckingMode = "strict"
 reportUnnecessaryTypeIgnoreComment = true
 venv = ".venv"
+# Keep pyright's defaults, plus the cloned upstream datasets (third-party code).
+exclude = ["**/node_modules", "**/__pycache__", "**/.*", "**/wc2026_raw_data"]
