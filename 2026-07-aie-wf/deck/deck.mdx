@@ -1,7 +1,10 @@
 import { Slide } from "deckx";
 import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import ToolsJson from "./components/ToolsJson.tsx";
 import ToolUniverseCompare from "./components/ToolUniverseCompare.tsx";
 import SandboxContinuum from "./components/SandboxContinuum.tsx";
+import SandboxInvocations from "./components/SandboxInvocations.tsx";
+import TwoParadigms from "./components/TwoParadigms.tsx";
 import AdvantagesChart from "./components/AdvantagesChart.tsx";
 import InstallLine from "./components/InstallLine.tsx";
 import hackmontyImg from "./assets/hackmonty.png";
@@ -10,7 +13,7 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 ### AI Engineer World's Fair, San Francisco / July 2026
 
-# Your agent needs a sandbox, not a desert
+# Your agent needs a sandbox,<br/>not a desert
 
 ## Samuel Colvin · Pydantic
 
@@ -22,15 +25,52 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 - Creator of **Pydantic**
 - Founder & CEO of **Pydantic Labs**
-- Working on **Pydantic AI**, **Logfire**, and **Monty**
-- Writing Python and Rust developer
-- Now AI talking head (like everyone else)
+
+## Pydantic
+
+- Valdiation
+- Agent Framework
+- Observability - AI & Infra
+- Evals
+- Prompt management
 
 </Slide>
 
 <Slide tab="codemode">
 
-# What is "codemode"?
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr', gap: '2rem', alignItems: 'stretch', height: '100%' }}>
+
+<div>
+
+# Agents & Tools
+
+Agents are easy to define in the abstract.
+
+```py
+env = Environment()
+tools = Tools(env)
+system_prompt = "Goals, constraints, and how to act"
+
+while True:
+    action = llm.run(system_prompt + env.state)
+    env.state = tools.run(action)
+```
+
+**Agents are models using tools in a loop**
+
+... but how many tools?
+
+</div>
+
+<ToolsJson />
+
+</div>
+
+</Slide>
+
+<Slide tab="codemode">
+
+# Enter Codemode 🥁
 
 <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
 
@@ -59,12 +99,31 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 <Slide tab="sandbox">
 
-# Sandbox, not a desert
+# Two Paradigms
 
-- A **curated list** beats the kitchen sink
-- Most agents don't need a whole Linux box - they need ~5 tools used well
-- "Analyse BI data to find efficiencies" sounds broad - the actual surface is tiny
-- Full sandboxes solve a problem most embedded agents don't have
+Both alike in dignity.
+
+<TwoParadigms variant="tasks" />
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# Two Paradigms
+
+Both alike in dignity. **Usage**
+
+<SandboxInvocations />
+
+</Slide>
+
+<Slide tab="sandbox">
+
+# Two Paradigms
+
+Both alike in dignity. **Problems**
+
+<TwoParadigms variant="env" />
 
 </Slide>
 
@@ -76,11 +135,20 @@ import hackmontyImg from "./assets/hackmonty.png";
 
 </Slide>
 
-<Slide tab="sandbox" id="tradeoff-slide">
+<Slide tab="sandbox">
 
-#### Yes, this is a tradeoff
+# Sandbox, not a desert
 
-<SandboxContinuum />
+- A **curated list** beats the kitchen sink
+- Most agents don't need a whole Linux box - they need ~5 tools used well
+- "Analyse BI data to find efficiencies" sounds broad - the actual surface is tiny
+- Full sandboxes solve a problem most embedded agents don't have
+
+</Slide>
+
+<Slide tab="monty" layout="statement">
+
+# What would a better sandbox for light tasks look like?
 
 </Slide>
 
@@ -93,7 +161,6 @@ import hackmontyImg from "./assets/hackmonty.png";
 - Pass in your own functions - the model calls them as ordinary Python
 - **Type-checks** code (via `ty`) before it runs
 - **Snapshottable** - pause at an external call, resume later, anywhere
-- Callable from **Rust, Python, or JavaScript**
 
 **Tradeoff:** Monty will not run your existing Python app - it's a Python *subset*.
 
@@ -114,10 +181,9 @@ import hackmontyImg from "./assets/hackmonty.png";
 # Hack Monty
 
 - Public bounty at **[hackmonty.com](https://hackmonty.com)**
-- Scape the sandbox, read the secret and we'll pay **$5,000**
-- Launched 2 weeks ago
-- Vulnerability found via use-after-free bug, and lots of less severe issues
-- <div style={{color: 'var(--accent)'}}>Relaunching in a week with double the prize - <b>$10,000</b></div>
+- Scape the sandbox, read the secret and we'll pay **$10,000**
+- Round 2 launched a month ago
+- No sandbox vulnerability found
 
 <img src={hackmontyImg} alt="hackmonty.com screenshot" style={{display: 'block', margin: '0 auto', maxHeight: '14rem', width: 'auto', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.10)'}} />
 

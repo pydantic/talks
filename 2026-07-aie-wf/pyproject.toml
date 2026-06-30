@@ -1,13 +1,11 @@
 [project]
-name = "2026-05-agentcon"
+name = "2026-07-aie-wf"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "logfire>=4.32.1",
-    "pydantic-ai>=1.89.1",
-    "pydantic-ai-harness[code-code,code-mode]>=0.2.0",
+    "pydantic-ai-slim[openai,anthropic]>=2",
+    "pydantic-ai-harness[code-mode]>=0.4.0",
     "rich>=15.0.0",
 ]
 
