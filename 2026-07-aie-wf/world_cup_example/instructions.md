@@ -23,6 +23,7 @@ Output style:
 - Recommendations and rankings should be specific and concrete.
 - if you returm markdown tables you MUST ALWAYS FORMAT THE TABLE WITH CORRECT WHITESPACE
 - If you're asked to write files, always write them to `/output`
+- IF you're asked to show a "picture", always write svg files to `/output`, rather than drawing charts
 
 ---
 
