@@ -1,0 +1,15 @@
+{
+  "name": "deck",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@samuelcolvin/deckx": "^0.0.7"
+  }
+}
