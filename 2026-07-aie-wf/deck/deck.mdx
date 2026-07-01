@@ -171,6 +171,7 @@ Both alike in dignity. **Problems**
 - Pass in your own functions - the model calls them as ordinary Python
 - **Type-checks** code (via `ty`) before it runs
 - **Snapshottable** - pause at an external call, resume later, anywhere
+- Monty code is run in a pool of subprocesses, wire protocol for communicating with the main process
 
 **Tradeoff:** Monty will not run your existing Python app - it's a Python *subset*.
 
@@ -204,6 +205,21 @@ Both alike in dignity. **Problems**
 # Demo
 
 🤞
+
+</Slide>
+
+<Slide tab="demo">
+
+# Coming soon...
+
+We also have a plan to solve agents for heavy tasks:
+
+<br/>
+
+```py
+async with logfire.sandbox(provider='modal', api_key=LOGFIRE_TOKEN) as session:
+    result = await session.run_feed(code, external_functions={'my_local_function': ...})
+```
 
 </Slide>
 

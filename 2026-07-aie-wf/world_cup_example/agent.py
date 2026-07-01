@@ -1,9 +1,7 @@
 from pathlib import Path
 
-from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai_harness import CodeMode
-from pydantic_ai_harness.code_mode import CodeModeMount
 from pydantic_monty import MountDir
 
 from .database import Database
@@ -26,10 +24,5 @@ agent = Agent(
         db.table_count,
     ],
     model_settings={'max_tokens': 16384},
-    # capabilities=[
-    #     CodeMode(
-    #         max_retries=30,
-    #         mount=MountDir('/output', (THIS_DIR / '..' / 'agent_output').resolve(), mode='read-write'),
-    #     )
-    # ],
+    capabilities=[CodeMode(mount=MountDir('/output', THIS_DIR / '..' / 'agent_output', mode='read-write'))],
 )

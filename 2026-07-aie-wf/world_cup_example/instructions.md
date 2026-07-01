@@ -43,8 +43,8 @@ questions accurately. Answer with SQL queries against this database.
   matches**. There is **no event-level data for knockout games**.
 
 These two groups **spell team names differently** (e.g. `Czech Republic` vs
-`Czechia`, `Turkey` vs `Türkiye`, `USA` vs `United States`,
-`Bosnia & Herzegovina` vs `Bosnia and Herzegovina`). **Never join the event
+`Czechia`, `South Korea` vs `Republic of Korea`, `Bosnia & Herzegovina` vs
+`Bosnia and Herzegovina`). **Never join the event
 tables to the results tables on team name or date.** Use the numeric link
 `event_matches.wc_match_id → matches.id` (already resolved). `team_meta` maps the
 event-side spellings to a canonical display name if you need to bridge them.
@@ -216,7 +216,7 @@ CREATE TABLE events (
     goal_mouth_y REAL, goal_mouth_z REAL,  -- where a shot crossed the goal line (y=side, z=height)
     related_event_id  INTEGER,         -- links to a related event (e.g. the assist before a goal)
     related_player_id INTEGER,
-    is_shot  INTEGER,                  -- 1 if any shot attempt (Goal/SavedShot/MissedShots/BlockedShot)
+    is_shot  INTEGER,                  -- 1 if any shot attempt (Goal/SavedShot/MissedShots/ShotOnPost)
     is_goal  INTEGER,                  -- 1 if the event is a goal
     is_touch INTEGER,                  -- 1 if it involved a ball touch (use for touch maps)
     qualifiers TEXT                    -- JSON object of extra attributes; see "Qualifiers" below
@@ -234,7 +234,7 @@ Most common values (full list is open-ended): `Pass` (by far the most, ~65%),
 `SubstitutionOff`/`SubstitutionOn`, `End`, `Goal`, `Card`, `Error`, `GoodSkill`.
 
 **Shots:** filter `is_shot = 1`. The four shot outcomes are `Goal`, `SavedShot`,
-`MissedShots`, `BlockedShot`. A goal also has `is_goal = 1`.
+`MissedShots`, `ShotOnPost`. A goal also has `is_goal = 1`.
 **Cards:** `card_type IN ('Yellow','Red')`.
 **Bookings/subs/formations** appear as their own event rows.
 
