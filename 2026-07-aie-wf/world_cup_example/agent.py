@@ -9,7 +9,6 @@ from .database import Database
 
 db = Database()
 
-# Persona/style notes followed by the full schema reference (one self-contained file).
 THIS_DIR = Path(__file__).parent
 INSTRUCTIONS = (THIS_DIR / 'instructions.md').read_text()
 

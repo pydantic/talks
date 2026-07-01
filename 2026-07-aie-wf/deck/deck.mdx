@@ -90,6 +90,7 @@ while True:
 - Intermediate state stays in the runtime, not in the context window
 - The agent only ever sees **two** tools: `run_code` and `find_tools`
 - "1000 tools in 1000 tokens" is the promise
+- even better "1000 tool calls with 1 LLM call"
 
 </div>
 
@@ -171,7 +172,7 @@ Both alike in dignity. **Problems**
 - Pass in your own functions - the model calls them as ordinary Python
 - **Type-checks** code (via `ty`) before it runs
 - **Snapshottable** - pause at an external call, resume later, anywhere
-- Supports a small but growing subsection of the standard library - `re`, `json`, `datetime`, `asyncio` etc.
+- Supports a small but growing subsection of the standard library - `re`, `json`, `datetime`, `Pathlib` etc.
 - Monty code is run in a pool of subprocesses, wire protocol for communicating with the main process
 
 <InstallLine />
