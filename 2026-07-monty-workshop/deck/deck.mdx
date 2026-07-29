@@ -6,8 +6,6 @@ import SandboxInvocations from "./components/SandboxInvocations.tsx";
 import TwoParadigms from "./components/TwoParadigms.tsx";
 import AdvantagesChart from "./components/AdvantagesChart.tsx";
 import InstallLine from "./components/InstallLine.tsx";
-import hackmontyImg from "./assets/hackmonty.png";
-import qrContact from "./assets/qr-contact.svg";
 
 <Slide layout="title">
 
@@ -187,19 +185,6 @@ Both alike in dignity. **Problems**
 
 </Slide>
 
-<Slide tab="security">
-
-# Hack Monty
-
-- Public bounty at **[hackmonty.com](https://hackmonty.com)**
-- Scape the sandbox, read the secret and we'll pay **$10,000**
-- Round 2 launched a month ago
-- No sandbox vulnerability found
-
-<img src={hackmontyImg} alt="hackmonty.com screenshot" style={{display: 'block', margin: '0 auto', maxHeight: '14rem', width: 'auto', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.10)'}} />
-
-</Slide>
-
 <Slide tab="demo" layout="statement">
 
 # Demo
@@ -208,18 +193,14 @@ Both alike in dignity. **Problems**
 
 </Slide>
 
-<Slide tab="demo">
+<Slide tab="roadmap">
 
-# Coming soon...
+# Roadmap
 
-We also have a plan to solve agents for heavy tasks:
-
-<br/>
-
-```py
-async with logfire.sandbox(provider='modal', api_key=LOGFIRE_TOKEN) as session:
-    result = await session.run_code(code, external_functions={'my_local_function': ...})
-```
+- **Next week** — [hackmonty.com](https://hackmonty.com) round 3, **$20,000** prize
+- **The week after** — **Monty V1** release
+- **Mid August** — **Monty service** in Logfire (`monty-over-websocket`)
+- **Once we have sufficient design partners** — Monty wire protocol for full sandboxes (`python-over-websocket`)
 
 </Slide>
 
@@ -227,9 +208,7 @@ async with logfire.sandbox(provider='modal', api_key=LOGFIRE_TOKEN) as session:
 
 # Thank you
 
-<img src={qrContact} alt="QR code linking to pydantic.dev/contact" style={{ display: 'block', margin: '0 auto 1rem', width: '14rem', height: '14rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
-
-<a href="https://pydantic.dev/contact" style={{ fontSize: '1.3em' }}>pydantic.dev/contact</a>
+contact <a href="mailto:sales@pydantic.dev" style={{ fontSize: '1.3em' }}>sales@pydantic.dev</a>
 
 <span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic`</span>
 

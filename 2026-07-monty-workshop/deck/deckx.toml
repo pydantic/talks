@@ -7,6 +7,6 @@ tabs = [
   { id = "codemode", label = "Codemode" },
   { id = "sandbox",  label = "Sandbox" },
   { id = "monty",    label = "Monty" },
-  { id = "security", label = "Security" },
   { id = "demo",     label = "Demo" },
+  { id = "roadmap",  label = "Roadmap" },
 ]
