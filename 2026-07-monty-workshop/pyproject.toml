@@ -8,6 +8,7 @@ dependencies = [
     "pydantic-ai-slim[openai,anthropic,cli]>=2",
     "pydantic-ai-harness[code-mode]>=0.4.0",
     "rich>=15.0.0",
+    "python-dotenv>=1.2.2",
 ]
 
 [dependency-groups]

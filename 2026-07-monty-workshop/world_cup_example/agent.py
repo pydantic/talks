@@ -6,8 +6,7 @@ from pydantic_monty import MountDir
 
 from .charts import draw_chart
 from .database import Database
-
-# from .hack_websocket_code_mode import WebsocketCodeMode
+from .hack_websocket_code_mode import WebsocketCodeMode
 
 db = Database()
 
@@ -15,7 +14,7 @@ THIS_DIR = Path(__file__).parent
 INSTRUCTIONS = (THIS_DIR / 'instructions.md').read_text()
 
 agent = Agent(
-    'gateway/anthropic:claude-sonnet-4-6',
+    'gateway/anthropic:claude-sonnet-5',
     name='monty_world_cup_agent',
     instructions=INSTRUCTIONS,
     retries=3,
@@ -36,7 +35,8 @@ agent = Agent(
             )
         )
         # WebsocketCodeMode(
-        #     url='ws://localhost:8000',
+        #     provider='monty',
+        #     # dependencies=['numpy', 'scikit-learn', 'pandas'],
         #     mount=MountDir(
         #         host_path=THIS_DIR / '..' / 'agent_output',
         #         virtual_path='/output',

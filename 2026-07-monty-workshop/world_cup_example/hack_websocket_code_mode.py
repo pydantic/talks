@@ -1,30 +1,28 @@
-"""A `CodeMode` variant that runs sandbox code on remote Monty workers over a WebSocket.
+"""A `CodeMode` variant that runs sandbox code in a `hack_full_monty.sandbox()` session.
 
 The stock `CodeMode` capability executes `run_code` snippets on a pool of local
 `monty` subprocesses (`pydantic_monty.Monty` + the sync snapshot API). This module
-swaps that execution backend for `pydantic_monty.AsyncMontyWebsocket`: each REPL
-session dials a `ws://`/`wss://` URL (a relay, or any server that bridges the
-connection to a worker) and drives the remote worker through the async snapshot
-API. Everything else -- the `run_code` tool schema and description, the sandboxed
-function catalog, tool dispatch through the agent's `ToolManager`, retry/error
-mapping -- is inherited from the harness implementation.
+swaps that execution backend for `hack_full_monty.sandbox()`, which yields an
+`AsyncMontySession` from the chosen provider -- `'monty'` (local `AsyncMonty`
+subprocess pool) or `'modal'` (a Modal-hosted worker reached over a WebSocket via
+`AsyncMontyWebsocket`) -- driven through the async snapshot API. Everything else
+-- the `run_code` tool schema and description, the sandboxed function catalog,
+tool dispatch through the agent's `ToolManager`, retry/error mapping -- is
+inherited from the harness implementation.
 
 Usage (drop-in replacement for `CodeMode` in `agent.py`):
 
-    from .websocket_code_mode import WebsocketCodeMode
+    from .hack_websocket_code_mode import WebsocketCodeMode
 
     agent = Agent(
         ...,
         capabilities=[
             WebsocketCodeMode(
-                url='ws://127.0.0.1:8799',
+                provider='modal',
                 mount=MountDir(host_path=..., virtual_path='/output', mode='read-write'),
             )
         ],
     )
-
-Note: the dialed URL must already contain any session/rendezvous routing the
-relay needs (e.g. a `/<uuid>/parent` path).
 """
 
 from __future__ import annotations
@@ -32,8 +30,8 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Container, Coroutine
 from contextlib import AsyncExitStack
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass, field, replace
+from typing import Any, Literal
 
 from pydantic_ai import AbstractToolset, RunContext
 from pydantic_ai.exceptions import ApprovalRequired, CallDeferred, ModelRetry, UserError
@@ -46,6 +44,7 @@ from pydantic_ai_harness._monty_exec import PrintCapture, is_sandbox_panic
 from pydantic_ai_harness.code_mode._toolset import (
     _TOOL_RETURN_CONTENT_TA,  # pyright: ignore[reportPrivateUsage]
     CodeModeToolset,
+    _base_description,  # pyright: ignore[reportPrivateUsage]
     _contains_multimodal,  # pyright: ignore[reportPrivateUsage]
     _global_mode_is_sequential,  # pyright: ignore[reportPrivateUsage]
     _RunCodeTool,  # pyright: ignore[reportPrivateUsage]
@@ -53,7 +52,6 @@ from pydantic_ai_harness.code_mode._toolset import (
 from pydantic_monty import (
     AsyncFunctionSnapshot,
     AsyncMontySession,
-    AsyncMontyWebsocket,
     AsyncNameLookupSnapshot,
     AsyncSnapshot,
     ExternalException,
@@ -66,6 +64,8 @@ from pydantic_monty import (
     MontyTypingError,
 )
 
+from .hack_full_monty import run_code_instructions, sandbox
+
 # Dispatch callback: given the sandbox function name and keyword arguments,
 # perform the host-side tool call and return the (serialized) result.
 DispatchFn = Coroutine[Any, Any, Any]
@@ -74,53 +74,43 @@ PendingCall = asyncio.Task[Any] | Coroutine[Any, Any, Any]
 
 
 @dataclass
-class _WebsocketRunState:
-    """Remote Monty resources shared by every toolset view created during one agent run.
+class _SandboxRunState:
+    """Sandbox session shared by every toolset view created during one agent run.
 
-    Async sibling of the harness's `_MontyRunState`: the pool dials a WebSocket URL
-    instead of spawning local subprocesses, so setup/teardown are awaitable.
+    Async sibling of the harness's `_MontyRunState`: the session comes from
+    `hack_full_monty.sandbox()` (a local `AsyncMonty` pool or a Modal-hosted
+    worker over a WebSocket), so setup/teardown are awaitable.
     """
 
-    url: str
-    max_processes: int | None = None
-    checkout_timeout: float | None = None
-    request_timeout: float | None = None
-    pool: AsyncMontyWebsocket | None = None
+    provider: Literal['modal', 'monty']
+    dependencies: list[str] | None = None
     session: AsyncMontySession | None = None
     has_executed_feed: bool = False
-    _pool_stack: AsyncExitStack = field(default_factory=AsyncExitStack, repr=False)
     _session_stack: AsyncExitStack = field(default_factory=AsyncExitStack, repr=False)
 
     async def get_session(self, *, type_check: bool, type_check_stubs: str | None) -> AsyncMontySession:
-        """Return the run's live remote REPL session, dialing the pool on first use."""
-        if self.pool is None:
-            self.pool = await self._pool_stack.enter_async_context(
-                AsyncMontyWebsocket(
-                    self.url,
-                    max_processes=self.max_processes,
-                    checkout_timeout=self.checkout_timeout,
-                    request_timeout=self.request_timeout,
-                )
-            )
+        """Return the run's live REPL session, creating the sandbox on first use."""
         if self.session is None:
             self.session = await self._session_stack.enter_async_context(
-                self.pool.checkout(type_check=type_check, type_check_stubs=type_check_stubs)
+                sandbox(
+                    provider=self.provider,
+                    dependencies=self.dependencies,
+                    type_check=type_check,
+                    type_check_stubs=type_check_stubs,
+                )
             )
         return self.session
 
     async def reset(self) -> None:
-        """Release the current connection and make the next call start a fresh REPL."""
+        """Tear down the sandbox and make the next call start a fresh REPL."""
         await self._session_stack.aclose()
         self._session_stack = AsyncExitStack()
         self.session = None
         self.has_executed_feed = False
 
     async def close(self) -> None:
-        """Release the session and close the owning pool."""
+        """Tear down the sandbox."""
         await self.reset()
-        await self._pool_stack.aclose()
-        self._pool_stack = AsyncExitStack()
-        self.pool = None
 
 
 @dataclass
@@ -147,8 +137,15 @@ class _AsyncMontyExecutor:
         try:
             while not isinstance(state, MontyComplete):
                 if isinstance(state, AsyncNameLookupSnapshot):
-                    # Leave the name undefined so the sandbox raises `NameError`.
-                    state = await state.resume()
+                    if state.variable_name in self.valid_names:
+                        # A tool name looked up as a bare name (the embedded-CPython worker
+                        # does this before calling it): bind the host function captured in
+                        # `external_lookup=` at `feed_start`. Its calls still arrive as
+                        # `AsyncFunctionSnapshot`s and are dispatched by this executor.
+                        state = await state.resume_auto()
+                    else:
+                        # Leave the name undefined so the sandbox raises `NameError`.
+                        state = await state.resume()
                 elif isinstance(state, AsyncFunctionSnapshot):
                     state = await self._handle_function(state)
                 else:
@@ -238,60 +235,86 @@ def _wrap_gathered(outcome: Any) -> ExternalReturnValue | ExternalException:
 
 @dataclass
 class WebsocketCodeModeToolset(CodeModeToolset[AgentDepsT]):
-    """`CodeModeToolset` that executes `run_code` on remote workers over a WebSocket.
+    """`CodeModeToolset` that executes `run_code` in a `hack_full_monty.sandbox()` session.
 
     Inherits tool splitting, catalog rendering, and the `run_code` tool definition
     from `CodeModeToolset`; only the execution backend (`__aenter__`/`__aexit__`
     lifecycle and the `run_code` branch of `call_tool`) is replaced.
     """
 
-    url: str = 'ws://127.0.0.1:8799'
-    """`ws://`/`wss://` URL to dial -- a relay, or any server that bridges to a worker."""
+    provider: Literal['modal', 'monty'] = field(kw_only=True)
+    """Where sandbox sessions run: `'monty'` (local subprocess pool) or `'modal'` (remote worker)."""
 
-    max_processes: int | None = None
-    """Cap on concurrent connections (defaults to the CPU count)."""
+    dependencies: list[str] | None = field(default=None, kw_only=True)
+    """Third-party packages installed into each sandbox session (modal provider only)."""
 
-    checkout_timeout: float | None = None
-    """Seconds `checkout()` waits for capacity before raising `TimeoutError`; `None` waits forever."""
+    _sandbox_state: _SandboxRunState | None = field(default=None, init=False, repr=False, compare=False)
 
-    request_timeout: float | None = 60.0
-    """Hard per-call deadline in seconds; a worker exceeding it is killed and the call retries."""
+    async def get_tools(self, ctx: RunContext[AgentDepsT]) -> dict[str, ToolsetTool[AgentDepsT]]:
+        """Return the tools, swapping in provider-specific `run_code` sandbox prose.
 
-    _ws_state: _WebsocketRunState | None = field(default=None, init=False, repr=False, compare=False)
+        The inherited description's base prose describes the local Monty sandbox
+        (subset of Python, stdlib allowlist); when `run_code_instructions` returns
+        replacement prose for the provider, splice it in over that base, keeping the
+        inherited REPL/return-value contract and the rendered function catalog.
+        """
+        tools = await super().get_tools(ctx)
+        override = run_code_instructions(self.provider, self.dependencies)
+        run_code = tools.get('run_code')
+        if override is None or run_code is None:
+            return tools
+        default_base = _base_description(has_os=self.os_access is not None, has_mount=self.mount is not None)
+        # Keep everything from the REPL-state paragraph on (return-value contract etc.);
+        # replace the sandbox-restrictions prose above it with the provider's own.
+        _, sep, contract = default_base.partition('\n\nState is preserved between calls')
+        assert sep, 'harness run_code description changed shape; update the partition marker'
+        description = (run_code.tool_def.description or '').replace(default_base, override + sep + contract, 1)
+        tools['run_code'] = replace(run_code, tool_def=replace(run_code.tool_def, description=description))
+        return tools
+
+    def _partition_callable_tools(
+        self, wrapped_tools: dict[str, ToolsetTool[AgentDepsT]]
+    ) -> tuple[dict[str, Any], dict[str, str]]:
+        """Partition tools, forcing every tool to sync dispatch on the `modal` provider.
+
+        The modal image runs an embedded-CPython worker, which does not support async
+        host functions -- tools must be rendered as `def` (called without `await`) and
+        resolved inline. Marking every tool def `sequential=True` makes the inherited
+        catalog/stub rendering and the executor's dispatch do exactly that.
+        """
+        callable_defs, sanitized_to_original = super()._partition_callable_tools(wrapped_tools)
+        if self.provider == 'modal':
+            callable_defs = {name: replace(td, sequential=True) for name, td in callable_defs.items()}
+        return callable_defs, sanitized_to_original
 
     async def for_run_step(self, ctx: RunContext[AgentDepsT]) -> AbstractToolset[AgentDepsT]:
-        """Update the wrapped toolset for this step while preserving remote REPL state."""
+        """Update the wrapped toolset for this step while preserving sandbox REPL state."""
         new_self = await super().for_run_step(ctx)
         if new_self is not self:
             assert isinstance(new_self, WebsocketCodeModeToolset)
-            new_self._ws_state = self._ws_state
+            new_self._sandbox_state = self._sandbox_state
         return new_self
 
     async def __aenter__(self) -> WebsocketCodeModeToolset[AgentDepsT]:
-        """Enter the wrapped toolset and prepare lazy remote-pool resources for this run."""
+        """Enter the wrapped toolset and prepare lazy sandbox resources for this run."""
         await self.wrapped.__aenter__()
-        self._ws_state = _WebsocketRunState(
-            url=self.url,
-            max_processes=self.max_processes,
-            checkout_timeout=self.checkout_timeout,
-            request_timeout=self.request_timeout,
-        )
+        self._sandbox_state = _SandboxRunState(provider=self.provider, dependencies=self.dependencies)
         return self
 
     async def __aexit__(self, *args: object) -> bool | None:
-        """Exit the wrapped toolset, then close the remote pool."""
-        ws_state = self._ws_state
-        assert ws_state is not None
-        self._ws_state = None
+        """Exit the wrapped toolset, then tear down the sandbox."""
+        sandbox_state = self._sandbox_state
+        assert sandbox_state is not None
+        self._sandbox_state = None
         try:
             return await self.wrapped.__aexit__(*args)
         finally:
-            await ws_state.close()
+            await sandbox_state.close()
 
     async def call_tool(
         self, name: str, tool_args: dict[str, Any], ctx: RunContext[AgentDepsT], tool: ToolsetTool[AgentDepsT]
     ) -> Any:
-        """Execute Python code on the remote worker, or pass through to a native tool."""
+        """Execute Python code in the sandbox session, or pass through to a native tool."""
         if not isinstance(tool, _RunCodeTool):
             # Native (non-sandboxed) tool -- pass through to the wrapped toolset.
             return await self.wrapped.call_tool(name, tool_args, ctx, tool)
@@ -299,13 +322,13 @@ class WebsocketCodeModeToolset(CodeModeToolset[AgentDepsT]):
         code = tool_args['code']
         restart = tool_args.get('restart', False)
 
-        ws_state = self._ws_state
-        assert ws_state is not None, '`WebsocketCodeModeToolset` must be entered before calling `run_code`'
+        sandbox_state = self._sandbox_state
+        assert sandbox_state is not None, '`WebsocketCodeModeToolset` must be entered before calling `run_code`'
 
         if restart:
-            await ws_state.reset()
+            await sandbox_state.reset()
 
-        fresh_repl = not ws_state.has_executed_feed
+        fresh_repl = not sandbox_state.has_executed_feed
 
         callable_defs = tool.callable_defs
         sanitized_to_original = tool.sanitized_to_original
@@ -380,11 +403,33 @@ class WebsocketCodeModeToolset(CodeModeToolset[AgentDepsT]):
 
         capture = PrintCapture()
 
+        # Host functions for the sandbox's name lookups: the embedded-CPython worker
+        # resolves a bare tool name via a name-lookup before calling it, and
+        # `resume_auto()` answers that lookup from this mapping. Actual calls still
+        # arrive as function snapshots and are dispatched by `_AsyncMontyExecutor`,
+        # so the bound callables' bodies never execute host-side. The CPython worker
+        # rejects async host functions, so the modal provider binds sync stubs.
+        def _make_external(sandbox_name: str) -> Any:
+            if self.provider == 'modal':
+
+                def _external_sync(**kwargs: Any) -> Any:
+                    raise RuntimeError(f'{sandbox_name} must be dispatched via a function snapshot')
+
+                return _external_sync
+
+            async def _external(**kwargs: Any) -> Any:
+                return await dispatch_tool_call(sandbox_name, kwargs)
+
+            return _external
+
+        external_lookup = {sandbox_name: _make_external(sandbox_name) for sandbox_name in callable_defs}
+
         try:
-            session = await ws_state.get_session(type_check=type_check, type_check_stubs=type_check_stubs)
+            session = await sandbox_state.get_session(type_check=type_check, type_check_stubs=type_check_stubs)
             try:
                 monty_state = await session.feed_start(
                     code,
+                    external_lookup=external_lookup,
                     print_callback=capture.callback,
                     os=self.os_access,
                     mount=self.mount,
@@ -398,31 +443,31 @@ class WebsocketCodeModeToolset(CodeModeToolset[AgentDepsT]):
                 ).run(monty_state)
             except MontyRuntimeError:
                 # The session is idle again and keeps assignments made before the failing line.
-                ws_state.has_executed_feed = True
+                sandbox_state.has_executed_feed = True
                 raise
-            ws_state.has_executed_feed = True
+            sandbox_state.has_executed_feed = True
         except MontySyntaxError as e:
             if fresh_repl:
                 # No code ran, so discard the checkout-time type stubs.
-                await ws_state.reset()
+                await sandbox_state.reset()
             raise ModelRetry(f'Syntax error in code:\n{capture.prepend_to(e.display())}') from e
         except MontyTypingError as e:
-            await ws_state.reset()
+            await sandbox_state.reset()
             raise ModelRetry(f'Type error in code:\n{capture.prepend_to(e.display())}') from e
         except MontyRuntimeError as e:
             raise ModelRetry(f'Runtime error:\n{capture.prepend_to(e.display())}') from e
         except MontyCrashedError as e:
-            # The remote worker died mid-feed (crash, request timeout, or dropped
-            # connection); the REPL state died with it. Reset so the retry dials fresh.
-            await ws_state.reset()
+            # The worker died mid-feed (crash, request timeout, or dropped connection);
+            # the REPL state died with it. Reset so the retry starts a fresh sandbox.
+            await sandbox_state.reset()
             raise ModelRetry(
                 'The code crashed the sandbox worker and the session was reset. Revise the code and try again.'
             ) from e
         except BaseException as e:
             if not is_sandbox_panic(e):
-                await ws_state.reset()
+                await sandbox_state.reset()
                 raise
-            await ws_state.reset()
+            await sandbox_state.reset()
             raise ModelRetry(
                 'The code aborted inside the sandbox and the session was reset. Revise the code and try again.'
             ) from e
@@ -452,27 +497,24 @@ class WebsocketCodeModeToolset(CodeModeToolset[AgentDepsT]):
 
 @dataclass
 class WebsocketCodeMode(CodeMode[AgentDepsT]):
-    """`CodeMode` that executes `run_code` snippets on remote Monty workers over a WebSocket.
+    """`CodeMode` that executes `run_code` snippets in a `hack_full_monty.sandbox()` session.
 
     Same model-facing behaviour as `CodeMode` (tool catalog, retries, mounts, OS access);
-    only the execution backend differs: instead of spawning local `monty` subprocesses,
-    each REPL session dials `url` via `pydantic_monty.AsyncMontyWebsocket`.
+    only the execution backend differs: each REPL session comes from
+    `sandbox(provider=...)` -- a local `AsyncMonty` pool (`'monty'`) or a
+    Modal-hosted worker over a WebSocket (`'modal'`).
     """
 
-    url: str = 'ws://127.0.0.1:8799'
-    """`ws://`/`wss://` URL to dial, including any routing path the relay needs."""
+    provider: Literal['modal', 'monty'] = field(kw_only=True)
+    """Where sandbox sessions run: `'monty'` (local subprocess pool) or `'modal'` (remote worker)."""
 
-    max_processes: int | None = None
-    """Cap on concurrent connections (defaults to the CPU count)."""
-
-    checkout_timeout: float | None = None
-    """Seconds a checkout waits for capacity before raising `TimeoutError`; `None` waits forever."""
-
-    request_timeout: float | None = 60.0
-    """Hard per-call deadline in seconds for each remote turn; `None` waits indefinitely."""
+    dependencies: list[str] | None = field(default=None, kw_only=True)
+    """Third-party packages installed into each sandbox session (modal provider only)."""
 
     def get_wrapper_toolset(self, toolset: AbstractToolset[AgentDepsT]) -> AbstractToolset[AgentDepsT] | None:
-        """Wrap the agent's assembled toolset with the websocket-backed code-mode toolset."""
+        """Wrap the agent's assembled toolset with the sandbox-backed code-mode toolset."""
+        if self.dependencies and self.provider != 'modal':
+            raise UserError('`dependencies` requires the `modal` provider')
         return WebsocketCodeModeToolset(
             wrapped=toolset,
             tool_selector=self.tools,
@@ -480,8 +522,6 @@ class WebsocketCodeMode(CodeMode[AgentDepsT]):
             dynamic_catalog=self.dynamic_catalog,
             os_access=self.os_access,
             mount=self.mount,
-            url=self.url,
-            max_processes=self.max_processes,
-            checkout_timeout=self.checkout_timeout,
-            request_timeout=self.request_timeout,
+            provider=self.provider,
+            dependencies=self.dependencies,
         )

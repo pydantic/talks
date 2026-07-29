@@ -3,3 +3,4 @@ worldcup2026.db
 scratch/
 agent_output/
 charts/
+/.env
