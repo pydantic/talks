@@ -25,5 +25,13 @@ agent = Agent(
         draw_chart,
     ],
     model_settings={'max_tokens': 16384},
-    capabilities=[CodeMode(mount=MountDir('/output', THIS_DIR / '..' / 'agent_output', mode='read-write'))],
+    capabilities=[
+        CodeMode(
+            mount=MountDir(
+                host_path=THIS_DIR / '..' / 'agent_output',
+                virtual_path='/output',
+                mode='read-write',
+            )
+        )
+    ],
 )

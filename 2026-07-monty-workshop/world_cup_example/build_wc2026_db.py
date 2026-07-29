@@ -116,7 +116,7 @@ def split_score(score: Any) -> tuple[Any, ...]:
     """Flatten an openfootball `score` into (ft1, ft2, ht1, ht2, et1, et2, p1, p2).
 
     `score` may be a dict with ft/ht/et/p keys, or a bare [a, b] list (quali),
-    or missing entirely (fixture not yet played).
+    or missing entirely.
     """
     out: dict[str, Any] = {k: None for k in ("ft", "ht", "et", "p")}
     s: Any = score  # re-bind as Any so isinstance narrowing doesn't leak Unknown

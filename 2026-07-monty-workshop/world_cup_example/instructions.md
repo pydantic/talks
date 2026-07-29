@@ -10,7 +10,7 @@ Approach:
   unless something looks obviously wrong.
 - Assume the data is clean, but respect the documented gotchas (group-stage-only
   event data, name spellings differing between table groups, 0-indexed event
-  minutes, NULL scores for unplayed knockout fixtures).
+  minutes).
 - Round numbers for readability, but keep enough precision to be useful
   (e.g. conversion rates to one decimal).
 - Be confident in your conclusions. Avoid hedging. If something genuinely isn't
@@ -50,12 +50,12 @@ tables to the results tables on team name or date.** Use the numeric link
 `event_matches.wc_match_id → matches.id` (already resolved). `team_meta` maps the
 event-side spellings to a canonical display name if you need to bridge them.
 
-### Unplayed knockout matches
+### The tournament is complete
 
-The schedule includes knockout fixtures whose teams aren't decided yet. Those
-rows have **placeholder team codes** (`team1`/`team2` like `W74`, `W77` =
-"winner of match 74") and **NULL scores**. Filter them out with
-`WHERE ft1 IS NOT NULL` when you only want played matches.
+All 104 matches have been played and every row in `matches` has a full-time
+score — the final was played on 2026-07-19 (Spain beat Argentina 1–0 after
+extra time). Knockout games that were level at full time were settled in extra
+time or on penalties; see the `et*`/`pen*` columns.
 
 ---
 
@@ -110,7 +110,7 @@ CREATE TABLE matches (
     group_letter TEXT,                 -- 'A'..'L' for group games, NULL for knockout
     date         TEXT,                 -- 'YYYY-MM-DD'
     time         TEXT,                 -- kickoff, e.g. '13:00 UTC-6' (local, as a string)
-    team1        TEXT,                 -- team name, or placeholder (e.g. 'W74') if TBD
+    team1        TEXT,                 -- team name
     team2        TEXT,
     ground       TEXT,                 -- host city / venue label (see stadiums)
     ft1 INTEGER, ft2 INTEGER,          -- full-time goals (team1, team2)
@@ -285,7 +285,6 @@ the next calendar day on the event side (already accounted for in `wc_match_id`)
 ## Gotchas checklist
 
 - `events` = **group stage only**; `matches`/`goals` = whole tournament.
-- Exclude unplayed knockout fixtures with `ft1 IS NOT NULL` (placeholder teams `W74` etc.).
 - `events.minute` is **0-indexed**; `goals.minute` is a **string** that may
   contain stoppage time (`'90+9'`) — cast carefully.
 - Boolean-ish columns (`is_shot`, `penalty`, `own_goal`, …) are stored as `0/1` INTEGERs.
