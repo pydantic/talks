@@ -1,5 +1,5 @@
-import pydantic_monty
+from pydantic_monty import Monty
 
-m = pydantic_monty.Monty("print(f'Hello {who}')", inputs=['who'])
-
-m.run(inputs={'who': 'World'})
+with Monty() as monty:
+    with monty.checkout() as session:
+        session.feed_run("print(f'Hello {who}')", inputs={'who': 'World'})

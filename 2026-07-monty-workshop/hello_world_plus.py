@@ -1,20 +1,20 @@
-import pydantic_monty
+from pydantic_monty import Monty
 
 
 def get_who(greating: str) -> str:
     if greating == 'Hello':
         return 'World'
     else:
-        return 'Pycon'
+        return 'Pydantic Workshop'
 
 
-m = pydantic_monty.Monty(
-    """
-greating = 'Hello'
+code = """
+greating = 'Hi'
 who = get_who(greating)
 f'{greating} {who}'
-""",
-)
+"""
 
-output = m.run(external_functions={'get_who': get_who})
-print('output:', output)
+with Monty() as monty:
+    with monty.checkout() as session:
+        output = session.feed_run(code, external_lookup={'get_who': get_who})
+        print('output:', output)
