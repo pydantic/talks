@@ -48,45 +48,96 @@ import qrContact from "./assets/qr-contact.svg";
 
 <Slide tab="easy" space="tight">
 
-# Two lines
+# Three lines
 
-<div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '1.5rem', alignItems: 'start' }}>
 
-<div style={{ minWidth: 0 }} className="small-code">
+<div style={{ minWidth: 0 }} className="tiny-code">
 
 ```py
-from opentelemetry import trace
+import logging
+import os
+
+from opentelemetry import metrics, trace
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.http import metric_exporter, trace_exporter
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http import trace_exporter
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-resource = Resource.create({'service.name': 'weather-app'})
-provider = TracerProvider(resource=resource)
-exporter = trace_exporter.OTLPSpanExporter(
-    endpoint='https://logfire-us.pydantic.dev/v1/traces',
-    headers={'Authorization': os.environ['LOGFIRE_TOKEN']},
+resource = Resource.create({
+    'service.name': 'weather-app',
+    'service.version': '1.0.0',
+    'deployment.environment.name': 'prod',
+})
+base = 'https://logfire-us.pydantic.dev/v1'
+headers = {'Authorization': os.environ['LOGFIRE_TOKEN']}
+
+tracer_provider = TracerProvider(resource=resource)
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(trace_exporter.OTLPSpanExporter(endpoint=f'{base}/traces', headers=headers))
 )
-provider.add_span_processor(BatchSpanProcessor(exporter))
-trace.set_tracer_provider(provider)
-FastAPIInstrumentor.instrument_app(app)
+trace.set_tracer_provider(tracer_provider)
+
+meter_provider = MeterProvider(
+    resource=resource,
+    metric_readers=[
+        PeriodicExportingMetricReader(
+            metric_exporter.OTLPMetricExporter(endpoint=f'{base}/metrics', headers=headers)
+        )
+    ],
+)
+metrics.set_meter_provider(meter_provider)
+
+logger_provider = LoggerProvider(resource=resource)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(OTLPLogExporter(endpoint=f'{base}/logs', headers=headers))
+)
+set_logger_provider(logger_provider)
+logging.getLogger().addHandler(LoggingHandler(logger_provider=logger_provider))
+
+
+def server_request_hook(span, scope):
+    if span and span.is_recording() and (route := scope.get('route')):
+        span.update_name(f'{scope["method"]} {route.path}')
+
+
+FastAPIInstrumentor.instrument_app(
+    app,
+    tracer_provider=tracer_provider,
+    meter_provider=meter_provider,
+    excluded_urls='health',
+    server_request_hook=server_request_hook,
+    http_capture_headers_server_request=['content-type', 'user-agent', 'x-request-id'],
+    http_capture_headers_server_response=['content-type'],
+    http_capture_headers_sanitize_fields=['authorization', 'cookie'],
+)
+HTTPXClientInstrumentor().instrument(tracer_provider=tracer_provider)
 ```
 
 </div>
 
-<div style={{ minWidth: 0 }}>
+<div style={{ minWidth: 0 }} className="small-code">
 
 ```py
 import logfire
 
-logfire.configure()
-logfire.instrument_fastapi(app)
+logfire.configure(service_name='weather-app', environment='prod')
+logfire.instrument_fastapi(app, capture_headers=True, excluded_urls='health')
+logfire.instrument_httpx()
 ```
 
-- Same result
+- Same traces, metrics and logs
 - The token comes from `.logfire/`, `LOGFIRE_TOKEN`, or an argument
-- Repeat the left side twice more for metrics and logs; the right side already sends all three
+- Header capture and scrubbing are on with one flag; the raw setup needs three lists and still misses your own secrets
+- The left side continues off the bottom of the slide
 
 </div>
 

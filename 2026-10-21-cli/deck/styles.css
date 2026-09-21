@@ -21,6 +21,14 @@
 }
 
 .slide .small-code pre {
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   padding: 0.9em 1em;
+}
+
+/* Deliberately too long: the raw OpenTelemetry setup runs off the bottom of the slide. */
+.slide .tiny-code pre {
+  font-size: 0.5rem;
+  line-height: 1.35;
+  padding: 0.8em 1em;
+  overflow: visible;
 }
