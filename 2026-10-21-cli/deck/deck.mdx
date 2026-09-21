@@ -57,44 +57,6 @@ import qrContact from "./assets/qr-contact.svg";
 
 <Slide tab="why">
 
-# What the SDK depends on
-
-<div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '2rem', alignItems: 'start' }}>
-
-<div>
-
-```toml
-# logfire-sdk/pyproject.toml
-dependencies = [
-    "opentelemetry-sdk",
-    "opentelemetry-exporter-otlp-proto-http",
-    "opentelemetry-instrumentation",
-    "rich",
-    "requests",
-    "protobuf",
-    "typing-extensions",
-    "executing",
-]
-```
-
-</div>
-
-<div>
-
-- Three OTel packages, a console renderer, and `executing` (used to recover f-string templates)
-- No pydantic dependency
-- 31 extras, each one an `opentelemetry-instrumentation-*` package
-- `logfire-api`: a no-op package with the same API and no dependencies, for libraries that want optional logging
-- `send_to_logfire=False` + `additional_span_processors=[...]` sends to any OTLP backend; the processors are plain OTel `SpanProcessor`s
-
-</div>
-
-</div>
-
-</Slide>
-
-<Slide tab="why">
-
 # Two lines
 
 ```py
