@@ -4,9 +4,7 @@ favicon = "assets/favicon.png"
 
 tabs = [
   { id = "intro",    label = "Intro" },
-  { id = "why",      label = "Why an SDK" },
-  { id = "opinions", label = "Opinions" },
-  { id = "langs",    label = "Three languages" },
+  { id = "easy",     label = "Out of the way" },
   { id = "agents",   label = "Agents" },
-  { id = "cli",      label = "CLI" },
+  { id = "protocol", label = "Beyond the protocol" },
 ]

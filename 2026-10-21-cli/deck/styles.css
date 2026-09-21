@@ -19,3 +19,8 @@
 .slide pre {
   flex-shrink: 0;
 }
+
+.slide .small-code pre {
+  font-size: 0.72rem;
+  padding: 0.9em 1em;
+}

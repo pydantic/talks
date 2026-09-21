@@ -1,7 +1,6 @@
 import { Slide } from "deckx";
 import InstallLine from "./components/InstallLine.tsx";
-import SdkMatrix from "./components/SdkMatrix.tsx";
-import PendingSpan from "./components/PendingSpan.tsx";
+import PendingSpans from "./components/PendingSpans.tsx";
 import qrContact from "./assets/qr-contact.svg";
 
 <Slide layout="title">
@@ -39,238 +38,119 @@ import qrContact from "./assets/qr-contact.svg";
 
 </Slide>
 
-<Slide tab="why">
+<Slide tab="easy" layout="statement">
 
-# What OpenTelemetry gives you
+# A great SDK gets out of the way
 
-- **A wire format** - OTLP, plus semantic conventions for what to call things
-- **Instrumentation for everything** - `opentelemetry-instrumentation-fastapi`, `-httpx`, `-asyncpg`, ~100 more
-- **Any backend** - Jaeger, Tempo, Datadog, Logfire, a file
-
-## What it doesn't give you
-
-- **Defaults.** You assemble the provider, processor, exporter and resource yourself, ~40 lines before the first span
-- **A span before it ends.** Exporters only receive finished spans, so a running request is invisible
-- **Structure for values.** An attribute is a string, number, bool, or a flat list of those
+## You should not have to learn it to use it
 
 </Slide>
 
-<Slide tab="why">
+<Slide tab="easy" space="tight">
 
 # Two lines
 
+<div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+
+<div style={{ minWidth: 0 }} className="small-code">
+
+```py
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http import trace_exporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+resource = Resource.create({'service.name': 'weather-app'})
+provider = TracerProvider(resource=resource)
+exporter = trace_exporter.OTLPSpanExporter(
+    endpoint='https://logfire-us.pydantic.dev/v1/traces',
+    headers={'Authorization': os.environ['LOGFIRE_TOKEN']},
+)
+provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(provider)
+FastAPIInstrumentor.instrument_app(app)
+```
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
 ```py
 import logfire
-from fastapi import FastAPI
-
-app = FastAPI()
 
 logfire.configure()
 logfire.instrument_fastapi(app)
 ```
 
-- `instrument_fastapi` calls `opentelemetry-instrumentation-fastapi`, then adds the message template and span-type attributes described next
-- 34 `instrument_*` methods built the same way: Pydantic AI, OpenAI, Anthropic, httpx, asyncpg, Django, Celery, Redis, MCP, Monty, ...
-- `logfire.configure()` reads the token from its argument, `LOGFIRE_TOKEN`, or `.logfire/`, in that order
+- Same result
+- The token comes from `.logfire/`, `LOGFIRE_TOKEN`, or an argument
+- Repeat the left side twice more for metrics and logs; the right side already sends all three
+
+</div>
+
+</div>
 
 </Slide>
 
-<Slide tab="opinions" layout="statement">
+<Slide tab="easy" space="tight">
 
-# Three things the SDK adds<br/>that the backend relies on
+# Out of the way, in every language
 
-## message templates · value schemas · pending spans
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', alignItems: 'start' }} className="small-code">
 
-</Slide>
-
-<Slide tab="opinions" space="tight">
-
-# Opinion 1: the template is the name
+<div style={{ minWidth: 0 }}>
 
 ```py
+import logfire
+
+logfire.configure()
+logfire.instrument_fastapi(app)
 logfire.info('hello {name}', name=user)
-
-# span name              'hello {name}'
-# logfire.msg_template   'hello {name}'
-# logfire.msg            "hello name=User(id=1, email='x@y.z', signed_up=datetime(...))"
-# logfire.json_schema    {"properties": {"name": {"x-python-datatype": "PydanticModel", ...}}}
-```
-
-- The **template** is the span name: low cardinality, so the UI can group, count and alert on it
-- The **message** is the template with values substituted, for reading
-- f-strings work too: `logfire.info(f'hello {user.email}')` - `executing` finds the call's AST and recovers the template
-- Values are sent as ordinary OTel attributes; the schema records the Python types that JSON drops
-
-</Slide>
-
-<Slide tab="opinions" space="tight">
-
-# Opinion 2: values look like Python
-
-<div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-
-<div style={{ minWidth: 0 }}>
-
-**What the wire carries**
-
-```json
-{"id": 1, "email": "x@y.z",
- "signed_up": "2026-01-01T09:30:00Z"}
-```
-
-plus, once per attribute, in `logfire.json_schema`:
-
-```json
-{"title": "User",
- "x-python-datatype": "PydanticModel",
- "properties": {"signed_up": {
-   "type": "string", "format": "date-time",
-   "x-python-datatype": "datetime"}}}
 ```
 
 </div>
 
 <div style={{ minWidth: 0 }}>
-
-**What you see**
-
-```py
-User(
-    id=1,
-    email='x@y.z',
-    signed_up=datetime(2026, 1, 1, 9, 30),
-)
-```
-
-- `x-python-datatype` for models, dataclasses, `datetime`, `Decimal`, `UUID`, `Enum`, `Path`, exceptions
-- DataFrames carry `x-columns`, `x-row-count`, `x-shape`
-- Plain `str`, `int`, `float`, `bool` need nothing: `{}`
-
-</div>
-
-</div>
-
-</Slide>
-
-<Slide tab="opinions">
-
-# Opinion 3: pending spans
-
-- OTLP has no "span started" message. Exporters run on `on_end`, so a 30-second agent run is invisible for 30 seconds
-- When a span starts, the SDK exports a **zero-duration copy** of it, tagged so the backend can replace it later
-
-<PendingSpan />
-
-- `RemovePendingSpansExporter` drops the copy when the real span is in the same export batch, so short spans are sent once
-- Only the Logfire exporter receives them; `additional_span_processors` do not
-
-</Slide>
-
-<Slide tab="langs">
-
-# Same opinions, three languages
-
-<SdkMatrix />
-
-</Slide>
-
-<Slide tab="langs">
-
-# Hello, TypeScript
 
 ```ts
 import * as logfire from 'logfire'
 
-logfire.configure({ serviceName: 'weather-app' })
-
-logfire.span('forecast for {city}', { city: 'Paris', units: 'C' }, {}, async () => {
-  const forecast = await fetchForecast('Paris')
-  logfire.info('got {days} days', { days: forecast.length, forecast })
-})
+logfire.configure()
+logfire.info('hello {name}', { name })
 ```
 
-- `npm i logfire` - wraps `@opentelemetry/sdk-node` and Node auto-instrumentations
-- `@pydantic/logfire-api` (zero deps, for libraries), `-browser`, `-cf-workers`
-- Same `logfire.msg_template` / `logfire.msg` / `logfire.json_schema` attributes
+</div>
 
-</Slide>
-
-<Slide tab="langs">
-
-# Hello, Rust
+<div style={{ minWidth: 0 }}>
 
 ```rust
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let logfire = logfire::configure().finish()?;
-    let _guard = logfire.shutdown_guard();
-
-    logfire::span!("forecast for {city}", city = "Paris").in_scope(|| {
-        logfire::info!("got {days} days", days = 7u64);
-    });
-    Ok(())
-}
+let lf = logfire::configure().finish()?;
+let _guard = lf.shutdown_guard();
+logfire::info!("hello {name}", name = name);
 ```
 
-- `cargo add logfire` - a `tracing` subscriber layer over `opentelemetry`, so existing `tracing` spans and events are exported unchanged
-- Pending spans included; the macros set `logfire.msg` and `logfire.json_schema`
-- The CLI is built on the same crate
+</div>
+
+</div>
+
+- 34 `instrument_*` one-liners in Python: Pydantic AI, OpenAI, Anthropic, httpx, asyncpg, Django, Celery, Redis, MCP, Monty, ...
+- Each one calls the OpenTelemetry instrumentation package for that library; instrumentation you already have keeps working
+- JS wraps the OTel Node SDK and its auto-instrumentations; Rust is a `tracing` layer, so existing `tracing` spans are exported unchanged
+- `send_to_logfire=False` and it exports to any OTLP backend
 
 </Slide>
 
 <Slide tab="agents" layout="statement">
 
-# Coding agents are the SDK's<br/>second audience
+# A great SDK is the agent's interface too
 
-## `configure()` plus one `instrument_*` call per library is an API a model gets right. 40 lines of OTel setup is not.
-
-</Slide>
-
-<Slide tab="agents" space="tight">
-
-# Demo: one trace, from agent to app
-
-```py
-logfire.configure(service_name='weather-app')
-logfire.instrument_pydantic_ai()
-logfire.instrument_monty()
-
-app = FastAPI()
-logfire.instrument_fastapi(app)
-
-@app.get('/weather')
-async def weather(q: str) -> dict[str, str]:
-    result = await weather_agent.run(f"What's the weather in {q}, in Celsius?")
-    return {'answer': result.output}
-```
-
-- One trace: HTTP request, Pydantic AI run, LLM call, Monty codemode execution, tool calls
-- Pending spans: the trace is on screen before the model has answered
+## `configure()` and one `instrument_*` call per library is an API a model gets right.<br/>The setup on the previous slide is not.
 
 </Slide>
 
-<Slide tab="agents" space="tight">
-
-# Prompts are variables
-
-```py
-prompt = logfire.template_var(
-    name='prompt__weather_agent',
-    type=str,
-    default='Combine tool calls into a single code execution call. Answer in {{units}}.',
-    inputs_type=WeatherInputs,  # a BaseModel with `units: str`
-)
-
-with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
-    result = await weather_agent.run(question, instructions=resolved.value)
-```
-
-- A prompt is a managed variable named `prompt__<slug>`, with the same versions, targeting rules and rollouts as a feature flag
-- Handlebars `{{placeholders}}`; `@{other_variable}@` inserts another variable
-- Python uses the `logfire[variables]` extra. Other languages: Logfire serves **OFREP**, so any **OpenFeature** client can evaluate the same variables
-
-</Slide>
-
-<Slide tab="cli">
+<Slide tab="agents">
 
 # One binary, every ecosystem
 
@@ -287,7 +167,7 @@ with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
 
 </Slide>
 
-<Slide tab="cli">
+<Slide tab="agents">
 
 # Demo: auth + query
 
@@ -304,6 +184,112 @@ logfire --output json mcp query run --file slow.sql --project demo
 
 - The query runs through the hosted MCP server, the same tool a coding agent calls
 - Same binary and login for people, CI and agents; `--output json` for the last two
+
+</Slide>
+
+<Slide tab="agents" space="tight">
+
+# Prompts reach the agent through the same SDK
+
+```py
+prompt = logfire.template_var(
+    name='prompt__weather_agent',
+    type=str,
+    default='Combine tool calls into a single code execution call. Answer in {{units}}.',
+    inputs_type=WeatherInputs,  # a BaseModel with `units: str`
+)
+
+with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
+    result = await weather_agent.run(question, instructions=resolved.value)
+```
+
+- A prompt is a managed variable named `prompt__<slug>`, with the same versions, targeting rules and rollouts as a feature flag
+- No second vendor SDK: the import that sends traces also fetches prompts
+- Other languages: Logfire serves **OFREP**, so any **OpenFeature** client can evaluate the same variables
+
+</Slide>
+
+<Slide tab="protocol" layout="statement">
+
+# A great SDK does what the protocol can't
+
+## OTLP carries finished spans. Your users are waiting on unfinished ones.
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Pending spans
+
+<PendingSpans />
+
+- When a span starts, the SDK exports a zero-duration copy tagged `pending_span`; the backend replaces it when the real span arrives
+- The copy is dropped if the real span is in the same export batch, so short spans are sent once
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Values that look like your code
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+
+<div style={{ minWidth: 0 }}>
+
+**What an OTLP attribute can hold**
+
+```json
+"{\"id\": 1, \"email\": \"x@y.z\",
+  \"signed_up\": \"2026-01-01T09:30:00Z\"}"
+```
+
+A string, a number, a bool, or a flat list of those.
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
+**What Logfire shows**
+
+```py
+User(
+    id=1,
+    email='x@y.z',
+    signed_up=datetime(2026, 1, 1, 9, 30),
+)
+```
+
+The SDK sends a small schema next to the value, and the UI renders it as the Python you wrote.
+
+</div>
+
+</div>
+
+- Works for Pydantic models, dataclasses, `datetime`, `Decimal`, `UUID`, `Enum`, `Path`, exceptions, DataFrames
+- Other backends still receive the plain attribute
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Demo: watch a trace arrive
+
+```py
+logfire.configure(service_name='weather-app')
+logfire.instrument_pydantic_ai()
+logfire.instrument_monty()
+
+app = FastAPI()
+logfire.instrument_fastapi(app)
+
+@app.get('/weather')
+async def weather(q: str) -> dict[str, str]:
+    result = await weather_agent.run(f"What's the weather in {q}, in Celsius?")
+    return {'answer': result.output}
+```
+
+- One trace: HTTP request, Pydantic AI run, LLM call, Monty codemode execution, tool calls
+- The rows are on screen before the model has answered
 
 </Slide>
 
