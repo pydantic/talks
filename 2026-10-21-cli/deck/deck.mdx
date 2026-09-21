@@ -1,0 +1,359 @@
+import { Slide } from "deckx";
+import InstallLine from "./components/InstallLine.tsx";
+import PendingSpans from "./components/PendingSpans.tsx";
+import qrContact from "./assets/qr-contact.svg";
+
+<Slide layout="title">
+
+### Pydantic x Modal / October 2026
+
+# Why even have an SDK?
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**
+- Founder & CEO of **Pydantic Labs**
+
+## The Pydantic Stack
+
+- <span style={{ color: 'var(--accent)' }}>Pydantic Validation:</span> contracts for data
+- <span style={{ color: 'var(--accent)' }}>Pydantic AI:</span> production grade agent framework
+- <span style={{ color: 'var(--accent)' }}>Pydantic Logfire:</span> observability, evals, prompt management, LLMOps
+- <span style={{ color: 'var(--accent)' }}>Pydantic AI Gateway:</span> one endpoint, every model
+- <span style={{ color: 'var(--accent)' }}>Pydantic Monty:</span> Python Sandbox
+
+</Slide>
+
+<Slide tab="intro" layout="statement">
+
+# OpenTelemetry already exists.<br/>Coding agents exist.
+
+## So why did we write three SDKs and a CLI?
+
+</Slide>
+
+<Slide tab="easy" layout="statement">
+
+# A great SDK gets out of the way
+
+## You should not have to learn it to use it
+
+</Slide>
+
+<Slide tab="easy" space="tight">
+
+# Three lines
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '1.5rem', alignItems: 'start' }}>
+
+<div style={{ minWidth: 0 }} className="tiny-code">
+
+```py
+import logging
+import os
+
+from opentelemetry import metrics, trace
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.http import metric_exporter, trace_exporter
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+resource = Resource.create({
+    'service.name': 'weather-app',
+    'service.version': '1.0.0',
+    'deployment.environment.name': 'prod',
+})
+base = 'https://logfire-us.pydantic.dev/v1'
+headers = {'Authorization': os.environ['LOGFIRE_TOKEN']}
+
+tracer_provider = TracerProvider(resource=resource)
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(trace_exporter.OTLPSpanExporter(endpoint=f'{base}/traces', headers=headers))
+)
+trace.set_tracer_provider(tracer_provider)
+
+meter_provider = MeterProvider(
+    resource=resource,
+    metric_readers=[
+        PeriodicExportingMetricReader(
+            metric_exporter.OTLPMetricExporter(endpoint=f'{base}/metrics', headers=headers)
+        )
+    ],
+)
+metrics.set_meter_provider(meter_provider)
+
+logger_provider = LoggerProvider(resource=resource)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(OTLPLogExporter(endpoint=f'{base}/logs', headers=headers))
+)
+set_logger_provider(logger_provider)
+logging.getLogger().addHandler(LoggingHandler(logger_provider=logger_provider))
+
+
+def server_request_hook(span, scope):
+    if span and span.is_recording() and (route := scope.get('route')):
+        span.update_name(f'{scope["method"]} {route.path}')
+
+
+FastAPIInstrumentor.instrument_app(
+    app,
+    tracer_provider=tracer_provider,
+    meter_provider=meter_provider,
+    excluded_urls='health',
+    server_request_hook=server_request_hook,
+    http_capture_headers_server_request=['content-type', 'user-agent', 'x-request-id'],
+    http_capture_headers_server_response=['content-type'],
+    http_capture_headers_sanitize_fields=['authorization', 'cookie'],
+)
+HTTPXClientInstrumentor().instrument(tracer_provider=tracer_provider)
+```
+
+</div>
+
+<div style={{ minWidth: 0 }} className="small-code">
+
+```py
+import logfire
+
+logfire.configure(service_name='weather-app', environment='prod')
+logfire.instrument_fastapi(app, capture_headers=True, excluded_urls='health')
+logfire.instrument_httpx()
+```
+
+- Same traces, metrics and logs
+- The token comes from `.logfire/`, `LOGFIRE_TOKEN`, or an argument
+- Header capture and scrubbing are on with one flag; the raw setup needs three lists and still misses your own secrets
+- The left side continues off the bottom of the slide
+
+</div>
+
+</div>
+
+</Slide>
+
+<Slide tab="easy" space="tight">
+
+# Out of the way, in every language
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', alignItems: 'start' }} className="small-code">
+
+<div style={{ minWidth: 0 }}>
+
+```py
+import logfire
+
+logfire.configure()
+logfire.instrument_fastapi(app)
+logfire.info('hello {name}', name=user)
+```
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
+```ts
+import * as logfire from 'logfire'
+
+logfire.configure()
+logfire.info('hello {name}', { name })
+```
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
+```rust
+let lf = logfire::configure().finish()?;
+let _guard = lf.shutdown_guard();
+logfire::info!("hello {name}", name = name);
+```
+
+</div>
+
+</div>
+
+- 34 `instrument_*` one-liners in Python: Pydantic AI, OpenAI, Anthropic, httpx, asyncpg, Django, Celery, Redis, MCP, Monty, ...
+- Each one calls the OpenTelemetry instrumentation package for that library; instrumentation you already have keeps working
+- JS wraps the OTel Node SDK and its auto-instrumentations; Rust is a `tracing` layer, so existing `tracing` spans are exported unchanged
+- `send_to_logfire=False` and it exports to any OTLP backend
+
+</Slide>
+
+<Slide tab="agents" layout="statement">
+
+# A great SDK is the agent's interface too
+
+## `configure()` and one `instrument_*` call per library is an API a model gets right.<br/>The setup on the previous slide is not.
+
+</Slide>
+
+<Slide tab="agents">
+
+# One binary, every ecosystem
+
+<InstallLine lines={[
+  { cmd: 'uv', args: 'tool install logfire-cli', note: 'or: uvx logfire-cli' },
+  { cmd: 'npm', args: 'install --global logfire-cli', note: 'or: npx logfire-cli' },
+  { cmd: 'pip', args: 'install logfire', note: 'logfire 6 = logfire-sdk + logfire-cli' },
+]} />
+
+- One Rust binary. PyPI wheels for 17 targets, npm for 8. Neither Rust nor Python is needed to run it
+- **For people:** `logfire signup`, `auth`, `init`, `project current`, `token read`
+- **For scripts:** `--output json|jsonl`, `--no-input`, documented exit codes
+- **For agents:** `logfire wizard` starts Claude Code or Codex in your repo with the Logfire setup skill; `logfire mcp ...` calls the hosted MCP server
+
+</Slide>
+
+<Slide tab="agents">
+
+# Demo: auth + query
+
+```bash
+logfire auth
+logfire mcp projects
+
+logfire mcp query run \
+  'SELECT span_name, duration, message FROM records ORDER BY start_timestamp DESC LIMIT 20' \
+  --project demo
+
+logfire --output json mcp query run --file slow.sql --project demo
+```
+
+- The query runs through the hosted MCP server, the same tool a coding agent calls
+- Same binary and login for people, CI and agents; `--output json` for the last two
+
+</Slide>
+
+<Slide tab="agents" space="tight">
+
+# Prompts reach the agent through the same SDK
+
+```py
+prompt = logfire.template_var(
+    name='prompt__weather_agent',
+    type=str,
+    default='Combine tool calls into a single code execution call. Answer in {{units}}.',
+    inputs_type=WeatherInputs,  # a BaseModel with `units: str`
+)
+
+with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
+    result = await weather_agent.run(question, instructions=resolved.value)
+```
+
+- A prompt is a managed variable named `prompt__<slug>`, with the same versions, targeting rules and rollouts as a feature flag
+- No second vendor SDK: the import that sends traces also fetches prompts
+- Other languages: Logfire serves **OFREP**, so any **OpenFeature** client can evaluate the same variables
+
+</Slide>
+
+<Slide tab="protocol" layout="statement">
+
+# A great SDK does what the protocol can't
+
+## OTLP carries finished spans. Your users are waiting on unfinished ones.
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Pending spans
+
+<PendingSpans />
+
+- When a span starts, the SDK exports a zero-duration copy tagged `pending_span`; the backend replaces it when the real span arrives
+- The copy is dropped if the real span is in the same export batch, so short spans are sent once
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Values that look like your code
+
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+
+<div style={{ minWidth: 0 }}>
+
+**What an OTLP attribute can hold**
+
+```json
+"{\"id\": 1, \"email\": \"x@y.z\",
+  \"signed_up\": \"2026-01-01T09:30:00Z\"}"
+```
+
+A string, a number, a bool, or a flat list of those.
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
+**What Logfire shows**
+
+```py
+User(
+    id=1,
+    email='x@y.z',
+    signed_up=datetime(2026, 1, 1, 9, 30),
+)
+```
+
+The SDK sends a small schema next to the value, and the UI renders it as the Python you wrote.
+
+</div>
+
+</div>
+
+- Works for Pydantic models, dataclasses, `datetime`, `Decimal`, `UUID`, `Enum`, `Path`, exceptions, DataFrames
+- Other backends still receive the plain attribute
+
+</Slide>
+
+<Slide tab="protocol" space="tight">
+
+# Demo: watch a trace arrive
+
+```py
+logfire.configure(service_name='weather-app')
+logfire.instrument_pydantic_ai()
+logfire.instrument_monty()
+
+app = FastAPI()
+logfire.instrument_fastapi(app)
+
+@app.get('/weather')
+async def weather(q: str) -> dict[str, str]:
+    result = await weather_agent.run(f"What's the weather in {q}, in Celsius?")
+    return {'answer': result.output}
+```
+
+- One trace: HTTP request, Pydantic AI run, LLM call, Monty codemode execution, tool calls
+- The rows are on screen before the model has answered
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+<span style={{ whiteSpace: 'nowrap' }}>Thanks to **Modal** for hosting</span>
+
+<img src={qrContact} alt="QR code linking to pydantic.dev/contact" style={{ display: 'block', margin: '0 auto 1rem', width: '12rem', height: '12rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a href="https://pydantic.dev/contact" style={{ fontSize: '1.3em' }}>pydantic.dev/contact</a>
+
+<span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic`</span>
+
+</Slide>
