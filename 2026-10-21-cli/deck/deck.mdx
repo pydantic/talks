@@ -197,18 +197,15 @@ logfire::info!("hello {name}", name = name);
 
 # A great SDK is the agent's interface too
 
-## `configure()` and one `instrument_*` call per library is an API a model gets right.<br/>The setup on the previous slide is not.
-
 </Slide>
 
 <Slide tab="agents">
 
-# One binary, every ecosystem
+# One binary, multiple ecosystem
 
 <InstallLine lines={[
-  { cmd: 'uv', args: 'tool install logfire-cli', note: 'or: uvx logfire-cli' },
-  { cmd: 'npm', args: 'install --global logfire-cli', note: 'or: npx logfire-cli' },
-  { cmd: 'pip', args: 'install logfire', note: 'logfire 6 = logfire-sdk + logfire-cli' },
+  { cmd: 'uvx', args: 'logfire' },
+  { cmd: 'npx', args: 'logfire' },
 ]} />
 
 - One Rust binary. PyPI wheels for 17 targets, npm for 8. Neither Rust nor Python is needed to run it
@@ -218,23 +215,48 @@ logfire::info!("hello {name}", name = name);
 
 </Slide>
 
-<Slide tab="agents">
+<Slide tab="agents" space="tight">
 
-# Demo: auth + query
+# Agent-friendly CLI
 
-```bash
-logfire auth
-logfire mcp projects
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-logfire mcp query run \
-  'SELECT span_name, duration, message FROM records ORDER BY start_timestamp DESC LIMIT 20' \
-  --project demo
+<div style={{ minWidth: 0 }}>
 
-logfire --output json mcp query run --file slow.sql --project demo
+**A person, stdin is a terminal**
+
+```console
+$ logfire init
+? Select a project
+❯ samuelcolvin/demo
+  samuelcolvin/dev
+  samuelcolvin/gateway
 ```
 
-- The query runs through the hosted MCP server, the same tool a coding agent calls
-- Same binary and login for people, CI and agents; `--output json` for the last two
+Arrow keys, a select menu, a browser opens for login.
+
+</div>
+
+<div style={{ minWidth: 0 }}>
+
+**An agent, stdin is a pipe**
+
+```console
+$ logfire init
+Error: not a terminal: run `logfire init new` or
+`logfire init use` (with --name <project-name>)
+
+$ logfire init use --name demo --permission send
+```
+
+No menu to get stuck in. The error names the arguments, the agent passes them and retries.
+
+</div>
+
+</div>
+
+- The same binary decides per invocation: `isatty(stdin)`
+- `--no-input` forces the second mode, `--output json` gives the agent a stable shape to parse
 
 </Slide>
 
@@ -321,26 +343,11 @@ The SDK sends a small schema next to the value, and the UI renders it as the Pyt
 
 </Slide>
 
-<Slide tab="protocol" space="tight">
+<Slide tab="protocol" layout="statement">
 
-# Demo: watch a trace arrive
+# Demo
 
-```py
-logfire.configure(service_name='weather-app')
-logfire.instrument_pydantic_ai()
-logfire.instrument_monty()
-
-app = FastAPI()
-logfire.instrument_fastapi(app)
-
-@app.get('/weather')
-async def weather(q: str) -> dict[str, str]:
-    result = await weather_agent.run(f"What's the weather in {q}, in Celsius?")
-    return {'answer': result.output}
-```
-
-- One trace: HTTP request, Pydantic AI run, LLM call, Monty codemode execution, tool calls
-- The rows are on screen before the model has answered
+🤞
 
 </Slide>
 
