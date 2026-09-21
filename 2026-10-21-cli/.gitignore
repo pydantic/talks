@@ -1,0 +1,4 @@
+scratch/
+agent_output/
+/.env
+.logfire/

@@ -1,0 +1,12 @@
+title = "Why even have an SDK? - Pydantic x Modal, October 2026"
+theme = "dark"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",    label = "Intro" },
+  { id = "why",      label = "Why an SDK" },
+  { id = "opinions", label = "Opinions" },
+  { id = "langs",    label = "Three languages" },
+  { id = "agents",   label = "Agents" },
+  { id = "cli",      label = "CLI" },
+]
