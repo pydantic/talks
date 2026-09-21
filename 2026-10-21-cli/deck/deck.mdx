@@ -33,7 +33,7 @@ import qrContact from "./assets/qr-contact.svg";
 
 <Slide tab="intro" layout="statement">
 
-# OpenTelemetry already exists.<br/>Coding agents now exist.
+# OpenTelemetry already exists.<br/>Coding agents exist.
 
 ## So why did we write three SDKs and a CLI?
 
@@ -49,15 +49,15 @@ import qrContact from "./assets/qr-contact.svg";
 
 ## What it doesn't give you
 
-- **An opinion.** A tracer, a span and an attribute bag. The rest is up to you.
-- Setting it up by hand is ~40 lines of provider, processor, exporter, resource
-- And nothing in the spec says "show me this trace *while it runs*"
+- **Defaults.** You assemble the provider, processor, exporter and resource yourself, ~40 lines before the first span
+- **A span before it ends.** Exporters only receive finished spans, so a running request is invisible
+- **Structure for values.** An attribute is a string, number, bool, or a flat list of those
 
 </Slide>
 
 <Slide tab="why">
 
-# The SDK is thin. On purpose.
+# What the SDK depends on
 
 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '2rem', alignItems: 'start' }}>
 
@@ -81,11 +81,11 @@ dependencies = [
 
 <div>
 
-- Three OTel packages, a console renderer, and `executing` (more on that later)
-- **No pydantic.** The Pydantic observability SDK does not depend on Pydantic
+- Three OTel packages, a console renderer, and `executing` (used to recover f-string templates)
+- No pydantic dependency
 - 31 extras, each one an `opentelemetry-instrumentation-*` package
-- `logfire-api`: a zero-dependency no-op shim with the same API, for libraries
-- `send_to_logfire=False` + `additional_span_processors=[...]` sends to any OTLP backend, using plain OTel types
+- `logfire-api`: a no-op package with the same API and no dependencies, for libraries that want optional logging
+- `send_to_logfire=False` + `additional_span_processors=[...]` sends to any OTLP backend; the processors are plain OTel `SpanProcessor`s
 
 </div>
 
@@ -107,17 +107,17 @@ logfire.configure()
 logfire.instrument_fastapi(app)
 ```
 
-- `instrument_fastapi` is `opentelemetry-instrumentation-fastapi` with our defaults, our message formatting, and our span tagging on top
-- 34 `instrument_*` one-liners, all built the same way: Pydantic AI, OpenAI, Anthropic, httpx, asyncpg, Django, Celery, Redis, MCP, Monty, ...
-- `logfire.configure()` reads `.logfire/`, env vars, or the token you pass - and works with no arguments
+- `instrument_fastapi` calls `opentelemetry-instrumentation-fastapi`, then adds the message template and span-type attributes described next
+- 34 `instrument_*` methods built the same way: Pydantic AI, OpenAI, Anthropic, httpx, asyncpg, Django, Celery, Redis, MCP, Monty, ...
+- `logfire.configure()` reads the token from its argument, `LOGFIRE_TOKEN`, or `.logfire/`, in that order
 
 </Slide>
 
 <Slide tab="opinions" layout="statement">
 
-# The SDK carries opinions<br/>the backend depends on.
+# Three things the SDK adds<br/>that the backend relies on
 
-## templates · schemas · pending spans
+## message templates · value schemas · pending spans
 
 </Slide>
 
@@ -134,10 +134,10 @@ logfire.info('hello {name}', name=user)
 # logfire.json_schema    {"properties": {"name": {"x-python-datatype": "PydanticModel", ...}}}
 ```
 
-- The **template** is low cardinality: group, count, alert on it
-- The **message** is rendered for humans, values included
-- f-strings work too: `logfire.info(f'hello {user.email}')` - we recover the template from the AST with `executing`
-- Attributes ride along as ordinary OTel attributes; the schema only carries what a JSON blob would lose
+- The **template** is the span name: low cardinality, so the UI can group, count and alert on it
+- The **message** is the template with values substituted, for reading
+- f-strings work too: `logfire.info(f'hello {user.email}')` - `executing` finds the call's AST and recovers the template
+- Values are sent as ordinary OTel attributes; the schema records the Python types that JSON drops
 
 </Slide>
 
@@ -194,13 +194,13 @@ User(
 
 # Opinion 3: pending spans
 
-- OTLP has no "span started" message. Exporters run on `on_end`, so a slow agent run is invisible until it finishes
-- We emit a **zero-duration twin** when a span starts, tagged so the backend can reconcile it later
+- OTLP has no "span started" message. Exporters run on `on_end`, so a 30-second agent run is invisible for 30 seconds
+- When a span starts, the SDK exports a **zero-duration copy** of it, tagged so the backend can replace it later
 
 <PendingSpan />
 
-- `RemovePendingSpansExporter` drops the twin when the real span lands in the same batch, so fast spans cost nothing
-- Only the Logfire exporter sees them: your `additional_span_processors` never do
+- `RemovePendingSpansExporter` drops the copy when the real span is in the same export batch, so short spans are sent once
+- Only the Logfire exporter receives them; `additional_span_processors` do not
 
 </Slide>
 
@@ -249,17 +249,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-- `cargo add logfire` - built on `tracing` and `opentelemetry`, so anything already instrumented with `tracing` just works
-- Pending spans included; `logfire.msg` and `logfire.json_schema` are set by the macros
-- It's the same crate the CLI is built on
+- `cargo add logfire` - a `tracing` subscriber layer over `opentelemetry`, so existing `tracing` spans and events are exported unchanged
+- Pending spans included; the macros set `logfire.msg` and `logfire.json_schema`
+- The CLI is built on the same crate
 
 </Slide>
 
 <Slide tab="agents" layout="statement">
 
-# Agents don't make the SDK redundant.<br/>They make it the interface.
+# Coding agents are the SDK's<br/>second audience
 
-## A small, stable, discoverable surface is exactly what an agent can learn.
+## `configure()` plus one `instrument_*` call per library is an API a model gets right. 40 lines of OTel setup is not.
 
 </Slide>
 
@@ -281,7 +281,7 @@ async def weather(q: str) -> dict[str, str]:
     return {'answer': result.output}
 ```
 
-- HTTP request → Pydantic AI run → LLM call → Monty codemode execution → tool calls, one trace
+- One trace: HTTP request, Pydantic AI run, LLM call, Monty codemode execution, tool calls
 - Pending spans: the trace is on screen before the model has answered
 
 </Slide>
@@ -302,9 +302,9 @@ with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
     result = await weather_agent.run(question, instructions=resolved.value)
 ```
 
-- A prompt is a managed variable named `prompt__<slug>`: versioned, targeted, rolled out like a feature flag
-- Handlebars `{{placeholders}}`, and `@{other_variable}@` composition
-- `logfire[variables]` extra in Python. Everyone else: Logfire speaks **OFREP**, so any **OpenFeature** client evaluates the same variables
+- A prompt is a managed variable named `prompt__<slug>`, with the same versions, targeting rules and rollouts as a feature flag
+- Handlebars `{{placeholders}}`; `@{other_variable}@` inserts another variable
+- Python uses the `logfire[variables]` extra. Other languages: Logfire serves **OFREP**, so any **OpenFeature** client can evaluate the same variables
 
 </Slide>
 
@@ -318,10 +318,10 @@ with prompt.get(WeatherInputs(units='celsius'), label='production') as resolved:
   { cmd: 'pip', args: 'install logfire', note: 'logfire 6 = logfire-sdk + logfire-cli' },
 ]} />
 
-- One Rust binary. PyPI wheels for 17 targets, npm for 8. No Rust, no Python needed to run it
-- **For humans:** `logfire signup`, `auth`, `init`, `project current`, `token read`
-- **For scripts:** `--output json|jsonl`, `--no-input`, stable exit categories
-- **For agents:** `logfire wizard` hands your repo to Claude Code or Codex with our setup skill; `logfire mcp ...` is the same hosted MCP server your agent uses
+- One Rust binary. PyPI wheels for 17 targets, npm for 8. Neither Rust nor Python is needed to run it
+- **For people:** `logfire signup`, `auth`, `init`, `project current`, `token read`
+- **For scripts:** `--output json|jsonl`, `--no-input`, documented exit codes
+- **For agents:** `logfire wizard` starts Claude Code or Codex in your repo with the Logfire setup skill; `logfire mcp ...` calls the hosted MCP server
 
 </Slide>
 
@@ -340,8 +340,8 @@ logfire mcp query run \
 logfire --output json mcp query run --file slow.sql --project demo
 ```
 
-- The query goes through the hosted MCP server, so a coding agent takes exactly the same path
-- Same binary, same auth, same output contract for people, pipelines and agents
+- The query runs through the hosted MCP server, the same tool a coding agent calls
+- Same binary and login for people, CI and agents; `--output json` for the last two
 
 </Slide>
 
