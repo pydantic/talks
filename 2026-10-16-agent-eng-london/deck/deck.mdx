@@ -1,0 +1,260 @@
+import { Slide } from "deckx";
+import Landscape from "./components/Landscape.tsx";
+import ContourMap from "./components/ContourMap.tsx";
+import ConstraintsMetrics from "./components/ConstraintsMetrics.tsx";
+import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
+import PydanticToday from "./components/PydanticToday.tsx";
+import { Row, Col } from "./components/Layout.tsx";
+import qrContact from "./assets/qr-contact.svg";
+
+<Slide layout="title">
+
+### Agent Engineering London / October 2026
+
+# Software Development as Constrained Optimization
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro" space="tight">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**, Founder & CEO of **Pydantic Labs**
+
+<PydanticToday />
+
+</Slide>
+
+<Slide tab="intro">
+
+# What Pydantic does, in five steps
+
+<LLMOpsSteps />
+
+<p className="caption">That's the day job. This talk is about something else.</p>
+
+</Slide>
+
+<Slide tab="intro" layout="statement">
+
+# How I think about building software now.
+
+## It's a theory. I'm not certain it's right today, let alone tomorrow.
+
+## One fairly simple idea, some dodgy AI-slop metaphors so everyone gets it, then three real projects for colour.
+
+</Slide>
+
+<Slide tab="theory" layout="statement">
+
+# Software development is a constrained, non-convex optimization problem.
+
+</Slide>
+
+<Slide tab="theory">
+
+# One sentence, three parts
+
+<Row align="flex-start" gap="1.6rem">
+<Col>
+
+### Optimization
+
+There are metrics and you want them better: speed, compatibility, memory, signups.
+
+The agent is the optimizer. Stochastic, tireless, not picky about how.
+
+</Col>
+<Col>
+
+### Constrained
+
+Some things must stay true whatever the metric says: the spec, security, no `unsafe`.
+
+Gates, not weights. The optimizer never gets to trade them.
+
+</Col>
+<Col>
+
+### Non-convex
+
+There is no single downhill path. Plenty of places "work" but aren't good, and the optimizer will stop in one.
+
+Someone has to poke it.
+
+</Col>
+</Row>
+
+<p style={{ marginTop: '1rem' }}>My job moved from finding **x** to choosing **f** and **g**. Review is one of the **g**'s.</p>
+
+</Slide>
+
+<Slide tab="theory" space="tight">
+
+# The bowl, from above
+
+<ContourMap />
+
+<p className="caption">Yes, the bowl is a convex <em>function</em>. No, I don't know why mathematicians called it that either. The dips make it non-convex, and the dips are where the agent stops. The hatched areas are the constraints: the ball never goes in, however good the slope looks.</p>
+
+</Slide>
+
+<Slide tab="theory" space="tight">
+
+# The ski slope
+
+<Landscape mode="slope" />
+
+<p className="caption">We never reach the bottom. It's a slope that goes on forever, with dips to get stuck in, and the job is to keep the ball moving downhill and inside the gates.</p>
+
+</Slide>
+
+<Slide tab="jiter" space="tight">
+
+# jiter: the obvious one
+
+<ConstraintsMetrics
+  constraints={[
+    { what: 'JSON compliance', how: 'agree with serde_json on every document in the json-cases corpus: ~3,300 files incl. JSONTestSuite, invalid cases swept byte by byte, nesting to 100,000 deep' },
+    { what: 'Known differences are written down', how: 'three exceptions in known_difference(); anything else fails the test, and a missing corpus fails too' },
+    { what: 'Nothing undefined', how: 'differential fuzzing against serde_json, 300 s per target in CI; cargo careful for UB; recursion capped at 200, digits at 4,300' },
+    { what: 'The order of work', how: 'the corpus landed on 17 August 2026, the differential test on the 20th, and only then did optimization resume' },
+  ]}
+  metrics={[
+    { what: 'Speed, on every PR', how: 'CodSpeed with ASLR off, Cargo.lock committed and the corpus ref pinned, so the number is the number' },
+    { what: 'Speed, per shape', how: 'criterion benches paired with serde_json for strings, ints, floats, deep nesting and the error path' },
+    { what: 'Allocations', how: 'a counting GlobalAlloc example: deterministic, so it can be trusted on a busy machine where timings can\'t' },
+    { what: 'Python', how: 'bench against orjson, ujson and the stdlib, with the string cache on and off' },
+  ]}
+  footer="4.1x faster than serde_json over the whole corpus · 26 commits since the tests landed, most of them co-authored with Claude"
+/>
+
+</Slide>
+
+<Slide tab="monty" space="tight">
+
+# Monty: the big one
+
+<ConstraintsMetrics
+  constraints={[
+    { what: 'No unsafe', how: 'unsafe_code = "deny" across the workspace, two documented expect()s; the agent rule is "NEVER write unsafe code, leave a todo!()"' },
+    { what: 'No escape, by construction', how: 'the capability does not exist in the bytecode VM: no FFI, no C dependencies, no filesystem or network unless granted' },
+    { what: 'Resource limits that hold', how: 'the hard memory limit lives in the allocator; ~80 tests in resource_limits.rs; compile-fail tests; miri' },
+    { what: 'Every exploit becomes a wall', how: 'Hack Monty round 3: a read-write mount overlapping a read-only one let the weaker mode win; now overlapping mounts are rejected, with a regression test' },
+  ]}
+  metrics={[
+    { what: 'CPython compatibility', how: '657 test files, ~17k asserts, run against Monty and embedded CPython; CPython fills in the expected values; "NEVER MARK TESTS AS XFAIL"' },
+    { what: 'Hard errors, not drift', how: 'unsupported syntax is NotImplementedError at parse time; 40 pages in limitations/ that every PR must keep in sync' },
+    { what: 'Speed', how: 'CodSpeed on every PR, criterion pairs against CPython; a new sandbox in 0.8 ms' },
+    { what: 'Memory and size', how: '~2 MB per worker; verbosity is reviewed, not measured' },
+  ]}
+  footer="~207k lines of Rust in 18 crates · about a third of commits since November 2025 carry a Claude trailer"
+/>
+
+</Slide>
+
+<Slide tab="monty" space="tight">
+
+# Constraints we couldn't afford before
+
+<Row align="flex-start" gap="1.6rem">
+<Col flex="1 1 55%">
+
+The hosted Monty relay shipped last week with a `verification/` directory written alongside the code:
+
+- **11 Dafny and 5 TLA+ models**: admission, lease replacement, dispatch, broker lifetime, recovery
+- **13 Kani harnesses** that import the production decision functions, over the full input domain
+- **86 implementation mutations** that must fail, so an always-deny implementation cannot pass
+- An **eight-job CI matrix**, required whenever relay code changes; each proof receipt is bound to the hash of its inputs
+- A README that says what it does **not** prove: the compiler, the scheduler, the deployed binary
+
+</Col>
+<Col flex="1 1 45%" className="small-code">
+
+```dafny
+predicate Safe(s: State, valid: set<int>,
+               authLimit: nat, lookupLimit: nat,
+               sessionLimit: nat) {
+  s.lookups <= s.pending &&
+  s.pending * s.authorized == {} &&
+  s.sessions <= s.authorized &&
+  s.authorized <= valid &&
+  |s.pending| <= authLimit &&
+  |s.lookups| <= lookupLimit &&
+  |s.sessions| <= sessionLimit
+}
+```
+
+<p className="caption">A year ago nobody would have paid for a Dafny proof of a WebSocket relay. When the agent writes it, the only question is whether the fence is worth having.</p>
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="logfire" space="tight">
+
+# Logfire: the least obvious one
+
+<ConstraintsMetrics
+  constraints={[
+    { what: 'Tenant isolation in the types', how: 'every scan carries a ProjectId, never an Option<ProjectId>, so a caller without a project fails to compile; a missing scope rejects the query, never continues' },
+    { what: 'The gate is mergify, not a prompt', how: '70 pre-commit hooks incl. 18 house lint rules, pyright strict, a 25-job check, 100% coverage on touched packages, old app booted on the new schema, one human approval' },
+    { what: 'Proofs where tests can\'t reach', how: 'Dafny for the DB kernel, TLA+ for cache eviction, checked in CI' },
+    { what: 'Incidents become rules', how: 'a project filter was dead code for 308 days; now project_id is non-optional and a ratchet test only lets the list of tenancy gaps shrink. MUST rules each cite a real example' },
+  ]}
+  metrics={[
+    { what: 'Query speed, measured not gated', how: 'paired A/B benchmark on every PR posts the latency diff and always exits 0; 408 corpus queries run against staging every five minutes' },
+    { what: 'Logfire on Logfire', how: 'every environment ships its telemetry to a meta project; SLOs live in code' },
+    { what: 'Ease of use', how: 'a feature "is not done without a working walkthrough"; 30 review agents, all advisory' },
+    { what: 'The loop itself', how: 'a weekly agent proposes one CI speed-up with a measured wall-clock gain' },
+  ]}
+  footer="~1.25M lines of Python, ~460k of Rust · 48 contributors · at least 40% of commits since April carry a Claude trailer"
+/>
+
+</Slide>
+
+<Slide tab="lessons" fontSize="large">
+
+# What I'd do tomorrow
+
+- **One objective.** Pick the metric. Turn every other thing you care about into a constraint with a threshold: "latency under 200 ms", not "also make it fast".
+- **Gates, not weights.** If a violation is unacceptable it fails the build. Security is never a score.
+- **Every incident becomes a permanent, executable constraint.** That is the job: given a bad solution, produce the cheap check it violates.
+- **Make the loop fast and deterministic.** The verifier is your leverage; flaky or slow CI caps how hard you can push.
+
+</Slide>
+
+<Slide tab="lessons" fontSize="large">
+
+# Where the metaphor breaks
+
+- **Constraints are sampled, not proven.** CI checks points, not the region. Types and proofs are the exception, which is why the Dafny slide matters.
+- **The optimizer can read the constraints.** A solver can't lobby you to relax a bound; an agent will edit the test. Fences need tamper-protection: branch protection, "never xfail", a human approval, credentials it doesn't have.
+- **The real objective is a proxy.** Signups, revenue, "ease of use" aren't measurable until deployed. Goodhart's law applies to you, not just the model.
+
+</Slide>
+
+<Slide tab="lessons" layout="statement">
+
+# Why I'm optimistic
+
+<p>Defining and maintaining the fences on an endless slope is a harder, more complex and more valuable job than typing out the code ever was.</p>
+
+<p className="muted">Not a software factory. I still write code, and my review is often the most important constraint. But the person who formulates the problem is worth more today than the person who wrote the code was a year ago.</p>
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+<img src={qrContact} alt="QR code linking to pydantic.dev/contact" style={{ display: 'block', margin: '0 auto 1rem', width: '12rem', height: '12rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a href="https://pydantic.dev/contact" style={{ fontSize: '1.3em' }}>pydantic.dev/contact</a>
+
+<span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic`</span>
+
+</Slide>

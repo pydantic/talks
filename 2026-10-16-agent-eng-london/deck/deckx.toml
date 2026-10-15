@@ -1,0 +1,12 @@
+title = "Software Development as Constrained Optimization - Agent Engineering London, October 2026"
+theme = "dark"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",   label = "Intro" },
+  { id = "theory",  label = "The idea" },
+  { id = "jiter",   label = "jiter" },
+  { id = "monty",   label = "Monty" },
+  { id = "logfire", label = "Logfire" },
+  { id = "lessons", label = "Lessons" },
+]
