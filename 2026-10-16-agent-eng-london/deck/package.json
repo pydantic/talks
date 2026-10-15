@@ -6,12 +6,14 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "0.170.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@samuelcolvin/deckx": "^0.0.7"
+    "@samuelcolvin/deckx": "^0.0.7",
+    "three": "0.170.0"
   }
 }
