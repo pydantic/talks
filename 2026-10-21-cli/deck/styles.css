@@ -1,0 +1,34 @@
+:root {
+  --bg-slide: #15101a;
+  --bg-light: #faf6f2;
+  --surface: #241a2e;
+
+  --color-heading: #f5eef8;
+  --color-text: rgba(245, 238, 248, 0.82);
+  --color-heading-light: #1a0e22;
+  --color-text-light: #2d1f3a;
+  --color-muted: #8a7d95;
+
+  --accent: #e520a8;
+  --accent-secondary: #ff8a4c;
+  --accent-tertiary: #b388ff;
+  --accent-aqua: #4ad7c5;
+}
+
+/* Let over-tall code blocks overflow visibly instead of silently scrolling. */
+.slide pre {
+  flex-shrink: 0;
+}
+
+.slide .small-code pre {
+  font-size: 0.66rem;
+  padding: 0.9em 1em;
+}
+
+/* Deliberately too long: the raw OpenTelemetry setup runs off the bottom of the slide. */
+.slide .tiny-code pre {
+  font-size: 0.5rem;
+  line-height: 1.35;
+  padding: 0.8em 1em;
+  overflow: visible;
+}

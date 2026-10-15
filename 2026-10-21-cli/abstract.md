@@ -1,0 +1,1 @@
+Pydantic Logfire wraps OpenTelemetry in a thin layer so code instrumentation works with little setup. In this talk, Samuel digs into how the SDK was designed for both human and agent audiences, the choices that keep it lightweight, and how the same foundation scales from agent observability to application-wide monitoring.
