@@ -1,0 +1,301 @@
+import { Slide } from "deckx";
+import SkiSlope from "./components/SkiSlope.tsx";
+import ContourMap from "./components/ContourMap.tsx";
+import Challenge from "./components/Challenge.tsx";
+import Project from "./components/Project.tsx";
+import Shot from "./components/Shot.tsx";
+import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
+import PydanticToday from "./components/PydanticToday.tsx";
+import { Row, Col } from "./components/Layout.tsx";
+import qrContact from "./assets/qr-contact.svg";
+import codspeedJiter from "./assets/codspeed-jiter.png";
+import logfireMcp from "./assets/logfire-mcp.png";
+import logfireTrace from "./assets/logfire-trace.png";
+
+<Slide layout="title">
+
+### Agent Engineering London / October 2026
+
+# Constrained Optimism
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro" space="tight">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**, Founder & CEO of **Pydantic Labs**
+
+## Pydantic Today
+
+<PydanticToday />
+
+</Slide>
+
+<Slide tab="intro">
+
+# What Pydantic does, in five steps
+
+<LLMOpsSteps />
+
+<p className="caption">That's the day job. This talk is about something else.</p>
+
+</Slide>
+
+<Slide tab="intro" layout="statement">
+
+# How I think about building software now.
+
+## It's a theory. I'm not certain it's right today, let alone tomorrow.
+
+</Slide>
+
+<Slide tab="theory" layout="statement">
+
+# Software development is a constrained, non-convex optimization problem.
+
+</Slide>
+
+<Slide tab="theory">
+
+# What does that mean?
+
+> Software development is a constrained, non-convex optimization problem.
+
+<Row align="flex-start" gap="1.6rem">
+<Col>
+
+### Optimization
+
+There are metrics and you want them better: speed, compatibility, memory, signups.
+
+The agent is the optimizer. Stochastic, tireless, not picky about how.
+
+</Col>
+<Col>
+
+### Constrained
+
+Some things must stay true whatever the metric says: the spec, security, no `unsafe`.
+
+Gates, not weights. The optimizer never gets to trade them.
+
+</Col>
+<Col>
+
+### Non-convex
+
+There is no single downhill path. Plenty of places "work" but aren't good, and the optimizer will stop in one.
+
+Someone has to poke it.
+
+</Col>
+</Row>
+
+<p style={{ marginTop: '1rem' }}>My job moved from finding **x** to choosing **f** and **g**. Review is one of the **g**'s.</p>
+
+</Slide>
+
+<Slide tab="theory" space="tight">
+
+# Visual slop metaphor
+
+<ContourMap />
+
+<p className="caption">Yes, the bowl is a convex <em>function</em>. No, I don't know why mathematicians called it that either. The dips make it non-convex, and the dips are where the agent stops. The hatched areas are the constraints: the ball never goes in, however good the slope looks.</p>
+
+</Slide>
+
+<Slide tab="theory" space="tight">
+
+<h1 style={{ fontSize: '1.95rem', whiteSpace: 'nowrap' }}>But we never reach perfect, the descent is indefinite</h1>
+
+<SkiSlope />
+
+</Slide>
+
+<Slide tab="challenge" layout="statement">
+
+# So what does the developer actually do?
+
+## Set up the problem for the agent to solve.
+
+</Slide>
+
+<Slide tab="challenge">
+
+# The challenge
+
+<Challenge />
+
+</Slide>
+
+<Slide tab="jiter" space="tight">
+
+# jiter
+
+<Project
+  summary={<>Fast JSON parser in Rust, used inside Pydantic. <strong>4.1x faster than <code>serde_json</code>.</strong></>}
+  optimize={['Parse speed']}
+  constraints={['Correctly parse JSON', <>Errors match <code>serde_json</code></>, 'Feature set, e.g. float, decimal or str output for floats', 'Memory limits', 'No extra unsafe code']}
+/>
+
+<p className="caption">I restarted development by writing the test corpus, not the code.</p>
+
+</Slide>
+
+<Slide tab="jiter" space="tight">
+
+# jiter: how the agent gets feedback
+
+<Row align="flex-start" gap="1.6rem">
+<Col flex="1 1 55%">
+
+### Metrics
+
+<Shot src={codspeedJiter} label="CodSpeed differential flame graph for a jiter benchmark" height="20rem" />
+
+<p className="caption">CodSpeed runs on every PR. MCP server for CodSpeed gives the agent access to the context. Don't be a meat proxy.</p>
+
+</Col>
+<Col flex="1 1 45%">
+
+### Constraints
+
+- **Clippy**, pedantic group denied, also on wasm with no SIMD
+- **Unit tests** under `cargo careful`, which catches undefined behaviour
+- **Corpus tests**: ~3,300 documents, same answer as serde_json
+- **Fuzzing** against serde_json, five minutes per target
+- **Python tests** on every supported version
+- **Builds** on the minimum Rust version and on the latest dependencies
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="monty" space="tight">
+
+# Monty
+
+<Project
+  summary={<>A Python interpreter in Rust for running the code agents write. <strong>Starts in under 1 ms.</strong></>}
+  optimize={['CPython compatibility', 'Startup and runtime speed', 'Memory']}
+  constraints={['No way out of the sandbox', 'Resource limits always hold', <>No <code>unsafe</code></>]}
+/>
+
+</Slide>
+
+<Slide tab="monty" space="tight">
+
+# Monty: how the agent gets feedback
+
+<Row align="flex-start" gap="1.6rem">
+<Col flex="1 1 50%">
+
+### Metrics
+
+<div className="small-code">
+
+```python
+x = {}
+x.get(1, 2, 3)
+# Raise=TypeError('get expected at most 2 arguments, got 3')
+```
+
+</div>
+
+- **~700 Python scripts** run with Monty and CPython, guaranteeing exactly matching behaviour
+- **CodSpeed** on every PR
+
+</Col>
+<Col flex="1 1 50%">
+
+### Constraints
+
+- **Masses of unit tests**
+- **Bounty program**: [hackmonty.com](https://hackmonty.com), $20k reward
+- `unsafe_code = "deny"`
+- **miri**
+- **Reference-counting build**
+- **3 review agents**: Cubic, Macroscope, Veria Labs
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="logfire" space="tight">
+
+# Logfire
+
+<p style={{ fontSize: '1.25rem', lineHeight: 1.4 }}>AI + Infra observability, evals, AI Gateway</p>
+
+<div style={{ flex: 1, minHeight: 0, marginBottom: '-31px', display: 'flex', justifyContent: 'center' }}>
+  <img src={logfireTrace} alt="A Logfire trace of a Pydantic AI agent run" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)' }} />
+</div>
+
+</Slide>
+
+<Slide tab="logfire" space="tight">
+
+# Logfire
+
+<Project
+  summary={<>AI + Infra observability, evals, AI Gateway</>}
+  optimize={[<><strong>Business:</strong> a Pareto frontier across signup success, engagement, new feature usage and data sent</>, <><strong>Engineering:</strong> query performance, ingest latency</>]}
+  constraints={['Tenant isolation', 'Alerts must fire', 'Ingest uptime']}
+/>
+
+</Slide>
+
+<Slide tab="logfire" space="tight">
+
+# Logfire Example
+
+Our MCP server lets coding agents query Logfire directly with SQL and do (almost) **everything**. This lets our customers use Logfire as a metric or a constraint.
+
+The constraints are obvious (security, isolation). The metrics are harder to define:
+
+- Speed to achieve a goal (we can't measure token count)
+- Valid SQL %
+
+We get feedback by including an `intent` field in MCP tools.
+
+<Shot src={logfireMcp} label="Connecting Claude Code to the Logfire MCP server" height="11rem" />
+
+</Slide>
+
+<Slide tab="lessons" fontSize="large">
+
+# Where the metaphor breaks
+
+- **Constraints are sampled, not proven.** CI checks points, not the region. Types and proofs are the exception, which is why the Dafny slide matters.
+- **The optimizer can read the constraints.** A solver can't lobby you to relax a bound; an agent will edit the test. Fences need tamper-protection: branch protection, "never xfail", a human approval, credentials it doesn't have.
+- **The real objective is a proxy.** Signups, revenue, "ease of use" aren't measurable until deployed. Goodhart's law applies to you, not just the model.
+
+</Slide>
+
+<Slide tab="lessons" layout="statement">
+
+# Why I'm optimistic
+
+<p>Defining and maintaining the fences on an endless slope is a harder, more complex and more valuable job than typing out the code ever was.</p>
+
+<p className="muted">Not a software factory. I still write code, and my review is often the most important constraint. But the person who formulates the problem is worth more today than the person who wrote the code was a year ago.</p>
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+<img src={qrContact} alt="QR code linking to pydantic.dev/contact" style={{ display: 'block', margin: '0 auto 1rem', width: '12rem', height: '12rem', background: 'white', padding: '0.6rem', borderRadius: '0.5rem' }} />
+
+<a href="https://pydantic.dev/contact" style={{ fontSize: '1.3em' }}>pydantic.dev/contact</a>
+
+<span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic`</span>
+
+</Slide>
