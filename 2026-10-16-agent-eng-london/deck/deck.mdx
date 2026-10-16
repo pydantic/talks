@@ -28,6 +28,8 @@ import logfireTrace from "./assets/logfire-trace.png";
 
 - Creator of **Pydantic**, Founder & CEO of **Pydantic Labs**
 
+## Pydantic Today
+
 <PydanticToday />
 
 </Slide>
@@ -133,9 +135,9 @@ Someone has to poke it.
 # jiter
 
 <Project
-  summary={<>Fast JSON parser in Rust, used inside Pydantic. <strong>4.1x faster than serde_json.</strong></>}
+  summary={<>Fast JSON parser in Rust, used inside Pydantic. <strong>4.1x faster than <code>serde_json</code>.</strong></>}
   optimize={['Parse speed']}
-  constraints={['Correctly parse JSON', 'Errors match serde_json', 'Feature set, e.g. float, decimal or str output for floats', 'No extra unsafe code']}
+  constraints={['Correctly parse JSON', <>Errors match <code>serde_json</code></>, 'Feature set, e.g. float, decimal or str output for floats', 'Memory limits', 'No extra unsafe code']}
 />
 
 <p className="caption">I restarted development by writing the test corpus, not the code.</p>
