@@ -246,6 +246,23 @@ export default function SkiSlope() {
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(SKIER_R, 0.1, 6, 12), new THREE.MeshStandardMaterial({ color: pal.accent, roughness: 0.45 }));
     body.position.y = SKIER_R + 0.07;
     skier.add(body);
+    // a straw sun hat: a wide flat brim, a short rounded crown and a dark band, sat on top of the body
+    const strawMat = new THREE.MeshStandardMaterial({ color: 0xe8c872, roughness: 0.85 });
+    const bodyTop = body.position.y + 0.05 + SKIER_R;
+    const hatBase = bodyTop - 0.025;
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(SKIER_R * 2.1, SKIER_R * 2.1, 0.008, 32), strawMat);
+    brim.position.y = hatBase;
+    skier.add(brim);
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(SKIER_R * 0.85, SKIER_R * 1.0, 0.05, 24), strawMat);
+    crown.position.y = hatBase + 0.025;
+    skier.add(crown);
+    const crownTop = new THREE.Mesh(new THREE.SphereGeometry(SKIER_R * 0.85, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), strawMat);
+    crownTop.scale.y = 0.45;
+    crownTop.position.y = hatBase + 0.05;
+    skier.add(crownTop);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(SKIER_R * 0.99, SKIER_R * 1.02, 0.014, 24), new THREE.MeshStandardMaterial({ color: 0x3a2a44, roughness: 0.7 }));
+    band.position.y = hatBase + 0.012;
+    skier.add(band);
     const skiMat = new THREE.MeshBasicMaterial({ color: pal.aqua });
     for (const dx of [-0.04, 0.04]) {
       const ski = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.01, 0.32), skiMat);
