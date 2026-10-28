@@ -7,6 +7,9 @@ import Shot from "./components/Shot.tsx";
 import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
 import PydanticToday from "./components/PydanticToday.tsx";
 import { Row, Col } from "./components/Layout.tsx";
+import IntelligenceOverTime from "./components/aside/IntelligenceOverTime.tsx";
+import IntelligenceVsCompute from "./components/aside/IntelligenceVsCompute.tsx";
+import InferredCost from "./components/aside/InferredCost.tsx";
 import qrContact from "./assets/qr-contact.svg";
 import codspeedJiter from "./assets/codspeed-jiter.png";
 import logfireMcp from "./assets/logfire-mcp.png";
@@ -49,6 +52,60 @@ import logfireTrace from "./assets/logfire-trace.png";
 # How I think about building software now.
 
 ## It's a theory. I'm not certain it's right today, let alone tomorrow.
+
+</Slide>
+
+<Slide tab="aside" layout="statement">
+
+# Aside
+
+## Will the models keep getting smarter?
+
+</Slide>
+
+<Slide tab="aside" space="tight" id="aside-time">
+
+# Model intelligence over time
+
+## A purely empirical relationship!
+
+<IntelligenceOverTime />
+
+<p className="caption">Sources on <a href="https://github.com/pydantic/talks/blob/main/2026-10-28-fastapiconf/deck/model_intelligence_sources.md">GitHub</a></p>
+
+</Slide>
+
+<Slide tab="aside" space="tight" id="aside-compute">
+
+# Model intelligence vs. training compute
+
+## Another empirical relationship
+
+<IntelligenceVsCompute />
+
+<p className="caption">Sources on <a href="https://github.com/pydantic/talks/blob/main/2026-10-28-fastapiconf/deck/model_intelligence_sources.md">GitHub</a></p>
+
+</Slide>
+
+<Slide tab="aside" space="tight" id="aside-cost">
+
+# What it costs to stay on the line
+
+<InferredCost />
+
+<p className="caption">Sources on <a href="https://github.com/pydantic/talks/blob/main/2026-10-28-fastapiconf/deck/model_intelligence_sources.md">GitHub</a></p>
+
+</Slide>
+
+<Slide tab="aside" fontSize="large">
+
+# Summary
+
+- We have **no mechanistic model** that says models will keep getting more intelligent
+- Indeed, we have a model that says they **won't**
+- **But**, in the past, the tech industry found a way (to keep Moore's law going)
+
+<p style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', margin: '1rem 0 0', padding: '0 2rem', fontSize: '2.2em', lineHeight: 1.25, fontWeight: 700, color: 'var(--color-heading)' }}>It's dumb to assume models will keep getting more intelligent, and dumb to assume they won't!</p>
 
 </Slide>
 

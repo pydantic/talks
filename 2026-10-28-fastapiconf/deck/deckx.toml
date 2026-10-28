@@ -4,6 +4,7 @@ favicon = "assets/favicon.png"
 
 tabs = [
   { id = "intro",   label = "Intro" },
+  { id = "aside",   label = "Aside" },
   { id = "theory",  label = "The idea" },
   { id = "challenge", label = "The challenge" },
   { id = "jiter",   label = "jiter" },
