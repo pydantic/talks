@@ -1,0 +1,55 @@
+:root {
+  --bg-slide: #15101a;
+  --bg-light: #faf6f2;
+  --surface: #241a2e;
+
+  --color-heading: #f5eef8;
+  --color-text: rgba(245, 238, 248, 0.82);
+  --color-heading-light: #1a0e22;
+  --color-text-light: #2d1f3a;
+  --color-muted: #8a7d95;
+
+  --accent: #e520a8;
+  --accent-secondary: #ff8a4c;
+  --accent-tertiary: #b388ff;
+  --accent-aqua: #4ad7c5;
+}
+
+.slide pre {
+  flex-shrink: 0;
+}
+
+.slide .small-code pre {
+  font-size: 0.66rem;
+  padding: 0.9em 1em;
+}
+
+.slide .muted {
+  color: var(--color-muted);
+}
+
+.slide .caption {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  margin-top: 0.4rem;
+}
+
+@media print {
+  div {
+    box-shadow: none !important;
+  }
+}
+
+/* Chart slides: drop the bottom padding so the chart gets the space. */
+.slide#aside-time .slide-content,
+.slide#aside-compute .slide-content,
+.slide#aside-cost .slide-content,
+.slide#contour-map .slide-content {
+  padding-bottom: 0;
+}
+
+.slide#aside-time .caption,
+.slide#aside-compute .caption,
+.slide#aside-cost .caption {
+  margin-bottom: 0.5rem;
+}
