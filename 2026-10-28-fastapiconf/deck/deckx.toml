@@ -7,7 +7,6 @@ tabs = [
   { id = "aside",   label = "Aside" },
   { id = "theory",  label = "The idea" },
   { id = "challenge", label = "The challenge" },
-  { id = "monty",   label = "Monty" },
-  { id = "logfire", label = "Logfire" },
+  { id = "examples", label = "Examples" },
   { id = "lessons", label = "Lessons" },
 ]
