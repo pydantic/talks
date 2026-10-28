@@ -21,7 +21,7 @@ const LOGFIRE: Product[] = [
   { name: 'AI Observability', detail: 'Traces, evals and prompt management for agents' },
   { name: 'Infra Observability', detail: 'Logs, metrics and traces for the whole application' },
   { name: 'AI Gateway', detail: 'One endpoint, every model' },
-  { name: 'Sandboxes', detail: 'Hosted code execution, built on Monty', tag: 'soon' },
+  { name: 'Agent Sandboxes', detail: 'Hosted code execution, built on Monty', tag: 'soon' },
 ]
 
 /** One bordered panel with a heading, a subheading and a list of products. */
@@ -118,7 +118,7 @@ export default function PydanticToday() {
       />
       <Panel
         title="Pydantic Logfire"
-        subtitle="Commercial - where you run it"
+        subtitle="Commercial Platform"
         color="var(--accent-aqua)"
         products={LOGFIRE}
       />

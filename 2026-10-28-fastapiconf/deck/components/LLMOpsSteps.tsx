@@ -9,7 +9,7 @@ interface Step {
 
 const STEPS: Step[] = [
   { label: 'Agent loop', product: 'Pydantic AI', cx: 10, cy: 92 },
-  { label: 'Code execution', product: 'Monty', cx: 28.75, cy: 72 },
+  { label: 'Code execution', product: 'Agent Sandboxes', cx: 28.75, cy: 72 },
   { label: 'Observability', product: 'Logfire', cx: 47.5, cy: 52 },
   { label: 'Evals', product: 'Logfire', cx: 66.25, cy: 32 },
   { label: 'Continuous learning', product: 'Logfire + Gateway', cx: 85, cy: 12 },
