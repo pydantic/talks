@@ -6,6 +6,7 @@ import Project from "./components/Project.tsx";
 import Shot from "./components/Shot.tsx";
 import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
 import PydanticToday from "./components/PydanticToday.tsx";
+import FluffyFunction from "./components/FluffyFunction.tsx";
 import { Row, Col } from "./components/Layout.tsx";
 import IntelligenceOverTime from "./components/aside/IntelligenceOverTime.tsx";
 import IntelligenceVsCompute from "./components/aside/IntelligenceVsCompute.tsx";
@@ -155,13 +156,11 @@ Someone has to poke it.
 
 </Slide>
 
-<Slide tab="theory" space="tight">
+<Slide tab="theory" space="tight" id="contour-map">
 
 # Visual slop metaphor
 
 <ContourMap />
-
-<p className="caption">Yes, the bowl is a convex <em>function</em>. No, I don't know why mathematicians called it that either. The dips make it non-convex, and the dips are where the agent stops. The hatched areas are the constraints: the ball never goes in, however good the slope looks.</p>
 
 </Slide>
 
@@ -186,6 +185,16 @@ Someone has to poke it.
 # The challenge
 
 <Challenge />
+
+<p style={{ marginTop: 'auto', paddingTop: '1rem', textAlign: 'center', fontSize: '2em', fontWeight: 800, color: 'var(--accent)', letterSpacing: '0.02em' }}>THIS IS NOT A SOFTWARE FACTORY!</p>
+
+</Slide>
+
+<Slide tab="challenge" space="tight">
+
+# How this feels
+
+<FluffyFunction />
 
 </Slide>
 
@@ -239,7 +248,7 @@ Someone has to poke it.
 
 <Project
   summary={<>A Python interpreter in Rust for running the code agents write. <strong>Starts in under 1 ms.</strong></>}
-  optimize={['CPython compatibility', 'Startup and runtime speed', 'Memory']}
+  optimize={['CPython compatibility', 'Startup and runtime speed', 'Memory', 'Code readability']}
   constraints={['No way out of the sandbox', 'Resource limits always hold', <>No <code>unsafe</code></>]}
 />
 
@@ -322,36 +331,6 @@ The constraints are obvious (security, isolation). The metrics are harder to def
 We get feedback by including an `intent` field in MCP tools.
 
 <Shot src={logfireMcp} label="Connecting Claude Code to the Logfire MCP server" height="11rem" />
-
-</Slide>
-
-<Slide tab="lessons">
-
-# What this means for your FastAPI service
-
-<Row align="flex-start" gap="1.6rem">
-<Col>
-
-### The objective
-
-Whatever your product metric is: p99 latency, conversion, cost per request. **One** of them; threshold the rest.
-
-Write it down as one sentence. If you can't, the agent is optimizing something you didn't choose.
-
-</Col>
-<Col>
-
-### The constraints
-
-- **Types**: Pydantic models and the OpenAPI schema, the one constraint that holds everywhere, not just where you tested
-- **Tests**: the behaviour your clients depend on
-- **A latency budget**: a gate in CI, not a hope
-- **Lint and formatting**: cheap, deterministic, no judgment needed
-
-</Col>
-</Row>
-
-<p className="caption">Tomorrow: audit your "requirements". Which are enforced by something a machine runs, and which are merely hoped for?</p>
 
 </Slide>
 

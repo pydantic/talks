@@ -43,7 +43,8 @@
 /* Chart slides: drop the bottom padding so the chart gets the space. */
 .slide#aside-time .slide-content,
 .slide#aside-compute .slide-content,
-.slide#aside-cost .slide-content {
+.slide#aside-cost .slide-content,
+.slide#contour-map .slide-content {
   padding-bottom: 0;
 }
 

@@ -28,23 +28,26 @@ export interface Sim {
   trailAcc: number;
 }
 
-/** The map covers x in [0, 1] and y in [0, 0.4] (same aspect as the 1000 x 400 SVG). */
-export const MAP = { w: 1, h: 0.4, margin: 0.03, ballR: 0.011 };
+/** The map covers x in [0, 1] and y in [0, 0.46] (same aspect as the 1000 x 460 SVG). */
+export const MAP = { w: 1, h: 0.46, margin: 0.03, ballR: 0.011 };
 
-export const GOAL: Vec = { x: 0.56, y: 0.2 };
-export const START: Vec = { x: 0.065, y: 0.35 };
+/** The bowl is an ellipse inscribed in the map; the ball stays inside it. */
+export const BOWL = { cx: MAP.w / 2, cy: MAP.h / 2, a: MAP.w / 2 - MAP.margin, b: MAP.h / 2 - MAP.margin };
+
+export const GOAL: Vec = { x: 0.56, y: 0.23 };
+export const START: Vec = { x: 0.11, y: 0.32 };
 
 /** Local minima that "work, but..." */
 export const DIPS: Vec[] = [
-  { x: 0.2, y: 0.315 },
-  { x: 0.82, y: 0.09 },
-  { x: 0.47, y: 0.09 },
+  { x: 0.2, y: 0.36 },
+  { x: 0.82, y: 0.1 },
+  { x: 0.47, y: 0.1 },
 ];
 
 /** Hard constraints: the ball may not enter these. They sit on the slope, not over a minimum. */
 export const ZONES: Zone[] = [
-  { c: { x: 0.4, y: 0.27 }, r: 0.075, label: 'breaks the spec' },
-  { c: { x: 0.7, y: 0.27 }, r: 0.06, label: 'insecure' },
+  { c: { x: 0.4, y: 0.31 }, r: 0.075, label: 'breaks the spec' },
+  { c: { x: 0.7, y: 0.31 }, r: 0.06, label: 'insecure' },
 ];
 
 function g2(p: Vec, c: Vec, w: number): number {
@@ -58,7 +61,7 @@ export function f(p: Vec): number {
   z -= 0.26 * g2(p, DIPS[1]!, 0.05);
   z -= 0.2 * g2(p, DIPS[2]!, 0.05);
   // a hill so the paths curve
-  z += 0.16 * g2(p, { x: 0.68, y: 0.12 }, 0.05);
+  z += 0.16 * g2(p, { x: 0.68, y: 0.14 }, 0.05);
   return z;
 }
 
@@ -95,11 +98,24 @@ function physics(p: Vec, v: Vec): boolean {
   p.x += v.x * DT;
   p.y += v.y * DT;
   let touching = false;
-  const lo = MAP.margin + MAP.ballR;
-  if (p.x < lo) { p.x = lo; v.x = Math.abs(v.x) * 0.3; touching = true; }
-  if (p.x > MAP.w - lo) { p.x = MAP.w - lo; v.x = -Math.abs(v.x) * 0.3; touching = true; }
-  if (p.y < lo) { p.y = lo; v.y = Math.abs(v.y) * 0.3; touching = true; }
-  if (p.y > MAP.h - lo) { p.y = MAP.h - lo; v.y = -Math.abs(v.y) * 0.3; touching = true; }
+  // the rim of the bowl: an ellipse shrunk by the ball's radius
+  const a = BOWL.a - MAP.ballR;
+  const b = BOWL.b - MAP.ballR;
+  const ex = (p.x - BOWL.cx) / a;
+  const ey = (p.y - BOWL.cy) / b;
+  const r = Math.hypot(ex, ey);
+  if (r > 1) {
+    p.x = BOWL.cx + (ex / r) * a;
+    p.y = BOWL.cy + (ey / r) * b;
+    let nx = (p.x - BOWL.cx) / (a * a);
+    let ny = (p.y - BOWL.cy) / (b * b);
+    const nl = Math.hypot(nx, ny) || 1;
+    nx /= nl;
+    ny /= nl;
+    const vn = v.x * nx + v.y * ny;
+    if (vn > 0) { v.x -= 1.3 * vn * nx; v.y -= 1.3 * vn * ny; }
+    touching = true;
+  }
   for (const z of ZONES) {
     const dx = p.x - z.c.x;
     const dy = p.y - z.c.y;

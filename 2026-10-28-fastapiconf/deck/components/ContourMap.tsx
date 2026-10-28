@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DIPS, GOAL, MAP, ZONES, f, fingerVisible, init, simulate, step, type Sim, type Vec } from './mapSim';
+import { BOWL, DIPS, GOAL, MAP, ZONES, f, fingerVisible, init, simulate, step, type Sim, type Vec } from './mapSim';
 
 const W = 1000;
-const H = 400;
+const H = 460;
 const S = W / MAP.w; // px per map unit
 const R = MAP.ballR * S;
 
@@ -14,7 +14,7 @@ function isPrint() {
 }
 
 // Frozen frame: the ball pressed against the first fence, finger still visible.
-const PRINT_T = 5.20;
+const PRINT_T = 4.8;
 
 function useSim(): Sim {
   const ref = useRef<Sim>(isPrint() ? simulate(PRINT_T) : init());
@@ -120,33 +120,38 @@ export default function ContourMap() {
   const poking = fingerVisible(s);
   const deg = (Math.atan2(s.pokeDir.y, s.pokeDir.x) * 180) / Math.PI;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', flex: 1, minHeight: 0, maxHeight: '100%' }}>
       <defs>
         <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <line x1={0} y1={0} x2={0} y2={10} stroke="var(--accent-secondary)" strokeWidth={3} opacity={0.5} />
         </pattern>
+        <clipPath id="bowl">
+          <ellipse cx={sx(BOWL.cx)} cy={sy(BOWL.cy)} rx={BOWL.a * S} ry={BOWL.b * S} />
+        </clipPath>
       </defs>
-      <rect x={0} y={0} width={W} height={H} rx={10} fill="var(--surface)" opacity={0.9} />
-      {/* contours: the deeper the level, the brighter and thicker the line, so dips read as dips and hills fade */}
-      {lines.map(({ z, d }) => {
-        const depth = Math.min(1, Math.max(0, (0.3 - z) / 0.7));
-        return <path key={z} d={d} fill="none" stroke="var(--accent-tertiary)" strokeWidth={0.8 + 1.6 * depth} opacity={0.12 + 0.75 * depth} />;
-      })}
-      {/* the edge of the map */}
-      <rect x={m} y={m} width={W - 2 * m} height={H - 2 * m} fill="none" stroke="var(--accent-secondary)" strokeWidth={2} strokeDasharray="6 6" opacity={0.7} />
-      {/* constraints: areas the ball may not enter */}
-      {ZONES.map((z) => (
-        <g key={z.label}>
-          <circle cx={sx(z.c.x)} cy={sy(z.c.y)} r={z.r * S} fill="url(#hatch)" stroke="var(--accent-secondary)" strokeWidth={2.5} strokeDasharray="6 6" />
-          <Label x={sx(z.c.x)} y={sy(z.c.y) + z.r * S + 18} color="var(--accent-secondary)" size={14}>{z.label}</Label>
-        </g>
-      ))}
+      {/* the bowl, seen from above */}
+      <ellipse cx={sx(BOWL.cx)} cy={sy(BOWL.cy)} rx={BOWL.a * S} ry={BOWL.b * S} fill="var(--surface)" opacity={0.9} />
+      <g clipPath="url(#bowl)">
+        {/* contours: the deeper the level, the brighter and thicker the line, so dips read as dips and hills fade */}
+        {lines.map(({ z, d }) => {
+          const depth = Math.min(1, Math.max(0, (0.3 - z) / 0.7));
+          return <path key={z} d={d} fill="none" stroke="var(--accent-tertiary)" strokeWidth={0.8 + 1.6 * depth} opacity={0.12 + 0.75 * depth} />;
+        })}
+        {/* constraints: areas the ball may not enter */}
+        {ZONES.map((z) => (
+          <circle key={z.label} cx={sx(z.c.x)} cy={sy(z.c.y)} r={z.r * S} fill="url(#hatch)" stroke="var(--accent-secondary)" strokeWidth={2.5} strokeDasharray="6 6" />
+        ))}
+      </g>
+      {/* the rim */}
+      <ellipse cx={sx(BOWL.cx)} cy={sy(BOWL.cy)} rx={BOWL.a * S} ry={BOWL.b * S} fill="none" stroke="var(--accent-secondary)" strokeWidth={2} strokeDasharray="6 6" opacity={0.7} />
       {/* labels */}
+      {ZONES.map((z) => (
+        <Label key={z.label} x={sx(z.c.x)} y={sy(z.c.y) + z.r * S + 18} color="var(--accent-secondary)" size={14}>{z.label}</Label>
+      ))}
       <Label x={sx(GOAL.x)} y={sy(GOAL.y) + 34} color="var(--accent-aqua)">good enough</Label>
       {DIPS.map((d) => (
-        <Label key={`${d.x},${d.y}`} x={sx(d.x)} y={sy(d.y) + 34}>works, but...</Label>
+        <Label key={`${d.x},${d.y}`} x={sx(d.x)} y={sy(d.y) + (d.y < BOWL.cy ? 34 : -26)}>works, but...</Label>
       ))}
-      <Label x={m + 10} y={m + 22} anchor="start" size={13}>the map is the code · contours: how bad it is · brighter is lower</Label>
       {/* trail and ball */}
       {s.trail.length > 1 ? (
         <polyline points={s.trail.map((p) => `${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ')} fill="none" stroke="var(--accent)" strokeWidth={2} opacity={0.45} />

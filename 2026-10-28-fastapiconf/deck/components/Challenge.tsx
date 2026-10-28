@@ -20,7 +20,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Close the feedback loop',
-    text: 'The agent reads the result itself: no human copying errors between windows.',
+    text: 'The agent reads the result itself: no human copying errors between windows. Human review is still important.',
     examples: ['gh run view', 'compiler errors', 'CodSpeed MCP', 'Logfire MCP'],
     color: 'var(--accent-tertiary)',
   },
