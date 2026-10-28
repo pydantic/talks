@@ -7,9 +7,9 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    title: 'Pick one or two metrics',
+    title: 'Pick a few metrics',
     text: 'What gets better. If there seem to be ten, combine them into one composite score.',
-    examples: ['p50 latency', 'CPython compat %', 'bytes allocated'],
+    examples: ['p50 latency', 'CPython compat %', 'sign-up success %'],
     color: 'var(--accent-aqua)',
   },
   {

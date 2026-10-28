@@ -13,16 +13,35 @@ function isPrint() {
   return /HeadlessChrome/.test(navigator.userAgent);
 }
 
-// Frozen frame: the ball pressed against the first fence, finger still visible.
-const PRINT_T = 4.8;
+// Frozen frame: the ball bouncing off the first fence, finger still visible.
+const PRINT_T = 4.85;
 
-function useSim(): Sim {
-  const ref = useRef<Sim>(isPrint() ? simulate(PRINT_T) : init());
+/** True while the enclosing slide is the active one, so the animation starts when the slide is reached and restarts on return. */
+function useSlideActive(ref: React.RefObject<SVGSVGElement | null>): boolean {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const slide = ref.current?.closest('.slide');
+    if (!slide) {
+      setActive(true);
+      return;
+    }
+    const check = () => setActive(slide.classList.contains('slide--active'));
+    check();
+    const mo = new MutationObserver(check);
+    mo.observe(slide, { attributes: true, attributeFilter: ['class'] });
+    return () => mo.disconnect();
+  }, [ref]);
+  return active;
+}
+
+function useSim(ref: React.RefObject<SVGSVGElement | null>): Sim {
+  const simRef = useRef<Sim>(isPrint() ? simulate(PRINT_T) : init());
   const [, setTick] = useState(0);
   const [frozen, setFrozen] = useState(isPrint);
+  const active = useSlideActive(ref);
   useEffect(() => {
     const freeze = () => {
-      ref.current = simulate(PRINT_T);
+      simRef.current = simulate(PRINT_T);
       setFrozen(true);
       setTick((n) => n + 1);
     };
@@ -30,22 +49,24 @@ function useSim(): Sim {
     return () => window.removeEventListener('beforeprint', freeze);
   }, []);
   useEffect(() => {
-    if (frozen) return;
+    if (frozen || !active) return;
+    // start from the beginning each time the slide is shown
+    simRef.current = init();
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      const s = ref.current;
-      if (s.done) ref.current = init();
+      const s = simRef.current;
+      if (s.done) simRef.current = init();
       else step(s, dt);
       setTick((n) => n + 1);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [frozen]);
-  return ref.current;
+  }, [frozen, active]);
+  return simRef.current;
 }
 
 const NX = 200;
@@ -110,7 +131,8 @@ function Label({ x, y, children, anchor = 'middle', color = 'var(--color-muted)'
 }
 
 export default function ContourMap() {
-  const s = useSim();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const s = useSim(svgRef);
   const lines = useMemo(contours, []);
   const sx = (x: number) => x * S;
   const sy = (y: number) => y * S;
@@ -120,7 +142,7 @@ export default function ContourMap() {
   const poking = fingerVisible(s);
   const deg = (Math.atan2(s.pokeDir.y, s.pokeDir.x) * 180) / Math.PI;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', flex: 1, minHeight: 0, maxHeight: '100%' }}>
+    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', flex: 1, minHeight: 0, maxHeight: '100%' }}>
       <defs>
         <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <line x1={0} y1={0} x2={0} y2={10} stroke="var(--accent-secondary)" strokeWidth={3} opacity={0.5} />
@@ -148,7 +170,7 @@ export default function ContourMap() {
       {ZONES.map((z) => (
         <Label key={z.label} x={sx(z.c.x)} y={sy(z.c.y) + z.r * S + 18} color="var(--accent-secondary)" size={14}>{z.label}</Label>
       ))}
-      <Label x={sx(GOAL.x)} y={sy(GOAL.y) + 34} color="var(--accent-aqua)">good enough</Label>
+      <Label x={sx(GOAL.x)} y={sy(GOAL.y) + 34} color="var(--accent-aqua)">optimal solution</Label>
       {DIPS.map((d) => (
         <Label key={`${d.x},${d.y}`} x={sx(d.x)} y={sy(d.y) + (d.y < BOWL.cy ? 34 : -26)}>works, but...</Label>
       ))}

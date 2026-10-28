@@ -23,7 +23,7 @@ export interface Sim {
   touching: boolean;
   /** places the ball has already been stuck; a poke must not lead back to one */
   rests: Vec[];
-  /** recent positions, oldest first */
+  /** every position so far, oldest first; the trail stays on screen for the whole run */
   trail: Vec[];
   trailAcc: number;
 }
@@ -73,15 +73,14 @@ function grad(p: Vec): Vec {
   };
 }
 
-const G = 0.7;
-const DAMP = 2.6;
+const G = 0.42;
+const DAMP = 2.2;
 const DT = 1 / 240;
 const POKE_SHOW = 1.0;
 const HOLD = 4.0;
 const SLOW_V = 0.05;
 const SLOW_FOR = 2.0;
 const TRAIL_EVERY = 1 / 30;
-const TRAIL_LEN = 90;
 
 export function init(): Sim {
   return {
@@ -90,14 +89,14 @@ export function init(): Sim {
   };
 }
 
-/** One physics step with walls and exclusion zones; returns whether the ball is touching something. */
-function physics(p: Vec, v: Vec): boolean {
+/** One physics step with the rim and the exclusion zones; returns 0 for free, 1 for touching the rim, 2 for touching a zone. */
+function physics(p: Vec, v: Vec): number {
   const gr = grad(p);
   v.x += (-G * gr.x - DAMP * v.x) * DT;
   v.y += (-G * gr.y - DAMP * v.y) * DT;
   p.x += v.x * DT;
   p.y += v.y * DT;
-  let touching = false;
+  let touching = 0;
   // the rim of the bowl: an ellipse shrunk by the ball's radius
   const a = BOWL.a - MAP.ballR;
   const b = BOWL.b - MAP.ballR;
@@ -114,7 +113,7 @@ function physics(p: Vec, v: Vec): boolean {
     ny /= nl;
     const vn = v.x * nx + v.y * ny;
     if (vn > 0) { v.x -= 1.3 * vn * nx; v.y -= 1.3 * vn * ny; }
-    touching = true;
+    touching = 1;
   }
   for (const z of ZONES) {
     const dx = p.x - z.c.x;
@@ -127,56 +126,66 @@ function physics(p: Vec, v: Vec): boolean {
       p.x = z.c.x + nx * min;
       p.y = z.c.y + ny * min;
       const vn = v.x * nx + v.y * ny;
-      if (vn < 0) { v.x -= vn * nx; v.y -= vn * ny; }
-      touching = true;
+      // a fence bounces the ball: reflect the inward velocity with some restitution
+      if (vn < 0) { v.x -= 1.6 * vn * nx; v.y -= 1.6 * vn * ny; }
+      touching = 2;
     }
   }
   return touching;
 }
 
-/** Dry-run an impulse and report where the ball comes to rest. */
-function tryImpulse(p0: Vec, dir: Vec, speed: number): { p: Vec; z: number; touching: boolean; moved: boolean } {
+interface Trial { p: Vec; z: number; bounced: boolean; moved: boolean }
+
+/** Dry-run an impulse and report where the ball comes to rest and whether it hit a fence on the way. */
+function tryImpulse(p0: Vec, dir: Vec, speed: number): Trial {
   const p = { ...p0 };
   const v = { x: dir.x * speed, y: dir.y * speed };
   let slow = 0;
-  let touching = false;
-  for (let k = 0; k < 5 * 240; k++) {
-    touching = physics(p, v);
+  let bounced = false;
+  // run until the ball has been slow for as long as the live loop waits before poking, so a slow apex is not mistaken for a rest
+  for (let k = 0; k < 10 * 240; k++) {
+    if (physics(p, v) === 2) bounced = true;
     slow = Math.hypot(v.x, v.y) < SLOW_V ? slow + DT : 0;
-    if (slow > 0.4) break;
+    if (slow > SLOW_FOR) break;
   }
-  return { p, z: f(p), touching, moved: Math.hypot(p.x - p0.x, p.y - p0.y) > 0.05 };
+  return { p, z: f(p), bounced, moved: Math.hypot(p.x - p0.x, p.y - p0.y) > 0.05 };
 }
 
-/** The finger accepts a nudge that ends somewhere new and lower. */
-function acceptable(r: { p: Vec; z: number; touching: boolean; moved: boolean }, here: number, rests: Vec[]): boolean {
+/** Where the pokes should send the ball, in order: a second local minimum, then the goal. */
+const ITINERARY: Vec[] = [DIPS[2]!, GOAL];
+
+/** The finger accepts a nudge that ends near the target and somewhere new, bouncing off a fence on the way if asked. */
+function acceptable(r: Trial, target: Vec, rests: Vec[], needBounce: boolean): boolean {
   if (!r.moved) return false;
+  if (needBounce && !r.bounced) return false;
   if (rests.some((q) => Math.hypot(q.x - r.p.x, q.y - r.p.y) < 0.04)) return false;
-  return r.z < here - 0.03;
+  return Math.hypot(r.p.x - target.x, r.p.y - target.y) < 0.06;
 }
 
 const N_ANGLES = 24;
 
-/** The smallest impulse (found by dry-running the physics) that lands the ball somewhere lower than it is now. */
+/** The smallest impulse (found by dry-running the physics) that lands the ball at the next stop on the itinerary. */
 function poke(s: Sim) {
-  const here = f(s.p);
-  const toGoal = Math.atan2(GOAL.y - s.p.y, GOAL.x - s.p.x);
+  const target = ITINERARY[Math.min(s.pokes, ITINERARY.length - 1)]!;
+  const toGoal = Math.atan2(target.y - s.p.y, target.x - s.p.x);
   const angles: number[] = [];
   for (let i = 0; i < N_ANGLES; i++) angles.push(toGoal + (i * 2 * Math.PI) / N_ANGLES);
-  // prefer directions closest to the goal at equal speed
+  // prefer directions closest to the target at equal speed
   angles.sort((a, b) => Math.abs(Math.atan2(Math.sin(a - toGoal), Math.cos(a - toGoal))) - Math.abs(Math.atan2(Math.sin(b - toGoal), Math.cos(b - toGoal))));
   s.rests.push({ ...s.p });
-  // the gentlest nudge that gets somewhere new; among equal nudges, the one aimed closest to the goal
-  for (let speed = 0.25; speed < 1.6; speed *= 1.12) {
-    for (const a of angles) {
-      const dir = { x: Math.cos(a), y: Math.sin(a) };
-      if (acceptable(tryImpulse(s.p, dir, speed), here, s.rests)) {
-        s.v = { x: dir.x * speed * 1.05, y: dir.y * speed * 1.05 };
-        s.pokeDir = dir;
-        s.sincePoke = 0;
-        s.pokes += 1;
-        s.slowTime = 0;
-        return;
+  // the gentlest nudge that gets there, preferring one that bounces off a fence on the way
+  for (const needBounce of [true, false]) {
+    for (let speed = 0.2; speed < 1.6; speed *= 1.1) {
+      for (const a of angles) {
+        const dir = { x: Math.cos(a), y: Math.sin(a) };
+        if (acceptable(tryImpulse(s.p, dir, speed), target, s.rests, needBounce)) {
+          s.v = { x: dir.x * speed, y: dir.y * speed };
+          s.pokeDir = dir;
+          s.sincePoke = 0;
+          s.pokes += 1;
+          s.slowTime = 0;
+          return;
+        }
       }
     }
   }
@@ -196,7 +205,7 @@ export function step(s: Sim, seconds: number): Sim {
   if (s.done) return s;
   const n = Math.max(1, Math.round(seconds / DT));
   for (let i = 0; i < n; i++) {
-    s.touching = physics(s.p, s.v);
+    s.touching = physics(s.p, s.v) > 0;
     s.t += DT;
     if (s.sincePoke >= 0) s.sincePoke += DT;
     s.slowTime = Math.hypot(s.v.x, s.v.y) < SLOW_V ? s.slowTime + DT : 0;
@@ -204,7 +213,6 @@ export function step(s: Sim, seconds: number): Sim {
     if (s.trailAcc >= TRAIL_EVERY) {
       s.trailAcc = 0;
       s.trail.push({ ...s.p });
-      if (s.trail.length > TRAIL_LEN) s.trail.shift();
     }
     if (atGoal(s.p) && s.slowTime > 0) {
       s.settled += DT;
