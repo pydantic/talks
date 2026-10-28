@@ -206,58 +206,14 @@ Someone has to poke it.
 
 </Slide>
 
-<Slide tab="jiter" space="tight">
-
-# jiter
-
-<Project
-  summary={<>Fast JSON parser in Rust, used inside Pydantic. <strong>4.1x faster than <code>serde_json</code>.</strong></>}
-  optimize={['Parse speed']}
-  constraints={['Correctly parse JSON', <>Errors match <code>serde_json</code></>, 'Feature set, e.g. float, decimal or str output for floats', 'Memory limits', 'No extra unsafe code']}
-/>
-
-<p className="caption">I restarted development by writing the test corpus, not the code.</p>
-
-</Slide>
-
-<Slide tab="jiter" space="tight">
-
-# jiter: how the agent gets feedback
-
-<Row align="flex-start" gap="1.6rem">
-<Col flex="1 1 55%">
-
-### Metrics
-
-<Shot src={codspeedJiter} label="CodSpeed differential flame graph for a jiter benchmark" height="20rem" />
-
-<p className="caption">CodSpeed runs on every PR. MCP server for CodSpeed gives the agent access to the context. Don't be a meat proxy.</p>
-
-</Col>
-<Col flex="1 1 45%">
-
-### Constraints
-
-- **Clippy**, pedantic group denied, also on wasm with no SIMD
-- **Unit tests** under `cargo careful`, which catches undefined behaviour
-- **Corpus tests**: ~3,300 documents, same answer as serde_json
-- **Fuzzing** against serde_json, five minutes per target
-- **Python tests** on every supported version
-- **Builds** on the minimum Rust version and on the latest dependencies
-
-</Col>
-</Row>
-
-</Slide>
-
 <Slide tab="monty" space="tight">
 
 # Monty
 
 <Project
   summary={<>A Python interpreter in Rust for running the code agents write. <strong>Starts in under 1 ms.</strong></>}
-  optimize={['CPython compatibility', 'Startup and runtime speed', 'Memory', 'Code readability']}
-  constraints={['No way out of the sandbox', 'Resource limits always hold', <>No <code>unsafe</code></>]}
+  optimize={['CPython compatibility', 'Startup and runtime speed', 'Memory']}
+  constraints={['No way out of the sandbox', 'Resource limits always hold', <>No <code>unsafe</code></>, 'Code readability']}
 />
 
 </Slide>
@@ -282,18 +238,23 @@ x.get(1, 2, 3)
 </div>
 
 - **~700 Python scripts** run with Monty and CPython, guaranteeing exactly matching behaviour
-- **CodSpeed** on every PR
+- **CodSpeed** on every PR, with an MCP server so the agent reads the result itself. Don't be a meat proxy.
+
+<Shot src={codspeedJiter} label="CodSpeed differential flame graph" height="9rem" />
 
 </Col>
 <Col flex="1 1 50%">
 
 ### Constraints
 
-- **Masses of unit tests**
-- **Bounty program**: [hackmonty.com](https://hackmonty.com), $20k reward
+- **Masses of unit tests**, under `cargo careful` and **miri**, which catch undefined behaviour
 - `unsafe_code = "deny"`
-- **miri**
+- **Clippy**, pedantic group denied
+- **Fuzzing** against adversarial input
 - **Reference-counting build**
+- **Python tests** on every supported version
+- **Builds** on the minimum Rust version and on the latest dependencies
+- **Bounty program**: [hackmonty.com](https://hackmonty.com), $20k reward
 - **3 review agents**: Cubic, Macroscope, Veria Labs
 
 </Col>
@@ -320,7 +281,7 @@ x.get(1, 2, 3)
 <Project
   summary={<>AI + Infra observability, evals, AI Gateway</>}
   optimize={[<><strong>Business:</strong> a Pareto frontier across signup success, engagement, new feature usage and data sent</>, <><strong>Engineering:</strong> query performance, ingest latency</>]}
-  constraints={['Tenant isolation', 'Alerts must fire', 'Ingest uptime']}
+  constraints={['Tenant isolation', 'Auth security', 'Alerts must fire', 'Ingest uptime']}
 />
 
 </Slide>
@@ -357,8 +318,6 @@ We get feedback by including an `intent` field in MCP tools.
 # Why I'm optimistic
 
 <p>Defining and maintaining the fences on an endless slope is a harder, more complex and more valuable job than typing out the code ever was.</p>
-
-<p className="muted">Not a software factory. I still write code, and my review is often the most important constraint. But the person who formulates the problem is worth more today than the person who wrote the code was a year ago.</p>
 
 </Slide>
 
