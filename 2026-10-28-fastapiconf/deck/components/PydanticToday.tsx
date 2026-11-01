@@ -13,7 +13,7 @@ interface Product {
 
 const OPEN_SOURCE: Product[] = [
   { name: 'Pydantic Validation', detail: 'Contracts for data, 1 billion downloads a month' },
-  { name: 'Pydantic AI', detail: 'Production grade agent framework' },
+  { name: 'Pydantic AI', detail: 'Production grade agent framework and harness' },
   { name: 'Pydantic Monty', detail: 'Python sandbox for code written by agents, starts in 1ms' },
 ]
 

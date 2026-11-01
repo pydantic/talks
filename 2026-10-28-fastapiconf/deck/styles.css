@@ -53,3 +53,9 @@
 .slide#aside-cost .caption {
   margin-bottom: 0.5rem;
 }
+
+.slide .medium-code pre {
+  font-size: 0.82rem;
+  padding: 0.8em 1em;
+  line-height: 1.45;
+}
