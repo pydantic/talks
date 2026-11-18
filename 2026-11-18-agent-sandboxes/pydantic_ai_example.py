@@ -8,7 +8,6 @@ logfire.instrument_pydantic_ai()
 
 agent = Agent(
     'gateway/openai:gpt-6.1-sol',
-    # this is an example MCP server slack-like users, channels and messages
     toolsets=[MCPToolset('https://teamchat-mcp.pydantic.workers.dev/mcp')],
     capabilities=[CodeMode(monty_sandbox=logfire.agent_sandboxes)],
 )
