@@ -62,3 +62,8 @@
   border-radius: 4px;
   font-weight: 700;
 }
+
+/* Slide 3: slightly larger code. */
+.slide#code-mode .medium-code pre {
+  font-size: 0.96rem;
+}

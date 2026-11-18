@@ -14,10 +14,15 @@ registerTelemetry(new OpenTelemetry())
 
 const tools = {
   query: tool({
-    description: 'Run a SQL query on the SQLite database. Tables: orders(id, month "YYYY-MM", country, product, amount in USD).',
+    description:
+      'Run a SQL query on the SQLite database. Tables: orders(id, month "YYYY-MM", country, product, amount in USD).',
     inputSchema: z.object({ sql: z.string() }),
     outputSchema: z.array(z.record(z.string(), z.any())),
-    execute: async ({ sql }) => db.prepare(sql).all().map((row) => ({ ...row })),
+    execute: async ({ sql }) =>
+      db
+        .prepare(sql)
+        .all()
+        .map((row) => ({ ...row })),
   }),
   chart: tool({
     description: 'Show the user a bar chart.',

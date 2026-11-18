@@ -119,10 +119,7 @@ export default function SandboxCost() {
           padding: '0.65rem 1.3rem',
         }}
       >
-        <span style={{ ...mono, fontSize: '2.3rem', fontWeight: 800, color: 'var(--accent)', whiteSpace: 'nowrap', lineHeight: 1 }}>&lt;1 ms</span>
-        <span style={{ fontSize: '1.15rem', lineHeight: 1.35 }}>
-          <strong>to run the code an agent writes.</strong> Everything else is sandbox overhead, and with a VM you pay for the machine while it sits idle.
-        </span>
+        <span style={{ fontSize: '1.15rem', lineHeight: 1.35 }}>With a VM you pay for the machine while it sits idle.</span>
       </div>
     </div>
   );
