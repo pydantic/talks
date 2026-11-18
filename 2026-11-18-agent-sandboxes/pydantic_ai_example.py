@@ -1,11 +1,7 @@
 import logfire
-from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai_harness import CodeMode
-
-# reads LOGFIRE_API_KEY from .env
-load_dotenv()
 
 logfire.configure(service_name='pydantic-ai-example')
 logfire.instrument_pydantic_ai()
