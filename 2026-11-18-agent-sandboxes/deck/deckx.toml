@@ -1,0 +1,9 @@
+title = "Agent Sandboxes - November 2026"
+theme = "dark"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "codemode",  label = "Code mode" },
+  { id = "sandboxes", label = "Agent Sandboxes" },
+  { id = "demo",      label = "Demo" },
+]
