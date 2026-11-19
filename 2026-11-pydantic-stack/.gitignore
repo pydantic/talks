@@ -4,5 +4,7 @@ __pycache__
 node_modules
 .logfire/
 /scratch/
-# Raw downloads cached by geo_service/build_data.py; the processed data in geo_service/data/ is committed.
+# Raw downloads cached by geo_service/build_data.py; the processed data in geo_service/data/ is committed,
+# apart from the aerial images, which `make images` downloads.
 geo_service/raw_data/
+geo_service/data/images/

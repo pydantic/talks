@@ -66,6 +66,8 @@ For a quick run without the web UI, `make agent` asks the agent one question in 
 
 `make build-data` downloads and preprocesses everything into `geo_service/data/`, which is committed, so it only needs running to change the town or the number of properties.
 
+The 300 aerial images are about 10 MB and are not committed. `make images` downloads them into `geo_service/data/images/`, and every target that starts the geo risk API runs it first, so the first run needs the network and takes a little longer.
+
 | Data | Source |
 |---|---|
 | Address points | Vermont E911 site locations, Vermont Open Geodata Portal |

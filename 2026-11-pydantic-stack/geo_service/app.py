@@ -1,6 +1,7 @@
 """The geo risk API: flood zone, elevation, distance to water and an aerial image for each property.
 
-It serves only the files that `build_data.py` wrote to `data/`, so it makes no outbound requests.
+It serves only the files that `build_data.py` and `download_images.py` wrote to `data/`, so it makes no
+outbound requests.
 Run with `make serve` (`uv run uvicorn geo_service.app:app --port 8001`).
 """
 
@@ -133,7 +134,10 @@ async def distance_to_water(property_id: str) -> DistanceToWater:
 @app.get('/properties/{property_id}/aerial-image')
 async def aerial_image(property_id: str) -> FileResponse:
     _point(property_id)
-    return FileResponse(DATA_DIR / 'images' / f'{property_id}.jpg', media_type='image/jpeg')
+    path = DATA_DIR / 'images' / f'{property_id}.jpg'
+    if not path.exists():
+        raise HTTPException(503, 'The aerial images have not been downloaded: run `make images`')
+    return FileResponse(path, media_type='image/jpeg')
 
 
 @app.get('/map/{layer}')

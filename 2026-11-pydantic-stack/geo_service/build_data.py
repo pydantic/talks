@@ -9,7 +9,7 @@ Sources, all for central Montpelier, Vermont:
   connections from outside the US).
 - Rivers: USGS National Hydrography Dataset.
 - Elevation: USGS 3DEP, sampled at each property and at the nearest point on the water.
-- Aerial imagery: USDA NAIP, from the USGS image service, one tile per property.
+- Aerial imagery: USDA NAIP, from the USGS image service, one tile per property (see `download_images.py`).
 
 Raw responses are cached under `raw_data/`, so a second run makes no requests.
 """
@@ -24,16 +24,14 @@ import httpx2
 from shapely.geometry import Point, box, mapping, shape
 from shapely.ops import nearest_points, unary_union
 
+from .download_images import download_images
 from .geo import BBOX, project, to_lon_lat, to_metres
 
 THIS_DIR = Path(__file__).parent
 RAW_DIR = THIS_DIR / 'raw_data'
 DATA_DIR = THIS_DIR / 'data'
-IMAGE_DIR = DATA_DIR / 'images'
 
 PROPERTY_COUNT = 300
-IMAGE_PIXELS = 384
-IMAGE_METRES = 110  # ground covered by one side of an image tile
 
 VCGI = 'https://services1.arcgis.com/BkFxaEFNwHqX3tAw/arcgis/rest/services'
 ADDRESSES_URL = f'{VCGI}/FS_VCGI_OPENDATA_Emergency_ESITE_point_SP_v1/FeatureServer/0/query'
@@ -43,7 +41,6 @@ FLOOD_URL = (
 )
 NHD_URL = 'https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/{layer}/query'
 ELEVATION_URL = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples'
-IMAGERY_URL = 'https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage'
 
 BBOX_QUERY = {
     'geometry': ','.join(str(v) for v in BBOX),
@@ -90,28 +87,6 @@ def flood_class(properties: dict[str, Any]) -> str | None:
     return None
 
 
-async def fetch_image(client: httpx2.AsyncClient, limit: asyncio.Semaphore, property_id: str, x: float, y: float):
-    path = IMAGE_DIR / f'{property_id}.jpg'
-    if path.exists():
-        return
-    half = IMAGE_METRES / 2
-    west, south = to_lon_lat(x - half, y - half)
-    east, north = to_lon_lat(x + half, y + half)
-    params = {
-        'bbox': f'{west},{south},{east},{north}',
-        'bboxSR': '4326',
-        'size': f'{IMAGE_PIXELS},{IMAGE_PIXELS}',
-        'format': 'jpg',
-        'f': 'image',
-    }
-    async with limit:
-        response = await client.get(IMAGERY_URL, params=params)
-    response.raise_for_status()
-    if not response.headers['content-type'].startswith('image/'):
-        raise RuntimeError(f'{property_id}: imagery service returned {response.text[:200]}')
-    path.write_bytes(response.content)
-
-
 async def sample_elevations(client: httpx2.AsyncClient, name: str, points: list[tuple[float, float]]) -> list[float]:
     """Ground elevation in metres at each lon/lat point."""
     elevations: list[float] = []
@@ -133,7 +108,7 @@ async def sample_elevations(client: httpx2.AsyncClient, name: str, points: list[
 
 
 async def main() -> None:
-    for directory in RAW_DIR, DATA_DIR, IMAGE_DIR:
+    for directory in RAW_DIR, DATA_DIR:
         directory.mkdir(parents=True, exist_ok=True)
 
     headers = {'User-Agent': 'pydantic-demo-data-build/0.1'}
@@ -209,14 +184,10 @@ async def main() -> None:
             p['elevation_m'] = elevation
             p['water_elevation_m'] = water_elevation
 
-        limit = asyncio.Semaphore(6)
-        async with asyncio.TaskGroup() as group:
-            for p in properties:
-                group.create_task(fetch_image(client, limit, p['id'], *to_metres(p['lon'], p['lat'])))
-
     (DATA_DIR / 'properties.json').write_text(json.dumps(properties, indent=1))
     (DATA_DIR / 'flood_zones.geojson').write_text(json.dumps({'type': 'FeatureCollection', 'features': zone_features}))
     (DATA_DIR / 'water.geojson').write_text(json.dumps({'type': 'FeatureCollection', 'features': water_features}))
+    await download_images(properties)
     print(
         f'{len(properties)} properties, {len(zone_features)} flood zone polygons, {len(water_features)} water features'
     )
