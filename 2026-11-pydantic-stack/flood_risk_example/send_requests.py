@@ -14,15 +14,39 @@ import httpx2
 
 APP_URL = os.getenv('APP_URL', 'http://localhost:8000')
 
+# A spread from one lookup to whole-portfolio analysis, plus questions that should not need the tools
+# at all, a few the agent cannot answer, and some vague ones, so the online evals do not all pass.
 QUESTIONS = [
+    # One property
     'Should we insure 34 State St?',
     'Should we insure 25 School St? Take the aerial image into account.',
     'How far is 2 Mechanic St from water, and how high above it?',
-    'Which properties on Langdon St would we decline?',
     'Should we insure 12 Pearl St?',
-    'Which five properties are closest to water?',
+    'Why would 197 State St be declined?',
+    # A handful of properties
     'Compare 197 State St and 160 Main St: which is the better risk?',
+    'Which properties on Langdon St would we decline?',
     'Triage the properties on Elm St and show me the referrals.',
+    'Look at the aerial images for the restaurants and tell me which are right on the river bank.',
+    # The whole portfolio
+    'Which five properties are closest to water?',
+    'Triage the whole portfolio. How many decisions did each model make, and how confident was the decision model on its declines?',
+    'What changes if the flood zones grow by 50 m? Which streets are affected most?',
+    'For each kind of property, what share is in the 1% zone, and what is the average height above water?',
+    'Which accepted properties are within 20 m of water? Check each of their aerial images.',
+    # Needs no tools
+    'What does FEMA zone AE mean?',
+    'What is the difference between a refer and a decline?',
+    'In general, would we insure a house in the regulatory floodway?',
+    # Cannot be answered from the data
+    'Should we insure 999 Nowhere Rd?',
+    'What premium should we charge for 34 State St?',
+    'Which of these properties flooded in July 2023?',
+    'Should we insure the house next to the bridge?',
+    # Vague or off topic
+    'Is the portfolio ok?',
+    'Tell me about Elm St.',
+    'What is the weather in Montpelier today?',
 ]
 
 
