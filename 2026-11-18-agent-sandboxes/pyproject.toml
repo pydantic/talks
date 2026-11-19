@@ -4,7 +4,9 @@ version = "0.1.0"
 requires-python = ">=3.15"
 dependencies = [
     "logfire[agent-sandboxes]>=5.4.0",
+    "numpy>=2.5.5",
     "pydantic-ai-harness[codemode]>=0.62.0",
     "pydantic-ai-slim[mcp,openai]>=2.70.0",
     "python-dotenv>=1.2.4",
+    "sounddevice>=0.5.6",
 ]

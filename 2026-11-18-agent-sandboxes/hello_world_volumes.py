@@ -2,7 +2,6 @@ import asyncio
 
 import logfire
 
-# the ID of a sandbox profile with a volume mounted at /data
 PROFILE = '01a1ef98-405d-7384-b76c-8b576c8df66d'
 
 write = """
