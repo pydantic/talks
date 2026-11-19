@@ -1,0 +1,144 @@
+import { Slide } from "deckx";
+import AgentTypes from "./components/AgentTypes.tsx";
+import SandboxCost from "./components/SandboxCost.tsx";
+import SandboxChecklist from "./components/SandboxChecklist.tsx";
+import { Row, Col } from "./components/Layout.tsx";
+
+<Slide layout="title">
+
+### November 2026
+
+# Agent Sandboxes
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="codemode">
+
+# Two types of agent
+
+<AgentTypes />
+
+<p style={{ marginTop: 'auto', fontSize: '1.35rem' }}>Until now, every sandbox was designed for developer agents.</p>
+
+<p style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--accent)', lineHeight: 1.3 }}>Agent Sandboxes in Pydantic Logfire is for all the other agents, with far lower overheads.</p>
+
+</Slide>
+
+<Slide tab="codemode" id="code-mode">
+
+# Virtually every agent can benefit from code mode
+
+The model writes one short program that calls your tools, instead of making one tool call per turn.
+
+<div className="medium-code">
+
+```python
+orders = await list_orders(customer_id=123)
+details = await asyncio.gather(*[get_order(o.id) for o in orders])
+late = [d for d in details if d.status == 'late']
+{'late_orders': len(late), 'total': sum(d.amount for d in late)}
+```
+
+</div>
+
+- **Fewer model turns**, so it's faster
+- **Fewer tokens**, so it's cheaper
+- **Intermediate results never enter the context**: only the answer goes back to the model
+
+</Slide>
+
+<Slide tab="codemode" space="tight">
+
+# Until today, sandboxes were too slow and expensive for code mode
+
+<SandboxCost />
+
+</Slide>
+
+<Slide tab="sandboxes" id="one-line">
+
+# Agent Sandboxes
+
+## Monty, hosted in Logfire. Starts in milliseconds, billed per run, with the REPL and external functions built in.
+
+<div className="medium-code">
+
+```python
+import logfire
+from pydantic_ai import Agent
+from pydantic_ai_harness import CodeMode
+
+agent = Agent(
+    'anthropic:claude-sonnet-5-5',
+    capabilities=[CodeMode(monty_sandbox=logfire.agent_sandboxes)],
+)
+```
+
+</div>
+
+<p className="caption" style={{ marginTop: 'auto' }}>One line in Pydantic AI. Any other framework connects with <code>AsyncMontyRemote</code> (Python) or <code>MontyRemote</code> (TypeScript), with a little more wiring.</p>
+
+</Slide>
+
+<Slide tab="sandboxes" space="tight">
+
+# But that's not all: durable execution
+
+## Snapshot at any external call, resume later, somewhere else.
+
+<Row align="flex-start" gap="1.8rem">
+<Col flex="1 1 56%">
+
+<div className="medium-code">
+
+```python
+while True:
+    report = await build_weekly_report()
+    # may take days
+    if await ask_human('Send this?', report):
+        await send(report)
+    # suspends, holds nothing open
+    await sleep_until(next_monday())
+```
+
+</div>
+
+</Col>
+<Col flex="1 1 44%">
+
+- The snapshot is the interpreter and its paused call stack, in **kilobytes**.
+- It isn't replay, so the code needs no workflow framework.
+- Monty code can be the definition of a loop or graph that runs for **weeks or months**.
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="sandboxes" space="tight">
+
+# What makes a sandbox?
+
+## A sandbox is more than a runtime
+
+<SandboxChecklist />
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+## 50,000 free invocations a month on every Logfire plan
+
+<span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic` · [pydantic.dev/signup](https://pydantic.dev/signup)</span>
+
+</Slide>

@@ -1,0 +1,10 @@
+[project]
+name = "agent-sandboxes-demo"
+version = "0.1.0"
+requires-python = ">=3.15"
+dependencies = [
+    "logfire[agent-sandboxes]>=5.4.0",
+    "pydantic-ai-harness[codemode]>=0.62.0",
+    "pydantic-ai-slim[mcp,openai]>=2.70.0",
+    "python-dotenv>=1.2.4",
+]
