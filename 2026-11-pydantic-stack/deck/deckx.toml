@@ -4,6 +4,7 @@ favicon = "assets/favicon.png"
 
 tabs = [
   { id = "intro",      label = "Intro" },
+  { id = "validation", label = "Validation" },
   { id = "agent-loop", label = "Agent loop" },
   { id = "code",       label = "Code execution" },
   { id = "o11y",       label = "Observability" },

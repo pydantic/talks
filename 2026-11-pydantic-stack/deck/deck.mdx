@@ -2,8 +2,7 @@ import { Slide } from "deckx";
 import PydanticToday from "./components/PydanticToday.tsx";
 import DownloadsChart from "./components/DownloadsChart.tsx";
 import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
-import ToolsJson from "./components/ToolsJson.tsx";
-import CodemodeDiagram from "./components/CodemodeDiagram.tsx";
+import CodemodeVsToolCalls from "./components/CodemodeVsToolCalls.tsx";
 import SandboxCost from "./components/SandboxCost.tsx";
 import SandboxChecklist from "./components/SandboxChecklist.tsx";
 import TraceObservability from "./components/TraceObservability.tsx";
@@ -35,7 +34,19 @@ import { Row, Col } from "./components/Layout.tsx";
 
 <Slide tab="intro">
 
-# Where Pydantic came from
+# The Pydantic AI engineering stack
+
+<LLMOpsSteps />
+
+</Slide>
+
+{/* The rest of the slides walk the six steps in order, then the demo does the same with one agent. */}
+
+<Slide tab="validation">
+
+### Step 1 - Pydantic
+
+# Validation
 
 <Row>
 <Col flex="0 0 46%" className="medium-code">
@@ -67,19 +78,9 @@ print(city)
 
 </Slide>
 
-<Slide tab="intro">
-
-# What Pydantic does, in five steps
-
-<LLMOpsSteps />
-
-</Slide>
-
-{/* The rest of the slides walk the five steps in order, then the demo does the same with one agent. */}
-
 <Slide tab="agent-loop" space="tight">
 
-### Step 1 - Pydantic AI
+### Step 2 - Pydantic AI
 
 # Agent loop
 
@@ -110,151 +111,103 @@ agent = Agent(
 
 <Slide tab="agent-loop" space="tight">
 
-### Step 1 - Pydantic AI
+### Step 2 - Pydantic AI
 
-# Tools and the harness
+# The harness
 
 <Row align="flex-start" gap="1.8rem">
 <Col flex="1 1 58%" className="medium-code">
 
 ```py
 from pydantic_ai import Agent
-from pydantic_ai_harness import CodeMode
+from pydantic_ai.capabilities import LocalWorkspace
+from pydantic_ai_harness.coder import Coder
 
 agent = Agent(
-    "gateway/openai:gpt-5.6-terra",
-    instructions="You are an equity analyst...",
-    tools=[db.query, db.list_tables, draw_chart],
-    capabilities=[CodeMode()],
-    retries=3,
+    'anthropic:claude-opus-5-5',
+    capabilities=[LocalWorkspace('.'), Coder()],
 )
+result = agent.run_sync(
+    'Find out why tests/test_parser.py fails '
+    'and fix the bug it caught.'
+)
+print(result.output)
 ```
 
 </Col>
 <Col flex="1 1 42%">
 
-- **Tools** are typed Python functions; the signature and docstring are the schema
-- **Validation errors go back to the model**, which gets another go
 - **Capabilities** are the harness: reusable behaviour you add to any agent
-- One model string for every provider, via the **Gateway**
+- **`Coder`** is a coding agent in one line: file tools, a shell, sub-agents and `AGENTS.md` context
+- **The workspace** is where it works: this machine, or a cloud sandbox
+- Take it apart: `FileSystem`, `Shell` and `SubAgents` are capabilities too
 
 </Col>
 </Row>
 
 </Slide>
 
-<Slide tab="code">
+<Slide tab="agent-loop" space="tight">
 
-### Step 2 - Code execution
+### Step 2 - Pydantic AI
 
-<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr', gap: '2rem', alignItems: 'stretch', height: '100%' }}>
+# Decision models
 
-<div>
-
-# Why code mode
-
-Agents are easy to define in the abstract.
+<Row align="flex-start" gap="1.8rem">
+<Col flex="1 1 58%" className="medium-code">
 
 ```py
-env = Environment()
-tools = Tools(env)
-system_prompt = "Goals, constraints, and how to act"
+class Outcome(UseEnumMemberDocstrings, StrEnum):
+    accept = 'accept'
+    """Outside every mapped flood zone..."""
+    refer = 'refer'
+    """In the 1% zone, 2 m or more above the water..."""
+    decline = 'decline'
+    """In the regulatory floodway..."""
 
-while True:
-    action = llm.run(system_prompt + env.state)
-    env.state = tools.run(action)
+class Decision(BaseModel):
+    """Decide whether to offer buildings insurance."""
+    outcome: Outcome
+    flood_excess: bool
+
+model = FallbackModel(
+    'typesafe:jev-latest', 'anthropic:claude-sonnet-5',
+    fallback_on=[ModelAPIError, unsure],
+)
+agent = Agent(model, output_type=Decision)
 ```
 
-**Agents are models using tools in a loop**
+</Col>
+<Col flex="1 1 42%">
 
-... but how much context do those tools take up?
+- A **classifier**, not a writer: each field of the output type is one typed question
+- Every answer has a **confidence**
+- Fast and cheap enough to ask **on every item in a loop**
+- The answers it is unsure of **fall back** to a language model
+- Same `Agent`, different model string
 
-</div>
-
-<div style={{ position: 'relative' }}>
-  <ToolsJson />
-</div>
-
-</div>
-
-</Slide>
-
-<Slide tab="code" space="tight">
-
-### Step 2 - Code execution
-
-# Code mode
-
-<div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem', alignItems: 'start' }}>
-
-<div>
-
-- aka "Programmatic tool calling", CodeAct, and RLM (Recursive Language Models)
-- The model writes Python (or JS); the Python calls tools
-- Tool composition, branching, looping - all happen in **code**, not round-trips
-- Intermediate state stays in the runtime, not in the context window
-- The agent only ever sees **two** tools: `run_code` and `find_tools`
-- "1000 tools in 1000 tokens" is the promise
-- even better: "1000 tool calls with 1 LLM call"
-
-</div>
-
-<div style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
-  <CodemodeDiagram />
-</div>
-
-</div>
+</Col>
+</Row>
 
 </Slide>
 
 <Slide tab="code" space="tight">
 
-### Step 2 - Code execution
+### Step 3 - Code execution
 
-# Monty: hello world
+# Code mode with Agent Sandboxes
 
-A minimal Python interpreter, written in Rust, for code written by AI. No filesystem, env or network unless you grant it.
-
-<div className="medium-code">
+<Row align="flex-start" gap="1.6rem">
+<Col flex="1 1 62%" className="medium-code">
 
 ```py
-from pydantic_monty import Monty
-
-def get_who(greeting: str) -> str:
-    return 'World' if greeting == 'Hello' else 'everyone'
-
-code = """
-greeting = 'Hi'
-who = get_who(greeting)
-f'{greeting} {who}'
-"""
-with Monty() as pool, pool.checkout() as session:
-    output = session.feed_run(code, external_lookup={'get_who': get_who})
-    print('output:', output)
-    #> output: Hi everyone
-```
-
-</div>
-
-</Slide>
-
-<Slide tab="code" space="tight">
-
-### Step 2 - Code execution
-
-# Code mode with Monty
-
-One `run_code` tool - your tools become Python functions inside the sandbox.
-
-<div className="medium-code">
-
-```py
+import logfire
 from pydantic_ai import Agent
 from pydantic_ai_harness import CodeMode
 
 agent = Agent(
     "gateway/anthropic:claude-sonnet-5",
-    capabilities=[CodeMode()],
+    capabilities=[CodeMode(monty_sandbox=logfire.agent_sandboxes)],
 )
 
 @agent.tool_plain
@@ -262,17 +215,22 @@ def get_weather(city: str) -> dict:
     """Get current weather for a city."""
     return {'city': city, 'temp_f': 72, 'condition': 'sunny'}
 
-result = agent.run_sync("What's the weather in New York and London, in Celsius?")
-print(result.output)
+result = agent.run_sync(
+    "What's the weather in New York, London and Tokyo, in Celsius?"
+)
 ```
 
-</div>
+</Col>
+<Col flex="1 1 38%">
+  <CodemodeVsToolCalls />
+</Col>
+</Row>
 
 </Slide>
 
 <Slide tab="code" space="tight">
 
-### Step 2 - Code execution
+### Step 3 - Code execution
 
 # Sandboxes were too slow and expensive for code mode
 
@@ -282,7 +240,7 @@ print(result.output)
 
 <Slide tab="code" id="one-line">
 
-### Step 2 - Code execution
+### Step 3 - Code execution
 
 # Agent Sandboxes
 
@@ -309,7 +267,7 @@ agent = Agent(
 
 <Slide tab="code" space="tight">
 
-### Step 2 - Code execution
+### Step 3 - Code execution
 
 # What makes a sandbox?
 
@@ -319,7 +277,7 @@ agent = Agent(
 
 <Slide tab="o11y">
 
-### Step 3 - Logfire
+### Step 4 - Logfire
 
 # Trace observability
 
@@ -329,7 +287,7 @@ agent = Agent(
 
 <Slide tab="o11y">
 
-### Step 3 - Logfire
+### Step 4 - Logfire
 
 # Aggregate observability
 
@@ -351,7 +309,7 @@ agent = Agent(
 
 <Slide tab="evals">
 
-### Step 4 - Logfire
+### Step 5 - Logfire
 
 # Offline evals
 
@@ -385,7 +343,7 @@ await dataset.evaluate(my_entrypoint)
 
 <Slide tab="evals">
 
-### Step 4 - Logfire
+### Step 5 - Logfire
 
 # Online evals
 
@@ -422,7 +380,7 @@ event_extract_agent = Agent(
 
 <Slide tab="learning">
 
-### Step 5 - Logfire + Gateway
+### Step 6 - Logfire + Gateway
 
 # Continuous learning
 
