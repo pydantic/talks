@@ -1,0 +1,30 @@
+[project]
+name = "pydantic-stack-demo"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115.0",
+    "httpx2>=2.16.0",
+    "logfire[agent-sandboxes,fastapi,httpx]>=5.4.0",
+    "numpy>=2.0",
+    "pydantic-ai-harness[codemode]>=0.62.0",
+    "pydantic-ai-slim[openai,anthropic,google,typesafe]>=2.70.0",
+    "pydantic-evals>=2.70.0",
+    "shapely>=2.0.0",
+    "uvicorn>=0.34.0",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "I"]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+
+[tool.ruff.format]
+quote-style = "single"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

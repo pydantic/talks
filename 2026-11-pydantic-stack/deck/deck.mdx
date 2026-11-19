@@ -1,0 +1,420 @@
+import { Slide } from "deckx";
+import PydanticToday from "./components/PydanticToday.tsx";
+import DownloadsChart from "./components/DownloadsChart.tsx";
+import LLMOpsSteps from "./components/LLMOpsSteps.tsx";
+import CodemodeVsToolCalls from "./components/CodemodeVsToolCalls.tsx";
+import SandboxCost from "./components/SandboxCost.tsx";
+import SandboxChecklist from "./components/SandboxChecklist.tsx";
+import TraceObservability from "./components/TraceObservability.tsx";
+import AgentTerminal from "./components/AgentTerminal.tsx";
+import ContinuousLearningLoop from "./components/ContinuousLearningLoop.tsx";
+import { Row, Col } from "./components/Layout.tsx";
+
+<Slide layout="title">
+
+### November 2026
+
+# The Pydantic Stack
+
+## Samuel Colvin · Pydantic
+
+</Slide>
+
+<Slide tab="intro" space="tight">
+
+# whoami - Samuel Colvin
+
+- Creator of **Pydantic**, Founder & CEO of **Pydantic Labs**
+
+## Pydantic Today
+
+<PydanticToday />
+
+</Slide>
+
+<Slide tab="intro">
+
+# The Pydantic AI engineering stack
+
+<LLMOpsSteps />
+
+</Slide>
+
+{/* The rest of the slides walk the six steps in order, then the demo does the same with one agent. */}
+
+<Slide tab="validation">
+
+### Step 1 - Pydantic
+
+# Validation
+
+<Row>
+<Col flex="0 0 46%" className="medium-code">
+
+```py
+from datetime import date
+from pydantic import BaseModel
+
+class City(BaseModel):
+    name: str
+    founded: date
+    location: tuple[float, float]
+
+city = City(
+    name="New York",
+    founded="1624-05-01",
+    location=["40.7128", b"-74.0060"]
+)
+print(city)
+#> name='New York' founded=date(1624, 5, 1)
+#> location=(40.7128, -74.006)
+```
+
+</Col>
+<Col flex="1 1 54%">
+  <DownloadsChart />
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="agent-loop" space="tight">
+
+### Step 2 - Pydantic AI
+
+# Agent loop
+
+Tool calling, structured output and reflection.
+
+<div className="medium-code">
+
+```py
+from datetime import datetime
+from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class Event(BaseModel):
+    title: str
+    timestamp: datetime
+    location: str | None = None
+
+agent = Agent(
+    "gateway/openai:gpt-5.6-terra",
+    output_type=list[Event],
+    instructions="Extract information about upcoming meetings",
+)
+```
+
+</div>
+
+</Slide>
+
+<Slide tab="agent-loop" space="tight">
+
+### Step 2 - Pydantic AI
+
+# The harness
+
+<Row align="flex-start" gap="1.8rem">
+<Col flex="1 1 58%" className="medium-code">
+
+```py
+from pydantic_ai import Agent
+from pydantic_ai.capabilities import LocalWorkspace
+from pydantic_ai_harness.coder import Coder
+
+agent = Agent(
+    'anthropic:claude-opus-5-5',
+    capabilities=[LocalWorkspace('.'), Coder()],
+)
+result = agent.run_sync(
+    'Find out why tests/test_parser.py fails '
+    'and fix the bug it caught.'
+)
+print(result.output)
+```
+
+</Col>
+<Col flex="1 1 42%">
+
+- **Capabilities** are the harness: reusable behaviour you add to any agent
+- **`Coder`** is a coding agent in one line: file tools, a shell, sub-agents and `AGENTS.md` context
+- **The workspace** is where it works: this machine, or a cloud sandbox
+- Take it apart: `FileSystem`, `Shell` and `SubAgents` are capabilities too
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="agent-loop" space="tight">
+
+### Step 2 - Pydantic AI
+
+# Decision models
+
+<Row align="flex-start" gap="1.8rem">
+<Col flex="1 1 58%" className="medium-code">
+
+```py
+class Outcome(UseEnumMemberDocstrings, StrEnum):
+    accept = 'accept'
+    """Outside every mapped flood zone..."""
+    refer = 'refer'
+    """In the 1% zone, 2 m or more above the water..."""
+    decline = 'decline'
+    """In the regulatory floodway..."""
+
+class Decision(BaseModel):
+    """Decide whether to offer buildings insurance."""
+    outcome: Outcome
+    flood_excess: bool
+
+model = FallbackModel(
+    'typesafe:jev-latest', 'anthropic:claude-sonnet-5',
+    fallback_on=[ModelAPIError, unsure],
+)
+agent = Agent(model, output_type=Decision)
+```
+
+</Col>
+<Col flex="1 1 42%">
+
+- A **classifier**, not a writer: each field of the output type is one typed question
+- Every answer has a **confidence**
+- Fast and cheap enough to ask **on every item in a loop**
+- The answers it is unsure of **fall back** to a language model
+- Same `Agent`, different model string
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="code" space="tight">
+
+### Step 3 - Code execution
+
+# Code mode with Agent Sandboxes
+
+<Row align="flex-start" gap="1.6rem">
+<Col flex="1 1 62%" className="medium-code">
+
+```py
+import logfire
+from pydantic_ai import Agent
+from pydantic_ai_harness import CodeMode
+
+agent = Agent(
+    "gateway/anthropic:claude-sonnet-5",
+    capabilities=[CodeMode(monty_sandbox=logfire.agent_sandboxes)],
+)
+
+@agent.tool_plain
+def get_weather(city: str) -> dict:
+    """Get current weather for a city."""
+    return {'city': city, 'temp_f': 72, 'condition': 'sunny'}
+
+result = agent.run_sync(
+    "What's the weather in New York, London and Tokyo, in Celsius?"
+)
+```
+
+</Col>
+<Col flex="1 1 38%">
+  <CodemodeVsToolCalls />
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="code" space="tight">
+
+### Step 3 - Code execution
+
+# Sandboxes were too slow and expensive for code mode
+
+<SandboxCost />
+
+</Slide>
+
+<Slide tab="code" id="one-line">
+
+### Step 3 - Code execution
+
+# Agent Sandboxes
+
+## Monty, hosted in Logfire. Starts in milliseconds, billed per run, with the REPL and external functions built in.
+
+<div className="medium-code">
+
+```python
+import logfire
+from pydantic_ai import Agent
+from pydantic_ai_harness import CodeMode
+
+agent = Agent(
+    'anthropic:claude-sonnet-5-5',
+    capabilities=[CodeMode(monty_sandbox=logfire.agent_sandboxes)],
+)
+```
+
+</div>
+
+<p className="caption" style={{ marginTop: 'auto' }}>One line in Pydantic AI. Any other framework connects with <code>AsyncMontyRemote</code> (Python) or <code>MontyRemote</code> (TypeScript), with a little more wiring.</p>
+
+</Slide>
+
+<Slide tab="code" space="tight">
+
+### Step 3 - Code execution
+
+# What makes a sandbox?
+
+<SandboxChecklist />
+
+</Slide>
+
+<Slide tab="o11y">
+
+### Step 4 - Logfire
+
+# Trace observability
+
+<TraceObservability />
+
+</Slide>
+
+<Slide tab="o11y">
+
+### Step 4 - Logfire
+
+# Aggregate observability
+
+<Row>
+<Col>
+
+* Move beyond looking at single traces to understand how agents are performing over time
+* Starts with ad-hoc investigations
+* Flexibility beats pretty - AI development is an open world game
+* AIs are good at summarising data, provided they have access
+
+</Col>
+<Col>
+  <AgentTerminal />
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="evals">
+
+### Step 5 - Logfire
+
+# Offline evals
+
+<Row>
+<Col>
+
+* Conceptually similar to unit tests
+* Should live in code
+* Managed by the entire team
+* A subject matter expert creates and curates the cases
+* 50 focused cases beat 500 generic ones
+
+</Col>
+<Col fontSize="0.78em">
+
+```py
+dataset = Dataset([
+    Case(...),
+    Case(...),
+    Case(...),
+    Case(...),
+])
+
+await dataset.evaluate(my_entrypoint)
+```
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="evals">
+
+### Step 5 - Logfire
+
+# Online evals
+
+<Row align="flex-start" marginTop="1rem">
+<Col>
+
+* Evaluate performance on production traffic
+* Detect failures and regressions as they happen
+* Most evals providers run online evals in their platform
+* Logfire lets you run the evals within your application
+
+</Col>
+<Col fontSize="0.78em">
+
+```py
+event_extract_agent = Agent(
+    'gateway/anthropic:claude-sonnet-5',
+    output_type=list[Event],
+    capabilities=[
+        OnlineEvaluation(
+            evaluators=[
+                LLMJudge(rubric='...'),
+                FunctionalCheck(),
+            ],
+        )
+    ],
+)
+```
+
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="learning">
+
+### Step 6 - Logfire + Gateway
+
+# Continuous learning
+
+<Row>
+<Col>
+
+* This is where it's all heading
+* Multiple techniques:
+  - **Scarring** - adding specific instructions to the system prompt to avoid known failures
+  - **GEPA** - genetic optimisation across the Pareto frontier
+  - **Fine tuning** - production traces become the canonical input to post-training
+
+</Col>
+<Col>
+  <ContinuousLearningLoop />
+</Col>
+</Row>
+
+</Slide>
+
+<Slide tab="demo" layout="statement">
+
+# Demo
+
+## One agent: Pydantic AI, Logfire and the harness, then Agent Sandboxes, offline evals and online evals.
+
+</Slide>
+
+<Slide layout="statement">
+
+# Thank you
+
+## 50,000 free invocations a month on every Logfire plan
+
+<span style={{ whiteSpace: 'nowrap', display: 'inline-block', marginTop: '1rem', fontSize: '1.2em' }}>`@samuelcolvin` · `@pydantic` · [pydantic.dev/signup](https://pydantic.dev/signup)</span>
+
+</Slide>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flood risk assistant</title>
+<link rel="stylesheet" href="/static/vendor/maplibre-gl.css">
+<!-- Browser tracing and session replay; does nothing unless the server has LOGFIRE_FRONTEND_TOKEN. -->
+<script type="module" src="/static/vendor/logfire/telemetry.js"></script>
+<style>
+  :root {
+    --bg: #15101a; --surface: #241a2e; --border: #3a2c47;
+    --heading: #f5eef8; --text: rgba(245, 238, 248, 0.82); --muted: #8a7d95;
+    --accent: #e520a8; --aqua: #4ad7c5;
+    --accept: #3ecf8e; --refer: #ffb347; --decline: #ff4d6d;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+
+  #chat { width: 38%; min-width: 360px; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+  header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; }
+  header h1 { margin: 0; font-size: 17px; color: var(--heading); }
+  header .mode { font: 12px ui-monospace, monospace; color: var(--aqua); }
+  header button { margin-left: auto; }
+  #messages { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .message { max-width: 100%; }
+  .message.user { align-self: flex-end; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; color: var(--heading); }
+  .message.assistant p:first-child { margin-top: 0; }
+  .message.assistant strong { color: var(--heading); }
+  .message.assistant code { font-size: 13px; background: var(--surface); padding: 1px 5px; border-radius: 4px; }
+  .message.assistant ul { padding-left: 20px; }
+  .status { font: 12px ui-monospace, monospace; color: var(--muted); }
+  .status b { color: var(--aqua); font-weight: 600; }
+  .error { color: var(--decline); }
+  #suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 10px; }
+  button { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); color: var(--heading); }
+  form { display: flex; gap: 8px; padding: 12px 18px 16px; border-top: 1px solid var(--border); }
+  input { flex: 1; font: inherit; color: var(--heading); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; outline: none; }
+  input:focus { border-color: var(--accent); }
+  form button { border-radius: 10px; background: var(--accent); border-color: var(--accent); color: #fff; padding: 0 16px; }
+  form button:disabled { opacity: 0.5; cursor: default; }
+
+  #map-pane { flex: 1; position: relative; }
+  #map { position: absolute; inset: 0; }
+  #legend { position: absolute; top: 14px; left: 14px; background: rgba(21, 16, 26, 0.9); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; max-width: 280px; }
+  #legend h2 { margin: 0 0 6px; font-size: 14px; color: var(--heading); }
+  #legend .row { display: flex; align-items: center; gap: 8px; }
+  #legend .swatch { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  #legend .swatch.zone { border-radius: 2px; }
+  #legend .count { margin-left: auto; padding-left: 14px; color: var(--muted); font: 12px ui-monospace, monospace; }
+  #legend hr { border: 0; border-top: 1px solid var(--border); margin: 8px 0; }
+  .maplibregl-popup-content { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px; font: 13px/1.4 system-ui, sans-serif; }
+  .maplibregl-popup-tip { display: none; }
+  .maplibregl-popup-content img { display: block; width: 240px; height: 240px; border-radius: 6px; margin-top: 8px; }
+  .maplibregl-popup-content b { color: var(--heading); }
+  .maplibregl-popup-close-button { color: var(--muted); font-size: 16px; }
+</style>
+</head>
+<body>
+<section id="chat">
+  <header>
+    <h1>Flood risk assistant</h1>
+    <span class="mode" id="mode"></span>
+    <button id="reset" type="button">New chat</button>
+  </header>
+  <div id="messages"></div>
+  <div id="suggestions"></div>
+  <form id="form">
+    <input id="input" placeholder="Ask about a property or the portfolio" autocomplete="off" autofocus>
+    <button id="send">Send</button>
+  </form>
+</section>
+<section id="map-pane">
+  <div id="map"></div>
+  <div id="legend"></div>
+</section>
+
+<script src="/static/vendor/maplibre-gl.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
+<script>
+const SUGGESTIONS = [
+  'Should we insure 34 State St? Take the aerial image into account.',
+  'Triage the whole portfolio and show me the declines.',
+  'What changes if the flood zones grow by 50 m?',
+  'Which street has the most referrals? Look at the aerial images for that street.',
+]
+const OUTCOME_COLOURS = { accept: '#3ecf8e', refer: '#ffb347', decline: '#ff4d6d' }
+const OTHER_COLOURS = ['#b388ff', '#4ad7c5', '#e520a8', '#ff8a4c', '#8ab4ff', '#f5eef8']
+const ZONES = [
+  ['floodway', 'Floodway', '#1d6fb8', 0.6],
+  ['1_percent', '1% annual chance', '#2f8fd8', 0.34],
+  ['0.2_percent', '0.2% annual chance', '#7fc4f0', 0.16],
+]
+const UNGROUPED = '#6b5f78'
+
+const $ = id => document.getElementById(id)
+const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+let properties = []
+let groupOf = {}  // property id -> group label, from the last show_map call
+let groupColours = {}
+
+const map = new maplibregl.Map({
+  container: 'map',
+  // No basemap tiles: everything drawn is our own data, so the map works offline.
+  style: { version: 8, sources: {}, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#1b1522' } }] },
+  center: [-72.577, 44.26],
+  zoom: 14.2,
+  attributionControl: false,
+})
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
+
+function propertyFeatures() {
+  return {
+    type: 'FeatureCollection',
+    features: properties.map(p => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
+      properties: { ...p, group: groupOf[p.id] || '', colour: groupColours[groupOf[p.id]] || UNGROUPED },
+    })),
+  }
+}
+
+function renderLegend(title) {
+  const counts = {}
+  for (const label of Object.values(groupOf)) counts[label] = (counts[label] || 0) + 1
+  const groups = Object.keys(groupColours).map(label =>
+    `<div class="row"><span class="swatch" style="background:${groupColours[label]}"></span>${escapeHtml(label)}<span class="count">${counts[label] || 0}</span></div>`)
+  const zones = ZONES.map(([, label, colour, opacity]) =>
+    `<div class="row"><span class="swatch zone" style="background:${colour};opacity:${opacity + 0.3}"></span>${label}</div>`)
+  $('legend').innerHTML =
+    `<h2>${escapeHtml(title)}</h2>${groups.join('')}${groups.length ? '<hr>' : ''}${zones.join('')}` +
+    `<div class="row"><span class="swatch zone" style="background:var(--aqua)"></span>Rivers and brooks</div>`
+}
+
+function showGroups(title, groups) {
+  groupOf = {}
+  groupColours = {}
+  let other = 0
+  for (const [label, ids] of Object.entries(groups)) {
+    groupColours[label] = OUTCOME_COLOURS[label.toLowerCase()] || OTHER_COLOURS[other++ % OTHER_COLOURS.length]
+    for (const id of ids) groupOf[id] = label
+  }
+  map.getSource('properties').setData(propertyFeatures())
+  renderLegend(title)
+  const shown = properties.filter(p => groupOf[p.id])
+  if (shown.length && shown.length < properties.length) {
+    const bounds = new maplibregl.LngLatBounds()
+    for (const p of shown) bounds.extend([p.lon, p.lat])
+    map.fitBounds(bounds, { padding: 90, maxZoom: 17.5, duration: 800 })
+  } else if (shown.length) {
+    map.easeTo({ center: [-72.577, 44.26], zoom: 14.2, duration: 800 })
+  }
+}
+
+map.on('load', async () => {
+  const [zones, water, props] = await Promise.all(
+    ['/api/map/flood-zones', '/api/map/water', '/api/properties'].map(url => fetch(url).then(r => r.json())))
+  properties = props
+  map.addSource('zones', { type: 'geojson', data: zones })
+  // Least severe first, so the floodway is drawn on top.
+  for (const [zone, , colour, opacity] of [...ZONES].reverse()) {
+    map.addLayer({ id: `zone-${zone}`, type: 'fill', source: 'zones', filter: ['==', ['get', 'zone'], zone], paint: { 'fill-color': colour, 'fill-opacity': opacity } })
+  }
+  map.addSource('water', { type: 'geojson', data: water })
+  map.addLayer({ id: 'water-fill', type: 'fill', source: 'water', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': '#4ad7c5', 'fill-opacity': 0.75 } })
+  map.addLayer({ id: 'water-line', type: 'line', source: 'water', filter: ['==', ['geometry-type'], 'LineString'], paint: { 'line-color': '#4ad7c5', 'line-width': 1.6 } })
+  map.addSource('properties', { type: 'geojson', data: propertyFeatures() })
+  map.addLayer({
+    id: 'properties', type: 'circle', source: 'properties',
+    paint: {
+      'circle-color': ['get', 'colour'],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, ['case', ['==', ['get', 'group'], ''], 2.2, 4], 17, ['case', ['==', ['get', 'group'], ''], 5, 9]],
+      'circle-stroke-color': '#15101a', 'circle-stroke-width': 1,
+    },
+  })
+  map.on('mouseenter', 'properties', () => map.getCanvas().style.cursor = 'pointer')
+  map.on('mouseleave', 'properties', () => map.getCanvas().style.cursor = '')
+  map.on('click', 'properties', e => {
+    const p = e.features[0].properties
+    const group = p.group ? ` · <b style="color:${p.colour}">${escapeHtml(p.group)}</b>` : ''
+    new maplibregl.Popup({ maxWidth: '280px' })
+      .setLngLat(e.features[0].geometry.coordinates)
+      .setHTML(`<b>${escapeHtml(p.address)}</b><br>${p.id} · ${escapeHtml(p.kind)}${group}<img src="/api/image/${p.id}" alt="Aerial image of ${escapeHtml(p.address)}">`)
+      .addTo(map)
+  })
+  renderLegend('Central Montpelier, Vermont')
+})
+
+function addMessage(role, html) {
+  const el = document.createElement('div')
+  el.className = `message ${role}`
+  el.innerHTML = html
+  $('messages').append(el)
+  $('messages').scrollTop = $('messages').scrollHeight
+  return el
+}
+
+async function ask(question) {
+  $('send').disabled = true
+  $('suggestions').hidden = true
+  addMessage('user', escapeHtml(question))
+  const answer = addMessage('assistant', '')
+  const status = addMessage('status', 'Thinking…')
+  const segments = []
+  const started = performance.now()
+  let requests = 0
+  const setStatus = text => {
+    const seconds = ((performance.now() - started) / 1000).toFixed(1)
+    status.innerHTML = `${text} · ${seconds}s` + (requests ? ` · <b>${requests.toLocaleString()}</b> API requests` : '')
+  }
+
+  const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: question }) })
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+  let buffer = ''
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += value
+    const frames = buffer.split('\n\n')
+    buffer = frames.pop()
+    for (const frame of frames) {
+      const event = JSON.parse(frame.replace(/^data: /, ''))
+      if (event.type === 'text') {
+        segments[event.segment] = event.text
+        answer.innerHTML = marked.parse(segments.filter(Boolean).join('\n\n'))
+        setStatus('Writing')
+      } else if (event.type === 'working') {
+        setStatus('Running code')
+      } else if (event.type === 'requests') {
+        requests = event.count
+        setStatus('Running code')
+      } else if (event.type === 'map') {
+        showGroups(event.title, event.groups)
+      } else if (event.type === 'error') {
+        answer.innerHTML = `<span class="error">${escapeHtml(event.message)}</span>`
+      } else if (event.type === 'done') {
+        setStatus('Done')
+      }
+      $('messages').scrollTop = $('messages').scrollHeight
+    }
+  }
+  $('send').disabled = false
+  $('input').focus()
+}
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault()
+  const question = $('input').value.trim()
+  if (!question || $('send').disabled) return
+  $('input').value = ''
+  ask(question)
+})
+
+$('reset').addEventListener('click', async () => {
+  await fetch('/api/reset', { method: 'POST' })
+  $('messages').innerHTML = ''
+  $('suggestions').hidden = false
+})
+
+for (const text of SUGGESTIONS) {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.textContent = text
+  button.addEventListener('click', () => $('send').disabled || ask(text))
+  $('suggestions').append(button)
+}
+
+fetch('/api/config').then(r => r.json()).then(c => {
+  $('mode').textContent = ['agent sandboxes', c.online_evals ? 'online evals' : ''].filter(Boolean).join(' · ')
+})
+</script>
+</body>
+</html>
