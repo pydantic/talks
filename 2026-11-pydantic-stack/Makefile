@@ -70,3 +70,7 @@ browser-telemetry: ## Rebuild the Logfire browser SDK and session replay bundle 
 .PHONY: test
 test: ## Test the geo risk API
 	uv run pytest geo_service -q
+
+.PHONY: requests
+requests: ## Send a few questions to the running web app, for recent traces and online evals (N=3 to send fewer)
+	uv run -m flood_risk_example.send_requests $(N)
