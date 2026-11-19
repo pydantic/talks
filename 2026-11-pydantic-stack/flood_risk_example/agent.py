@@ -9,6 +9,7 @@ from pydantic_ai_harness import CodeMode
 from pydantic_evals.online import wait_for_evaluations
 
 from .evals_online import online_evaluation
+from .policy import GUIDE
 from .tools import TOOLS, Deps, http_client
 
 # Evaluate every run in the background and attach the results to its trace.
@@ -25,7 +26,7 @@ agent = Agent(
     'gateway/anthropic:claude-sonnet-5-5',
     name='flood_risk_agent',
     deps_type=Deps,
-    instructions=(Path(__file__).parent / 'instructions.md').read_text(),
+    instructions=(Path(__file__).parent / 'instructions.md').read_text().replace('{guide}', GUIDE),
     retries=3,
     tools=TOOLS,
     capabilities=[code_mode, online_evaluation()] if ONLINE_EVALS else [code_mode],

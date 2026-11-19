@@ -27,6 +27,19 @@ An underwriter's assistant for a portfolio of 300 properties in central Montpeli
 
 It needs two keys in `.env`, which the `make` targets below load for you: `TYPESAFE_API_KEY`, and a Logfire API key as `LOGFIRE_API_KEY`. The targets also use it as `LOGFIRE_TOKEN` and `PYDANTIC_AI_GATEWAY_API_KEY`, so the one key covers tracing, Agent Sandboxes and the Gateway, so everything lands in one Logfire project. Without a TypeSafe key, set `DECISION_MODEL` and `JUDGE_MODEL` to a language model such as `gateway/anthropic:claude-sonnet-5-5`.
 
+### Session replay
+
+The web UI can also trace the page and record a session replay, so the Logfire trace starts at the click in the browser. In the Logfire project open **Frontend → Session replays → Set up**, create a frontend application, and add its two values to `.env`:
+
+```bash
+export LOGFIRE_FRONTEND_TOKEN=...
+export LOGFIRE_FRONTEND_BASE_URL=https://logfire-eu.pydantic.dev
+```
+
+Without them the page sends nothing. Session replay is in Early Access, so the organization needs it enabled. The demo records every session with text, inputs and images unmasked, since all the data is invented or public. The map is drawn on a canvas, which replay does not record, so it is blank in playback.
+
+The browser SDK is bundled into `flood_risk_example/static/vendor/logfire/` from `flood_risk_example/browser/telemetry.js`. `make browser-telemetry` rebuilds it.
+
 ### Running order
 
 `make run` starts everything: the geo risk API on port 8001 and the web UI. Each `make` target below starts the geo risk API on port 8001 alongside it and stops it afterwards, so one terminal is enough. The web UI is at http://localhost:8000.
@@ -35,7 +48,7 @@ It needs two keys in `.env`, which the `make` targets below load for you: `TYPES
 |---|---|---|---|
 | 1 | 8 | `make app` | Ask about one property. Walk through `agent.py`, `decision.py` and `vision.py`, then the trace in Logfire: the HTTP request, the agent, the vision call, the decision with its confidence, and the calls to the geo risk API. |
 | 2 | 6 | (same app) | Agent Sandboxes, where the agent's code always runs. Triage the whole portfolio, then ask the what-if. The page counts the API requests as they happen; the trace has one `run_code` with hundreds of calls under it. |
-| 3 | 5 | `make evals` | Offline evals. 30 properties with a known correct outcome, on the decision model and then on a language model. Compare accuracy, time and cost in the terminal and in Logfire. |
+| 3 | 5 | `make evals` | Offline evals. 60 borderline properties with a known correct outcome, on the decision model and then on a language model. Compare accuracy, time and cost in the terminal and in Logfire. `make evals MODELS="..."` compares any list of models. |
 | 4 | 6 | `make app-online-evals` | Online evals. Ask a question, then find the three evaluator results on the live trace. |
 
 For a quick run without the web UI, `make agent` asks the agent one question in the terminal and prints the answer, and `make agent Q="Which street has the most referrals?"` asks your own. It runs `flood_risk_example/agent.py` as a module (`uv run -m flood_risk_example.agent`).
@@ -43,8 +56,8 @@ For a quick run without the web UI, `make agent` asks the agent one question in 
 ### Questions
 
 - Should we insure 34 State St? Take the aerial image into account. (Decline: it is in the regulatory floodway. About 15 seconds.)
-- Triage the whole portfolio and show me the declines. (23 declines, mostly on Langdon St, State St and Summer St. 300 decisions and about 1,200 API requests.)
-- What changes if the flood zones grow by 50 m? (Declines rise from 23 to about 107. About 2,400 API requests.)
+- Triage the whole portfolio and show me the declines. (The guide gives 37 declines; a run returns slightly fewer, because the decision model misses a few. 300 decisions and about 1,200 API requests.)
+- What changes if the flood zones grow by 50 m? (Declines rise sharply, because the floodway grows too. About 2,400 API requests.)
 - Which street has the most referrals? Look at the aerial images for that street.
 
 `make evals-portfolio` runs a second offline dataset: four portfolio questions whose answers are computed from the data.

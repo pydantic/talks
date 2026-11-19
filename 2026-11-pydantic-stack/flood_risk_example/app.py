@@ -1,11 +1,13 @@
 """The web UI: a chat on the left and a map on the right.
 
 Run with `make app` (`uv run uvicorn flood_risk_example.app:app --port 8000`), with the geo risk service
-already running (`make serve`). Set `FLOOD_ONLINE_EVALS=1` to evaluate every run.
+already running (`make serve`). Set `FLOOD_ONLINE_EVALS=1` to evaluate every run, and `LOGFIRE_FRONTEND_TOKEN`
+and `LOGFIRE_FRONTEND_BASE_URL` to trace the page and record session replays.
 """
 
 import asyncio
 import json
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -28,6 +30,12 @@ STATIC_DIR = Path(__file__).parent / 'static'
 logfire.configure(service_name='flood-risk-app')
 logfire.instrument_pydantic_ai()
 
+# A Logfire frontend application's token and base URL, from Frontend > Session replays > Set up in the
+# project. The token can only send data for that application, so it is safe to hand to the page; the
+# write token in LOGFIRE_TOKEN is not.
+FRONTEND_TOKEN = os.getenv('LOGFIRE_FRONTEND_TOKEN')
+FRONTEND_BASE_URL = os.getenv('LOGFIRE_FRONTEND_BASE_URL')
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -47,14 +55,28 @@ class ChatRequest(BaseModel):
     message: str
 
 
+class FrontendTelemetry(BaseModel):
+    base_url: str
+    token: str
+
+
+class Config(BaseModel):
+    online_evals: bool
+    logfire_frontend: FrontendTelemetry | None
+    """Set when the page should send browser traces and session replays to Logfire."""
+
+
 @app.get('/')
 async def index() -> FileResponse:
     return FileResponse(STATIC_DIR / 'index.html')
 
 
 @app.get('/api/config')
-async def config() -> dict[str, bool]:
-    return {'online_evals': ONLINE_EVALS}
+async def config() -> Config:
+    frontend = None
+    if FRONTEND_TOKEN and FRONTEND_BASE_URL:
+        frontend = FrontendTelemetry(base_url=FRONTEND_BASE_URL, token=FRONTEND_TOKEN)
+    return Config(online_evals=ONLINE_EVALS, logfire_frontend=frontend)
 
 
 @app.get('/api/properties')

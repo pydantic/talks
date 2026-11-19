@@ -2,7 +2,7 @@
 
 Two datasets, both built from the geo risk service, so `make serve` must be running:
 
-- `decisions`: 30 properties whose correct outcome follows from the underwriting guide, run through the
+- `decisions`: 60 borderline properties whose correct outcome follows from the underwriting guide, run through the
   decision agent on the decision model and again on a language model, to compare the two.
 - `portfolio`: questions about the whole portfolio with answers computed here from the same data, run
   through the main agent.
@@ -14,6 +14,7 @@ experiment in Logfire.
 import asyncio
 import re
 import sys
+from collections import Counter
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
@@ -23,13 +24,16 @@ import logfire
 from pydantic import BaseModel
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext, LLMJudge
+from rich.console import Console
+from rich.table import Table
 
 from . import decision
 from .agent import agent
-from .policy import Facts, OutcomeName, expected_flood_excess, expected_outcome
+from .policy import Facts, OutcomeName, expected_flood_excess, expected_outcome, margin
 from .tools import Deps, http_client
 
-CASES_PER_OUTCOME = 10
+CASES_PER_OUTCOME = 20
+TASK_TIMEOUT_S = 120
 
 
 class Expected(BaseModel):
@@ -54,9 +58,11 @@ async def all_facts(http: httpx2.AsyncClient, buffer_m: float = 0) -> list[Facts
             property_id=prop['id'],
             address=prop['address'],
             kind=prop['kind'],
+            units=prop['units'],
             zone=zone['zone'],
             distance_to_1_percent_zone_m=zone['distance_to_1_percent_zone_m'],
-            height_above_water_m=elevation['height_above_water_m'],
+            elevation_m=elevation['elevation_m'],
+            water_elevation_m=elevation['water_elevation_m'],
             distance_to_water_m=water['distance_m'],
             water_name=water['water_name'],
         )
@@ -95,9 +101,11 @@ class DecidedBy(Evaluator[Facts, decision.DecisionResult, None]):
 def decisions_dataset(facts: list[Facts]) -> Dataset[Facts, Any, None]:
     cases: list[Case[Facts, Any, None]] = []
     for outcome in ('accept', 'refer', 'decline'):
-        matching = sorted((f for f in facts if expected_outcome(f) == outcome), key=lambda f: f.property_id)
-        step = max(len(matching) // CASES_PER_OUTCOME, 1)
-        for f in matching[::step][:CASES_PER_OUTCOME]:
+        # The cases closest to one of the guide's thresholds: the ones a careless reader gets wrong.
+        matching = sorted(
+            (f for f in facts if expected_outcome(f) == outcome), key=lambda f: (margin(f), f.property_id)
+        )
+        for f in sorted(matching[:CASES_PER_OUTCOME], key=lambda f: f.property_id):
             expected = Expected(outcome=outcome, flood_excess=expected_flood_excess(f))
             cases.append(Case(name=f'{f.property_id} {f.address}', inputs=f, expected_output=expected))
     return Dataset(
@@ -105,11 +113,29 @@ def decisions_dataset(facts: list[Facts]) -> Dataset[Facts, Any, None]:
     )
 
 
-async def evaluate_decisions(http: httpx2.AsyncClient) -> None:
+async def evaluate_decisions(http: httpx2.AsyncClient, model_names: list[str]) -> None:
+    """Run the decisions dataset once per model, then print the models side by side."""
     dataset = decisions_dataset(await all_facts(http))
-    for model_name in dict.fromkeys([decision.DECISION_MODEL, decision.LANGUAGE_MODEL]):
-        report = await dataset.evaluate(decide_with(model_name), name=model_name, max_concurrency=10)
+    summary = Table(title='Decisions by model')
+    for column in 'Model', 'Outcome', 'Flood excess', 'Decided by', 'Avg time', 'Total cost':
+        summary.add_column(column, justify='left' if column in ('Model', 'Decided by') else 'right')
+    for model_name in model_names:
+        # The timeout stops one hung model request from holding up the whole run.
+        report = await dataset.evaluate(
+            decide_with(model_name), name=model_name, max_concurrency=10, task_timeout=TASK_TIMEOUT_S
+        )
         report.print(include_input=False, include_output=False, include_reasons=True)
+        cases, total = report.cases, len(report.cases) + len(report.failures)
+        decided_by = Counter(case.labels['decided_by'].value for case in cases)
+        summary.add_row(
+            model_name,
+            f'{sum(case.assertions["OutcomeCorrect"].value for case in cases)}/{total}',
+            f'{sum(case.assertions["FloodExcessCorrect"].value for case in cases)}/{total}',
+            ', '.join(f'{name} {n}' for name, n in decided_by.most_common()),
+            f'{sum(case.task_duration for case in cases) / max(len(cases), 1) * 1000:.0f} ms',
+            f'${sum(case.metrics.get("cost", 0) for case in cases):.4f}',
+        )
+    Console().print(summary)
 
 
 def decide_with(model_name: str) -> Callable[[Facts], Awaitable[decision.DecisionResult]]:
@@ -203,7 +229,9 @@ async def main() -> None:
     which = sys.argv[1] if len(sys.argv) > 1 else 'decisions'
     async with http_client() as http:
         if which in ('decisions', 'all'):
-            await evaluate_decisions(http)
+            # Models to compare can be given on the command line, e.g. `make evals MODELS="..."`.
+            models = sys.argv[2:] or list(dict.fromkeys([decision.DECISION_MODEL, decision.LANGUAGE_MODEL]))
+            await evaluate_decisions(http, models)
         if which in ('portfolio', 'all'):
             await evaluate_portfolio(http)
 

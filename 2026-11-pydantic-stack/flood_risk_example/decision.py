@@ -7,14 +7,13 @@ call once per property from a loop in the sandbox, and anything it is unsure of 
 
 import os
 from enum import StrEnum
-from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict
-from pydantic_ai import Agent, BoolCriteria, ModelAPIError, ModelResponse, UseEnumMemberDocstrings
+from pydantic_ai import Agent, ModelAPIError, ModelResponse, UseEnumMemberDocstrings
 from pydantic_ai.models import Model
 from pydantic_ai.models.fallback import FallbackModel
 
-from .policy import Facts
+from .policy import GUIDE, Facts
 
 DECISION_MODEL = os.getenv('DECISION_MODEL', 'typesafe:jev-latest')
 LANGUAGE_MODEL = 'gateway/anthropic:claude-sonnet-5-5'
@@ -25,35 +24,25 @@ CONFIDENCE_BARS = {'outcome': 0.6, 'flood_excess': 0.5}
 
 class Outcome(UseEnumMemberDocstrings, StrEnum):
     accept = 'accept'
-    """Offer cover. The property is outside every mapped flood zone and at least 2 m above the nearest
-    water, or it is in the 0.2% annual chance zone and at least 3 m above the nearest water."""
+    """Offer cover: none of the guide's decline or refer conditions is true."""
 
     refer = 'refer'
-    """Send to a senior underwriter. The property is in the 1% annual chance zone and 2 m or more above
-    the nearest water, or in the 0.2% zone and less than 3 m above it, or outside every mapped zone but
-    less than 2 m above it."""
+    """Send to a senior underwriter: one of the guide's refer conditions is true, and no decline condition."""
 
     decline = 'decline'
-    """Do not offer cover. The property is in the regulatory floodway, or in the 1% annual chance zone
-    and less than 2 m above the nearest water."""
+    """Do not offer cover: one of the guide's decline conditions is true."""
 
 
 class Decision(BaseModel):
-    """Decide whether to offer buildings insurance for a property, from its flood risk."""
+    """Decide whether to offer buildings insurance for a property, following the underwriting guide."""
 
     model_config = ConfigDict(use_attribute_docstrings=True)
 
     outcome: Outcome
-    """What should the underwriter do with this property?"""
+    """What does the underwriting guide say to do with this property?"""
 
-    flood_excess: Annotated[
-        bool,
-        BoolCriteria(
-            true='The property is in the floodway, the 1% zone or the 0.2% zone.',
-            false='The property is outside every mapped flood zone.',
-        ),
-    ]
-    """Should a higher excess apply to flood claims?"""
+    flood_excess: bool
+    """Does the underwriting guide apply a higher flood excess to this property?"""
 
 
 class DecisionResult(BaseModel):
@@ -81,7 +70,7 @@ def decision_model(name: str = DECISION_MODEL) -> Model | str:
     return name
 
 
-decision_agent = Agent(output_type=Decision, name='decision_agent')
+decision_agent = Agent(output_type=Decision, name='decision_agent', instructions=f'Underwriting guide:\n\n{GUIDE}')
 
 
 async def decide(facts: Facts, model: Model | str | None = None) -> DecisionResult:

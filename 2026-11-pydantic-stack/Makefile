@@ -53,7 +53,7 @@ agent: ## Ask the agent one question in the terminal, e.g. make agent Q="Which s
 
 .PHONY: evals
 evals: ## Demo 3: offline evals of the decision model against a language model
-	@$(WITH_GEO_SERVICE) uv run -m flood_risk_example.evals_offline decisions
+	@$(WITH_GEO_SERVICE) uv run -m flood_risk_example.evals_offline decisions $(MODELS)
 
 .PHONY: evals-portfolio
 evals-portfolio: ## Offline evals of the main agent on portfolio questions
@@ -62,6 +62,10 @@ evals-portfolio: ## Offline evals of the main agent on portfolio questions
 .PHONY: app-online-evals
 app-online-evals: ## Demo 4: the same, with online evals on every run
 	@$(WITH_GEO_SERVICE) FLOOD_ONLINE_EVALS=1 uv run uvicorn flood_risk_example.app:app --port 8000
+
+.PHONY: browser-telemetry
+browser-telemetry: ## Rebuild the Logfire browser SDK and session replay bundle (the output is committed)
+	cd flood_risk_example/browser && bun install && bun run build
 
 .PHONY: test
 test: ## Test the geo risk API
