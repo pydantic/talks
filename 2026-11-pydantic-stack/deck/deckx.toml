@@ -1,0 +1,13 @@
+title = "The Pydantic Stack - November 2026"
+theme = "dark"
+favicon = "assets/favicon.png"
+
+tabs = [
+  { id = "intro",      label = "Intro" },
+  { id = "agent-loop", label = "Agent loop" },
+  { id = "code",       label = "Code execution" },
+  { id = "o11y",       label = "Observability" },
+  { id = "evals",      label = "Evals" },
+  { id = "learning",   label = "Learning" },
+  { id = "demo",       label = "Demo" },
+]

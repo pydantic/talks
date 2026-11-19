@@ -1,0 +1,8 @@
+.env
+.venv
+__pycache__
+node_modules
+.logfire/
+/scratch/
+/charts/
+ai_trade_example/ai_trade.duckdb

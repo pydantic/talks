@@ -1,0 +1,24 @@
+[project]
+name = "pydantic-stack-demo"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "duckdb>=1.5.0",
+    "logfire[agent-sandboxes]>=5.4.0",
+    "matplotlib>=3.9.0",
+    "prompt-toolkit>=3.0.0",
+    "pydantic-ai-harness[codemode]>=0.62.0",
+    "pydantic-ai-slim[openai,anthropic]>=2.70.0",
+    "pydantic-evals>=2.70.0",
+    "rich>=14.0.0",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "I"]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+
+[tool.ruff.format]
+quote-style = "single"
