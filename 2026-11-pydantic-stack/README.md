@@ -14,27 +14,53 @@ make dev      # deck with live reload
 
 ## Demo
 
-One agent carried through four stages. It is a Pydantic AI agent using code mode (`CodeMode` from the harness, running on Monty) over a DuckDB database of prices and 13F filings, investigating the July 2026 AI selloff and the collapse of Situational Awareness LP. Press coverage in `ai_trade_example/docs/` is mounted read-only into the sandbox at `/docs`, and charts are written to `charts/`.
+An underwriter's assistant for a portfolio of 300 properties in central Montpelier, Vermont, a town on the Winooski River that flooded in July 2023. It answers questions about one property or the whole portfolio and draws the answer on a map.
 
-It needs `PYDANTIC_AI_GATEWAY_API_KEY`, `LOGFIRE_TOKEN` and, for Agent Sandboxes, `LOGFIRE_API_KEY` with the `project:execute_agent_sandboxes` scope.
+| Part | Where | What it shows |
+|---|---|---|
+| Geo risk API | `geo_service/` | Our own FastAPI service over local data: flood zone, elevation, distance to water and an aerial image per property. Nothing third-party is called during the demo. |
+| Main agent | `flood_risk_example/agent.py`, `tools.py` | Pydantic AI with code mode from the harness. One portfolio question is one piece of model-written code making over a thousand API requests. |
+| Decision model | `flood_risk_example/decision.py` | TypeSafe's Jev decides accept, refer or decline for each property, with a confidence, and falls back to a language model when unsure. |
+| Vision agent | `flood_risk_example/vision.py` | A multimodal model reads the aerial image into structured observations. |
+| Web UI | `flood_risk_example/app.py`, `static/index.html` | Chat on the left, map on the right. The map draws only our own data, so it needs no basemap tiles. |
+| Evals | `flood_risk_example/evals_offline.py`, `evals_online.py` | A labelled decision dataset run on two models, and evaluators on every live run. |
 
-Build the database once with `make ai-trade-db`. Downloads are cached in `ai_trade_example/raw_data/`, so it works offline.
+It needs `PYDANTIC_AI_GATEWAY_API_KEY`, `LOGFIRE_TOKEN`, `TYPESAFE_API_KEY` and, for Agent Sandboxes, `LOGFIRE_API_KEY` with the `project:execute_agent_sandboxes` scope. Without a TypeSafe key, set `DECISION_MODEL` and `JUDGE_MODEL` to a language model such as `gateway/anthropic:claude-sonnet-5-5`.
+
+### Running order
+
+Keep `make serve` running in one terminal throughout. The web UI is at http://localhost:8000.
 
 | # | Minutes | Command | Show |
 |---|---|---|---|
-| 1 | 8 | `make ai-trade` | Pydantic AI, Logfire and the harness. Walk through `agent.py`, ask the first two questions below, then open the trace in Logfire. |
-| 2 | 5 | `make ai-trade-sandbox` | Agent Sandboxes. The one-line `monty_sandbox=logfire.agent_sandboxes` change in `agent.py`, the same question, then the sandbox spans in the trace. |
-| 3 | 6 | `make evals` | Offline evals. `evals_offline.py`: four cases with known answers, a code check and an LLM judge. The report prints in the terminal and the experiment is in Logfire. |
-| 4 | 6 | `make ai-trade-online-evals` | Online evals. `evals_online.py`: the same agent with `OnlineEvaluation` added. Ask a question, then find the evaluator results on the live trace. |
+| 1 | 8 | `make app` | Ask about one property. Walk through `agent.py`, `decision.py` and `vision.py`, then the trace in Logfire: the HTTP request, the agent, the vision call, the decision with its confidence, and the calls to the geo risk API. |
+| 2 | 6 | `make app-sandbox` | Agent Sandboxes. Triage the whole portfolio, then ask the what-if. The page counts the API requests as they happen; the trace has one `run_code` with hundreds of calls under it. |
+| 3 | 5 | `make evals` | Offline evals. 30 properties with a known correct outcome, on the decision model and then on a language model. Compare accuracy, time and cost in the terminal and in Logfire. |
+| 4 | 6 | `make app-online-evals` | Online evals. Ask a question, then find the three evaluator results on the live trace. |
 
-Questions, with the answers to expect:
+### Questions
 
-- The press says the fund made 439% in the first half of 2026. Does the long book in its March filing, at the leverage the press reported, account for that? (Yes: the March longs gained 110.8% by 30 June, which at the reported 4x is 443%. About 15 seconds.)
-- Chart July returns by AI theme. (One bar chart: neoclouds and memory down 25 to 35%, software up 21%. About 10 seconds.)
-- Which hurt the fund more in July, Sandisk or SK Hynix? (Sandisk, -47% vs -30%. About 6 seconds.)
-- Was the Adobe short a hedge in July? (No, Adobe rose 22% while the book fell 33%. About 10 seconds.)
+- Should we insure 34 State St? Take the aerial image into account. (Decline: it is in the regulatory floodway. About 15 seconds.)
+- Triage the whole portfolio and show me the declines. (23 declines, mostly on Langdon St, State St and Summer St. 300 decisions and about 1,200 API requests.)
+- What changes if the flood zones grow by 50 m? (Declines rise from 23 to about 107. About 2,400 API requests.)
+- Which street has the most referrals? Look at the aerial images for that street.
 
-Longer questions that produce a full write-up and a chart, if there is time:
+`make evals-portfolio` runs a second offline dataset: four portfolio questions whose answers are computed from the data.
 
-- Reconstruct what the fund's Q2 book did day by day through July. Which positions did the damage? Chart the cumulative P&L with the fund events annotated.
-- Was that a fund-specific blow-up or the whole AI trade unwinding? Compare the theme baskets.
+### Data
+
+`make build-data` downloads and preprocesses everything into `geo_service/data/`, which is committed, so it only needs running to change the town or the number of properties.
+
+| Data | Source |
+|---|---|
+| Address points | Vermont E911 site locations, Vermont Open Geodata Portal |
+| Flood zones | FEMA National Flood Hazard Layer, from Esri's hosted copy |
+| Rivers and brooks | USGS National Hydrography Dataset |
+| Elevation | USGS 3DEP |
+| Aerial imagery | USDA NAIP, from the USGS image service |
+
+The underwriting guide and every decision are invented for the demo. They say nothing about the real insurability of these addresses.
+
+### Deploying the geo risk API
+
+`geo_service/Dockerfile` builds the service on its own. Point the demo at it with `GEO_SERVICE_URL`.

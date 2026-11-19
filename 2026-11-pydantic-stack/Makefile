@@ -25,22 +25,34 @@ pdf: html ## Build the deck to deck-v$(VERSION).pdf
 	cd deck && bunx deckx html-to-pdf ../deck-v$(VERSION).html ../deck-v$(VERSION).pdf
 	@echo "PDF written to deck-v$(VERSION).pdf"
 
-.PHONY: ai-trade-db
-ai-trade-db: ## Build the DuckDB database for the demo agent
-	uv run ai_trade_example/build_db.py
+.PHONY: build-data
+build-data: ## Download and preprocess the open data (one-off; the output is committed)
+	uv run -m geo_service.build_data
 
-.PHONY: ai-trade
-ai-trade: ## Demo 1: the agent REPL, code running in a local Monty process
-	uv run -m ai_trade_example
+.PHONY: serve
+serve: ## Run the geo risk API on port 8001; every demo needs it
+	uv run uvicorn geo_service.app:app --port 8001
 
-.PHONY: ai-trade-sandbox
-ai-trade-sandbox: ## Demo 2: the same REPL, code running in Logfire Agent Sandboxes
-	uv run -m ai_trade_example --sandbox
+.PHONY: app
+app: ## Demo 1: the web UI on port 8000, code running in a local Monty process
+	uv run uvicorn flood_risk_example.app:app --port 8000
+
+.PHONY: app-sandbox
+app-sandbox: ## Demo 2: the web UI, code running in Logfire Agent Sandboxes
+	FLOOD_SANDBOX=1 uv run uvicorn flood_risk_example.app:app --port 8000
 
 .PHONY: evals
-evals: ## Demo 3: offline evals against the dataset of known answers
-	uv run -m ai_trade_example.evals_offline
+evals: ## Demo 3: offline evals of the decision model against a language model
+	uv run -m flood_risk_example.evals_offline decisions
 
-.PHONY: ai-trade-online-evals
-ai-trade-online-evals: ## Demo 4: the REPL on Agent Sandboxes with online evals on every run
-	uv run -m ai_trade_example --sandbox --online-evals
+.PHONY: evals-portfolio
+evals-portfolio: ## Offline evals of the main agent on portfolio questions
+	uv run -m flood_risk_example.evals_offline portfolio
+
+.PHONY: app-online-evals
+app-online-evals: ## Demo 4: the web UI on Agent Sandboxes with online evals on every run
+	FLOOD_SANDBOX=1 FLOOD_ONLINE_EVALS=1 uv run uvicorn flood_risk_example.app:app --port 8000
+
+.PHONY: test
+test: ## Test the geo risk API
+	uv run pytest geo_service -q

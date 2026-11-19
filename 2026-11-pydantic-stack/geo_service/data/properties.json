@@ -1,0 +1,3002 @@
+[
+ {
+  "id": "P001",
+  "address": "0 Main St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568953,
+  "lat": 44.262837,
+  "elevation_m": 163.76,
+  "water_elevation_m": 157.4
+ },
+ {
+  "id": "P002",
+  "address": "1 Blanchard Ct",
+  "kind": "office",
+  "units": 6,
+  "lon": -72.574967,
+  "lat": 44.258737,
+  "elevation_m": 162.0,
+  "water_elevation_m": 156.94
+ },
+ {
+  "id": "P003",
+  "address": "1 Cherry Ave",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.577122,
+  "lat": 44.255892,
+  "elevation_m": 179.61,
+  "water_elevation_m": 158.21
+ },
+ {
+  "id": "P004",
+  "address": "1 Granite St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.570743,
+  "lat": 44.252066,
+  "elevation_m": 161.8,
+  "water_elevation_m": 158.42
+ },
+ {
+  "id": "P005",
+  "address": "1 Mechanic St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569381,
+  "lat": 44.264635,
+  "elevation_m": 160.99,
+  "water_elevation_m": 159.37
+ },
+ {
+  "id": "P006",
+  "address": "1 Prospect St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.578317,
+  "lat": 44.256451,
+  "elevation_m": 164.36,
+  "water_elevation_m": 158.5
+ },
+ {
+  "id": "P007",
+  "address": "1 School St",
+  "kind": "flats",
+  "units": 8,
+  "lon": -72.575476,
+  "lat": 44.261509,
+  "elevation_m": 159.01,
+  "water_elevation_m": 155.27
+ },
+ {
+  "id": "P008",
+  "address": "1 Spring St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571977,
+  "lat": 44.263582,
+  "elevation_m": 158.62,
+  "water_elevation_m": 157.68
+ },
+ {
+  "id": "P009",
+  "address": "10 Brown St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570872,
+  "lat": 44.262038,
+  "elevation_m": 161.87,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P010",
+  "address": "10 Cross St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568479,
+  "lat": 44.263916,
+  "elevation_m": 165.04,
+  "water_elevation_m": 159.49
+ },
+ {
+  "id": "P011",
+  "address": "10 Downing St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.574924,
+  "lat": 44.258309,
+  "elevation_m": 165.59,
+  "water_elevation_m": 157.37
+ },
+ {
+  "id": "P012",
+  "address": "10 Langdon St",
+  "kind": "flats",
+  "units": 10,
+  "lon": -72.575802,
+  "lat": 44.26083,
+  "elevation_m": 159.28,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P013",
+  "address": "10 Park Ave",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569993,
+  "lat": 44.259774,
+  "elevation_m": 163.66,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P014",
+  "address": "10 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572857,
+  "lat": 44.265361,
+  "elevation_m": 161.28,
+  "water_elevation_m": 156.02
+ },
+ {
+  "id": "P015",
+  "address": "102 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575213,
+  "lat": 44.260587,
+  "elevation_m": 159.24,
+  "water_elevation_m": 155.99
+ },
+ {
+  "id": "P016",
+  "address": "104 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57518,
+  "lat": 44.260608,
+  "elevation_m": 159.22,
+  "water_elevation_m": 155.51
+ },
+ {
+  "id": "P017",
+  "address": "106 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575144,
+  "lat": 44.260648,
+  "elevation_m": 159.22,
+  "water_elevation_m": 155.23
+ },
+ {
+  "id": "P018",
+  "address": "107 State St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.578881,
+  "lat": 44.261402,
+  "elevation_m": 159.22,
+  "water_elevation_m": 157.58
+ },
+ {
+  "id": "P019",
+  "address": "108 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575107,
+  "lat": 44.260682,
+  "elevation_m": 159.23,
+  "water_elevation_m": 155.25
+ },
+ {
+  "id": "P020",
+  "address": "11 Baldwin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.583358,
+  "lat": 44.263282,
+  "elevation_m": 168.47,
+  "water_elevation_m": 154.21
+ },
+ {
+  "id": "P021",
+  "address": "11 Cliff St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574448,
+  "lat": 44.262895,
+  "elevation_m": 185.08,
+  "water_elevation_m": 155.89
+ },
+ {
+  "id": "P022",
+  "address": "11 Cross St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.568662,
+  "lat": 44.263738,
+  "elevation_m": 165.29,
+  "water_elevation_m": 160.94
+ },
+ {
+  "id": "P023",
+  "address": "11 Loomis St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.570614,
+  "lat": 44.260419,
+  "elevation_m": 162.93,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P024",
+  "address": "11 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576471,
+  "lat": 44.258642,
+  "elevation_m": 160.44,
+  "water_elevation_m": 156.6
+ },
+ {
+  "id": "P025",
+  "address": "11 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572327,
+  "lat": 44.26526,
+  "elevation_m": 160.53,
+  "water_elevation_m": 156.16
+ },
+ {
+  "id": "P026",
+  "address": "115 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573259,
+  "lat": 44.255831,
+  "elevation_m": 168.29,
+  "water_elevation_m": 157.07
+ },
+ {
+  "id": "P027",
+  "address": "115 Berlin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572779,
+  "lat": 44.252743,
+  "elevation_m": 163.39,
+  "water_elevation_m": 157.95
+ },
+ {
+  "id": "P028",
+  "address": "118 Main St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.574958,
+  "lat": 44.260886,
+  "elevation_m": 159.29,
+  "water_elevation_m": 155.78
+ },
+ {
+  "id": "P029",
+  "address": "119 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573094,
+  "lat": 44.255762,
+  "elevation_m": 168.42,
+  "water_elevation_m": 157.92
+ },
+ {
+  "id": "P030",
+  "address": "12 Liberty St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569917,
+  "lat": 44.261647,
+  "elevation_m": 162.75,
+  "water_elevation_m": 159.94
+ },
+ {
+  "id": "P031",
+  "address": "12 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571047,
+  "lat": 44.26105,
+  "elevation_m": 160.97,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P032",
+  "address": "12 Park Ave",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569847,
+  "lat": 44.259619,
+  "elevation_m": 165.05,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P033",
+  "address": "12 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571484,
+  "lat": 44.267153,
+  "elevation_m": 163.74,
+  "water_elevation_m": 161.23
+ },
+ {
+  "id": "P034",
+  "address": "12 State St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576054,
+  "lat": 44.260045,
+  "elevation_m": 159.2,
+  "water_elevation_m": 155.55
+ },
+ {
+  "id": "P035",
+  "address": "120 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57402,
+  "lat": 44.26298,
+  "elevation_m": 159.24,
+  "water_elevation_m": 156.63
+ },
+ {
+  "id": "P036",
+  "address": "127 Berlin St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57228,
+  "lat": 44.25224,
+  "elevation_m": 163.35,
+  "water_elevation_m": 157.38
+ },
+ {
+  "id": "P037",
+  "address": "127 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573604,
+  "lat": 44.262956,
+  "elevation_m": 158.1,
+  "water_elevation_m": 155.44
+ },
+ {
+  "id": "P038",
+  "address": "13 Baldwin St",
+  "kind": "office",
+  "units": 8,
+  "lon": -72.583615,
+  "lat": 44.26335,
+  "elevation_m": 168.08,
+  "water_elevation_m": 154.21
+ },
+ {
+  "id": "P039",
+  "address": "13 Franklin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569931,
+  "lat": 44.263617,
+  "elevation_m": 160.52,
+  "water_elevation_m": 158.51
+ },
+ {
+  "id": "P040",
+  "address": "13 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570323,
+  "lat": 44.260266,
+  "elevation_m": 162.85,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P041",
+  "address": "13 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576426,
+  "lat": 44.258683,
+  "elevation_m": 160.4,
+  "water_elevation_m": 156.6
+ },
+ {
+  "id": "P042",
+  "address": "13 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572197,
+  "lat": 44.265352,
+  "elevation_m": 160.63,
+  "water_elevation_m": 156.16
+ },
+ {
+  "id": "P043",
+  "address": "13 Vine St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570134,
+  "lat": 44.266414,
+  "elevation_m": 161.33,
+  "water_elevation_m": 160.31
+ },
+ {
+  "id": "P044",
+  "address": "131 Berlin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572219,
+  "lat": 44.25209,
+  "elevation_m": 164.05,
+  "water_elevation_m": 157.2
+ },
+ {
+  "id": "P045",
+  "address": "134 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.574433,
+  "lat": 44.261766,
+  "elevation_m": 159.43,
+  "water_elevation_m": 155.41
+ },
+ {
+  "id": "P046",
+  "address": "136 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.574304,
+  "lat": 44.261861,
+  "elevation_m": 159.41,
+  "water_elevation_m": 155.76
+ },
+ {
+  "id": "P047",
+  "address": "137 Barre St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572794,
+  "lat": 44.255534,
+  "elevation_m": 167.8,
+  "water_elevation_m": 157.02
+ },
+ {
+  "id": "P048",
+  "address": "139 State St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.583524,
+  "lat": 44.262414,
+  "elevation_m": 159.51,
+  "water_elevation_m": 154.33
+ },
+ {
+  "id": "P049",
+  "address": "14 Langdon St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.575734,
+  "lat": 44.260787,
+  "elevation_m": 159.54,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P050",
+  "address": "14 N Franklin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568628,
+  "lat": 44.264635,
+  "elevation_m": 163.02,
+  "water_elevation_m": 158.88
+ },
+ {
+  "id": "P051",
+  "address": "14 Saint Paul St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571998,
+  "lat": 44.261076,
+  "elevation_m": 160.35,
+  "water_elevation_m": 155.93
+ },
+ {
+  "id": "P052",
+  "address": "14 Spring St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573375,
+  "lat": 44.264358,
+  "elevation_m": 160.47,
+  "water_elevation_m": 155.76
+ },
+ {
+  "id": "P053",
+  "address": "14 State St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576084,
+  "lat": 44.260019,
+  "elevation_m": 159.18,
+  "water_elevation_m": 155.75
+ },
+ {
+  "id": "P054",
+  "address": "14 Vine St",
+  "kind": "flats",
+  "units": 2,
+  "lon": -72.570516,
+  "lat": 44.266227,
+  "elevation_m": 160.86,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P055",
+  "address": "140 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.573703,
+  "lat": 44.261893,
+  "elevation_m": 159.39,
+  "water_elevation_m": 155.93
+ },
+ {
+  "id": "P056",
+  "address": "141 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.573001,
+  "lat": 44.261665,
+  "elevation_m": 159.66,
+  "water_elevation_m": 156.1
+ },
+ {
+  "id": "P057",
+  "address": "143 Barre St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572572,
+  "lat": 44.255361,
+  "elevation_m": 168.15,
+  "water_elevation_m": 156.93
+ },
+ {
+  "id": "P058",
+  "address": "144 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.573372,
+  "lat": 44.26207,
+  "elevation_m": 159.67,
+  "water_elevation_m": 156.78
+ },
+ {
+  "id": "P059",
+  "address": "149 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572485,
+  "lat": 44.254992,
+  "elevation_m": 166.73,
+  "water_elevation_m": 157.32
+ },
+ {
+  "id": "P060",
+  "address": "15 Brown St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571235,
+  "lat": 44.261907,
+  "elevation_m": 160.18,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P061",
+  "address": "15 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570193,
+  "lat": 44.260602,
+  "elevation_m": 163.71,
+  "water_elevation_m": 156.72
+ },
+ {
+  "id": "P062",
+  "address": "15 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575787,
+  "lat": 44.26036,
+  "elevation_m": 159.5,
+  "water_elevation_m": 155.52
+ },
+ {
+  "id": "P063",
+  "address": "15 Vine St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570284,
+  "lat": 44.266536,
+  "elevation_m": 161.57,
+  "water_elevation_m": 160.27
+ },
+ {
+  "id": "P064",
+  "address": "15 Winter St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572129,
+  "lat": 44.266332,
+  "elevation_m": 164.68,
+  "water_elevation_m": 156.96
+ },
+ {
+  "id": "P065",
+  "address": "150 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573336,
+  "lat": 44.263715,
+  "elevation_m": 159.69,
+  "water_elevation_m": 155.76
+ },
+ {
+  "id": "P066",
+  "address": "150 Main St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572757,
+  "lat": 44.26257,
+  "elevation_m": 159.86,
+  "water_elevation_m": 157.35
+ },
+ {
+  "id": "P067",
+  "address": "153 Elm St",
+  "kind": "mixed use",
+  "units": 4,
+  "lon": -72.572832,
+  "lat": 44.263257,
+  "elevation_m": 159.01,
+  "water_elevation_m": 155.56
+ },
+ {
+  "id": "P068",
+  "address": "153 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.585766,
+  "lat": 44.262586,
+  "elevation_m": 158.68,
+  "water_elevation_m": 154.61
+ },
+ {
+  "id": "P069",
+  "address": "155 Barre St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.571946,
+  "lat": 44.254882,
+  "elevation_m": 166.24,
+  "water_elevation_m": 156.85
+ },
+ {
+  "id": "P070",
+  "address": "158 Main St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570927,
+  "lat": 44.263045,
+  "elevation_m": 160.86,
+  "water_elevation_m": 157.75
+ },
+ {
+  "id": "P071",
+  "address": "16 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575869,
+  "lat": 44.258425,
+  "elevation_m": 160.53,
+  "water_elevation_m": 156.68
+ },
+ {
+  "id": "P072",
+  "address": "16 Langdon St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575695,
+  "lat": 44.260764,
+  "elevation_m": 159.59,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P073",
+  "address": "16 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570551,
+  "lat": 44.260969,
+  "elevation_m": 162.78,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P074",
+  "address": "16 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57113,
+  "lat": 44.267424,
+  "elevation_m": 163.6,
+  "water_elevation_m": 160.32
+ },
+ {
+  "id": "P075",
+  "address": "16 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572349,
+  "lat": 44.265733,
+  "elevation_m": 161.54,
+  "water_elevation_m": 156.04
+ },
+ {
+  "id": "P076",
+  "address": "160 Main St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.57092,
+  "lat": 44.262866,
+  "elevation_m": 161.11,
+  "water_elevation_m": 158.0
+ },
+ {
+  "id": "P077",
+  "address": "161 State St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.587937,
+  "lat": 44.262332,
+  "elevation_m": 160.76,
+  "water_elevation_m": 153.94
+ },
+ {
+  "id": "P078",
+  "address": "162 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572949,
+  "lat": 44.263904,
+  "elevation_m": 160.31,
+  "water_elevation_m": 155.87
+ },
+ {
+  "id": "P079",
+  "address": "166 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572584,
+  "lat": 44.264048,
+  "elevation_m": 160.51,
+  "water_elevation_m": 157.5
+ },
+ {
+  "id": "P080",
+  "address": "167 Main St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569624,
+  "lat": 44.262453,
+  "elevation_m": 164.66,
+  "water_elevation_m": 156.97
+ },
+ {
+  "id": "P081",
+  "address": "169 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571306,
+  "lat": 44.254503,
+  "elevation_m": 165.22,
+  "water_elevation_m": 156.84
+ },
+ {
+  "id": "P082",
+  "address": "17 Court St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576667,
+  "lat": 44.262087,
+  "elevation_m": 165.69,
+  "water_elevation_m": 155.49
+ },
+ {
+  "id": "P083",
+  "address": "17 Northfield St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.578405,
+  "lat": 44.257062,
+  "elevation_m": 164.58,
+  "water_elevation_m": 158.2
+ },
+ {
+  "id": "P084",
+  "address": "17 Saint Paul St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571582,
+  "lat": 44.26108,
+  "elevation_m": 160.64,
+  "water_elevation_m": 158.25
+ },
+ {
+  "id": "P085",
+  "address": "171 Main St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569293,
+  "lat": 44.262396,
+  "elevation_m": 164.8,
+  "water_elevation_m": 157.61
+ },
+ {
+  "id": "P086",
+  "address": "174 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572207,
+  "lat": 44.26424,
+  "elevation_m": 160.85,
+  "water_elevation_m": 156.78
+ },
+ {
+  "id": "P087",
+  "address": "176 Main St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568637,
+  "lat": 44.262776,
+  "elevation_m": 164.68,
+  "water_elevation_m": 158.2
+ },
+ {
+  "id": "P088",
+  "address": "177 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571039,
+  "lat": 44.254187,
+  "elevation_m": 165.2,
+  "water_elevation_m": 156.73
+ },
+ {
+  "id": "P089",
+  "address": "18 Langdon St",
+  "kind": "flats",
+  "units": 10,
+  "lon": -72.575654,
+  "lat": 44.260743,
+  "elevation_m": 159.49,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P090",
+  "address": "18 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57616,
+  "lat": 44.260127,
+  "elevation_m": 159.51,
+  "water_elevation_m": 156.57
+ },
+ {
+  "id": "P091",
+  "address": "181 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570945,
+  "lat": 44.254081,
+  "elevation_m": 165.23,
+  "water_elevation_m": 156.79
+ },
+ {
+  "id": "P092",
+  "address": "182 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572317,
+  "lat": 44.264561,
+  "elevation_m": 160.6,
+  "water_elevation_m": 155.7
+ },
+ {
+  "id": "P093",
+  "address": "183 State St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.590663,
+  "lat": 44.260974,
+  "elevation_m": 159.8,
+  "water_elevation_m": 153.88
+ },
+ {
+  "id": "P094",
+  "address": "184 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571952,
+  "lat": 44.264354,
+  "elevation_m": 161.09,
+  "water_elevation_m": 156.02
+ },
+ {
+  "id": "P095",
+  "address": "188 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571714,
+  "lat": 44.264494,
+  "elevation_m": 161.24,
+  "water_elevation_m": 156.32
+ },
+ {
+  "id": "P096",
+  "address": "189 State St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.591238,
+  "lat": 44.260703,
+  "elevation_m": 158.86,
+  "water_elevation_m": 153.74
+ },
+ {
+  "id": "P097",
+  "address": "19 Barre St",
+  "kind": "retail",
+  "units": 1,
+  "lon": -72.575983,
+  "lat": 44.257797,
+  "elevation_m": 161.07,
+  "water_elevation_m": 156.86
+ },
+ {
+  "id": "P098",
+  "address": "19 Franklin St",
+  "kind": "flats",
+  "units": 2,
+  "lon": -72.569866,
+  "lat": 44.263745,
+  "elevation_m": 160.73,
+  "water_elevation_m": 156.82
+ },
+ {
+  "id": "P099",
+  "address": "19 Liberty St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569653,
+  "lat": 44.260639,
+  "elevation_m": 164.91,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P100",
+  "address": "19 Loomis St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569741,
+  "lat": 44.260771,
+  "elevation_m": 164.57,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P101",
+  "address": "19 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570311,
+  "lat": 44.267585,
+  "elevation_m": 162.26,
+  "water_elevation_m": 159.96
+ },
+ {
+  "id": "P102",
+  "address": "19 Saint Paul St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571559,
+  "lat": 44.261105,
+  "elevation_m": 160.72,
+  "water_elevation_m": 158.25
+ },
+ {
+  "id": "P103",
+  "address": "195 State St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.591639,
+  "lat": 44.260385,
+  "elevation_m": 158.11,
+  "water_elevation_m": 154.35
+ },
+ {
+  "id": "P104",
+  "address": "197 State St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.591813,
+  "lat": 44.260179,
+  "elevation_m": 157.88,
+  "water_elevation_m": 156.07
+ },
+ {
+  "id": "P105",
+  "address": "2 Baird St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571909,
+  "lat": 44.26176,
+  "elevation_m": 159.79,
+  "water_elevation_m": 158.25
+ },
+ {
+  "id": "P106",
+  "address": "2 Cedar St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572863,
+  "lat": 44.259585,
+  "elevation_m": 164.81,
+  "water_elevation_m": 156.29
+ },
+ {
+  "id": "P107",
+  "address": "2 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571756,
+  "lat": 44.260347,
+  "elevation_m": 160.76,
+  "water_elevation_m": 155.59
+ },
+ {
+  "id": "P108",
+  "address": "2 Mechanic St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568678,
+  "lat": 44.265254,
+  "elevation_m": 159.55,
+  "water_elevation_m": 158.79
+ },
+ {
+  "id": "P109",
+  "address": "2 Prospect St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.578023,
+  "lat": 44.256846,
+  "elevation_m": 162.98,
+  "water_elevation_m": 158.41
+ },
+ {
+  "id": "P110",
+  "address": "20 Baldwin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.585223,
+  "lat": 44.263312,
+  "elevation_m": 169.61,
+  "water_elevation_m": 154.16
+ },
+ {
+  "id": "P111",
+  "address": "20 Court St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.576819,
+  "lat": 44.261792,
+  "elevation_m": 161.82,
+  "water_elevation_m": 155.81
+ },
+ {
+  "id": "P112",
+  "address": "20 Liberty St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569611,
+  "lat": 44.261261,
+  "elevation_m": 163.93,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P113",
+  "address": "20 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570748,
+  "lat": 44.267684,
+  "elevation_m": 162.43,
+  "water_elevation_m": 159.94
+ },
+ {
+  "id": "P114",
+  "address": "20 Spring St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573483,
+  "lat": 44.264488,
+  "elevation_m": 160.59,
+  "water_elevation_m": 155.76
+ },
+ {
+  "id": "P115",
+  "address": "20 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576293,
+  "lat": 44.260148,
+  "elevation_m": 159.62,
+  "water_elevation_m": 155.79
+ },
+ {
+  "id": "P116",
+  "address": "20 Winter St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572672,
+  "lat": 44.266279,
+  "elevation_m": 167.73,
+  "water_elevation_m": 155.65
+ },
+ {
+  "id": "P117",
+  "address": "200 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571485,
+  "lat": 44.26463,
+  "elevation_m": 161.23,
+  "water_elevation_m": 155.57
+ },
+ {
+  "id": "P118",
+  "address": "202 Barre St",
+  "kind": "flats",
+  "units": 2,
+  "lon": -72.56999,
+  "lat": 44.253638,
+  "elevation_m": 166.24,
+  "water_elevation_m": 157.16
+ },
+ {
+  "id": "P119",
+  "address": "203 Barre St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.570253,
+  "lat": 44.253385,
+  "elevation_m": 163.79,
+  "water_elevation_m": 157.36
+ },
+ {
+  "id": "P120",
+  "address": "209 Barre St",
+  "kind": "flats",
+  "units": 6,
+  "lon": -72.570394,
+  "lat": 44.253161,
+  "elevation_m": 163.0,
+  "water_elevation_m": 157.54
+ },
+ {
+  "id": "P121",
+  "address": "21 Court St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57692,
+  "lat": 44.26226,
+  "elevation_m": 166.16,
+  "water_elevation_m": 155.49
+ },
+ {
+  "id": "P122",
+  "address": "21 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569374,
+  "lat": 44.260951,
+  "elevation_m": 164.73,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P123",
+  "address": "22 Pearl St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570589,
+  "lat": 44.267803,
+  "elevation_m": 162.15,
+  "water_elevation_m": 160.35
+ },
+ {
+  "id": "P124",
+  "address": "22 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571809,
+  "lat": 44.266004,
+  "elevation_m": 161.21,
+  "water_elevation_m": 156.64
+ },
+ {
+  "id": "P125",
+  "address": "22 Winter St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572784,
+  "lat": 44.266424,
+  "elevation_m": 170.29,
+  "water_elevation_m": 155.79
+ },
+ {
+  "id": "P126",
+  "address": "221 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570585,
+  "lat": 44.264637,
+  "elevation_m": 161.07,
+  "water_elevation_m": 155.64
+ },
+ {
+  "id": "P127",
+  "address": "223 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570403,
+  "lat": 44.264743,
+  "elevation_m": 161.01,
+  "water_elevation_m": 155.67
+ },
+ {
+  "id": "P128",
+  "address": "228 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569266,
+  "lat": 44.252724,
+  "elevation_m": 165.35,
+  "water_elevation_m": 158.52
+ },
+ {
+  "id": "P129",
+  "address": "23 Hill St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573664,
+  "lat": 44.253432,
+  "elevation_m": 165.58,
+  "water_elevation_m": 158.14
+ },
+ {
+  "id": "P130",
+  "address": "23 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57728,
+  "lat": 44.256119,
+  "elevation_m": 175.44,
+  "water_elevation_m": 157.47
+ },
+ {
+  "id": "P131",
+  "address": "23 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571114,
+  "lat": 44.266037,
+  "elevation_m": 160.55,
+  "water_elevation_m": 157.33
+ },
+ {
+  "id": "P132",
+  "address": "231 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570223,
+  "lat": 44.264868,
+  "elevation_m": 161.41,
+  "water_elevation_m": 155.77
+ },
+ {
+  "id": "P133",
+  "address": "238 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.5688,
+  "lat": 44.252434,
+  "elevation_m": 167.3,
+  "water_elevation_m": 158.43
+ },
+ {
+  "id": "P134",
+  "address": "24 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576473,
+  "lat": 44.26127,
+  "elevation_m": 159.71,
+  "water_elevation_m": 155.39
+ },
+ {
+  "id": "P135",
+  "address": "24 Franklin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570139,
+  "lat": 44.263916,
+  "elevation_m": 160.29,
+  "water_elevation_m": 156.82
+ },
+ {
+  "id": "P136",
+  "address": "24 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569398,
+  "lat": 44.261635,
+  "elevation_m": 164.33,
+  "water_elevation_m": 157.86
+ },
+ {
+  "id": "P137",
+  "address": "24 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576518,
+  "lat": 44.259037,
+  "elevation_m": 159.95,
+  "water_elevation_m": 157.62
+ },
+ {
+  "id": "P138",
+  "address": "24 North St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.568525,
+  "lat": 44.262934,
+  "elevation_m": 165.44,
+  "water_elevation_m": 156.09
+ },
+ {
+  "id": "P139",
+  "address": "24 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571546,
+  "lat": 44.261688,
+  "elevation_m": 160.42,
+  "water_elevation_m": 157.17
+ },
+ {
+  "id": "P140",
+  "address": "24 Summer St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571626,
+  "lat": 44.266103,
+  "elevation_m": 161.29,
+  "water_elevation_m": 156.96
+ },
+ {
+  "id": "P141",
+  "address": "24 Vine St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571244,
+  "lat": 44.266955,
+  "elevation_m": 162.87,
+  "water_elevation_m": 161.23
+ },
+ {
+  "id": "P142",
+  "address": "241 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569827,
+  "lat": 44.265102,
+  "elevation_m": 161.38,
+  "water_elevation_m": 156.96
+ },
+ {
+  "id": "P143",
+  "address": "248 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569971,
+  "lat": 44.265502,
+  "elevation_m": 161.5,
+  "water_elevation_m": 156.21
+ },
+ {
+  "id": "P144",
+  "address": "249 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569627,
+  "lat": 44.265286,
+  "elevation_m": 161.08,
+  "water_elevation_m": 156.32
+ },
+ {
+  "id": "P145",
+  "address": "25 E State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.574066,
+  "lat": 44.259601,
+  "elevation_m": 160.84,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P146",
+  "address": "25 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571184,
+  "lat": 44.261314,
+  "elevation_m": 160.84,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P147",
+  "address": "25 School St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.573779,
+  "lat": 44.260528,
+  "elevation_m": 159.69,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P148",
+  "address": "25 State St",
+  "kind": "commercial",
+  "units": 6,
+  "lon": -72.576225,
+  "lat": 44.260446,
+  "elevation_m": 158.94,
+  "water_elevation_m": 155.61
+ },
+ {
+  "id": "P149",
+  "address": "25 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570954,
+  "lat": 44.266103,
+  "elevation_m": 160.78,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P150",
+  "address": "26 Franklin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569991,
+  "lat": 44.264016,
+  "elevation_m": 160.19,
+  "water_elevation_m": 156.09
+ },
+ {
+  "id": "P151",
+  "address": "26 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569193,
+  "lat": 44.26149,
+  "elevation_m": 164.91,
+  "water_elevation_m": 158.7
+ },
+ {
+  "id": "P152",
+  "address": "26 Pearl St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570418,
+  "lat": 44.267926,
+  "elevation_m": 162.15,
+  "water_elevation_m": 160.25
+ },
+ {
+  "id": "P153",
+  "address": "26 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576826,
+  "lat": 44.256182,
+  "elevation_m": 170.18,
+  "water_elevation_m": 158.17
+ },
+ {
+  "id": "P154",
+  "address": "26 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576355,
+  "lat": 44.260168,
+  "elevation_m": 159.73,
+  "water_elevation_m": 155.79
+ },
+ {
+  "id": "P155",
+  "address": "26 Summer St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571312,
+  "lat": 44.266296,
+  "elevation_m": 161.15,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P156",
+  "address": "267 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569197,
+  "lat": 44.265705,
+  "elevation_m": 161.42,
+  "water_elevation_m": 156.63
+ },
+ {
+  "id": "P157",
+  "address": "27 Franklin St",
+  "kind": "flats",
+  "units": 3,
+  "lon": -72.569508,
+  "lat": 44.264031,
+  "elevation_m": 160.8,
+  "water_elevation_m": 160.81
+ },
+ {
+  "id": "P158",
+  "address": "27 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570992,
+  "lat": 44.261389,
+  "elevation_m": 161.19,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P159",
+  "address": "27 School St",
+  "kind": "flats",
+  "units": 6,
+  "lon": -72.573362,
+  "lat": 44.260299,
+  "elevation_m": 160.21,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P160",
+  "address": "27 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576265,
+  "lat": 44.260454,
+  "elevation_m": 157.88,
+  "water_elevation_m": 155.85
+ },
+ {
+  "id": "P161",
+  "address": "279 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.568934,
+  "lat": 44.265859,
+  "elevation_m": 161.3,
+  "water_elevation_m": 160.02
+ },
+ {
+  "id": "P162",
+  "address": "28 Barre St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.575439,
+  "lat": 44.258013,
+  "elevation_m": 161.91,
+  "water_elevation_m": 156.73
+ },
+ {
+  "id": "P163",
+  "address": "28 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576377,
+  "lat": 44.261332,
+  "elevation_m": 160.28,
+  "water_elevation_m": 155.7
+ },
+ {
+  "id": "P164",
+  "address": "28 Pearl St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570489,
+  "lat": 44.267958,
+  "elevation_m": 162.12,
+  "water_elevation_m": 160.25
+ },
+ {
+  "id": "P165",
+  "address": "28 State St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576422,
+  "lat": 44.260182,
+  "elevation_m": 158.99,
+  "water_elevation_m": 155.79
+ },
+ {
+  "id": "P166",
+  "address": "28 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571167,
+  "lat": 44.266383,
+  "elevation_m": 161.27,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P167",
+  "address": "285 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.568772,
+  "lat": 44.266117,
+  "elevation_m": 161.59,
+  "water_elevation_m": 159.98
+ },
+ {
+  "id": "P168",
+  "address": "286 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569097,
+  "lat": 44.266364,
+  "elevation_m": 162.32,
+  "water_elevation_m": 160.31
+ },
+ {
+  "id": "P169",
+  "address": "29 Court St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.5775,
+  "lat": 44.262113,
+  "elevation_m": 164.35,
+  "water_elevation_m": 155.39
+ },
+ {
+  "id": "P170",
+  "address": "29 E State St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573805,
+  "lat": 44.25949,
+  "elevation_m": 161.98,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P171",
+  "address": "3 Cedar St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572547,
+  "lat": 44.259414,
+  "elevation_m": 168.41,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P172",
+  "address": "3 Granite St",
+  "kind": "mixed use",
+  "units": 6,
+  "lon": -72.570506,
+  "lat": 44.252198,
+  "elevation_m": 162.14,
+  "water_elevation_m": 158.38
+ },
+ {
+  "id": "P173",
+  "address": "3 Holmes Ct",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573668,
+  "lat": 44.264238,
+  "elevation_m": 160.41,
+  "water_elevation_m": 155.76
+ },
+ {
+  "id": "P174",
+  "address": "3 Hubbard St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573671,
+  "lat": 44.256803,
+  "elevation_m": 163.38,
+  "water_elevation_m": 159.34
+ },
+ {
+  "id": "P175",
+  "address": "3 Liberty St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570588,
+  "lat": 44.262266,
+  "elevation_m": 161.97,
+  "water_elevation_m": 159.0
+ },
+ {
+  "id": "P176",
+  "address": "3 Main St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.57682,
+  "lat": 44.257882,
+  "elevation_m": 160.76,
+  "water_elevation_m": 157.76
+ },
+ {
+  "id": "P177",
+  "address": "3 Miles Ct",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574249,
+  "lat": 44.259435,
+  "elevation_m": 161.2,
+  "water_elevation_m": 155.37
+ },
+ {
+  "id": "P178",
+  "address": "3 Peck Pl",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569691,
+  "lat": 44.263667,
+  "elevation_m": 161.03,
+  "water_elevation_m": 156.08
+ },
+ {
+  "id": "P179",
+  "address": "3 Pitkin Ct",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.574721,
+  "lat": 44.25914,
+  "elevation_m": 160.89,
+  "water_elevation_m": 156.95
+ },
+ {
+  "id": "P180",
+  "address": "3 Prospect St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.577915,
+  "lat": 44.256208,
+  "elevation_m": 164.44,
+  "water_elevation_m": 159.13
+ },
+ {
+  "id": "P181",
+  "address": "3 Shipman Pl",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.575395,
+  "lat": 44.262029,
+  "elevation_m": 164.9,
+  "water_elevation_m": 156.58
+ },
+ {
+  "id": "P182",
+  "address": "3 Spring St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572136,
+  "lat": 44.263714,
+  "elevation_m": 159.95,
+  "water_elevation_m": 157.9
+ },
+ {
+  "id": "P183",
+  "address": "3 Vine St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.569278,
+  "lat": 44.265613,
+  "elevation_m": 161.47,
+  "water_elevation_m": 160.2
+ },
+ {
+  "id": "P184",
+  "address": "3 Winter St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570978,
+  "lat": 44.26528,
+  "elevation_m": 161.12,
+  "water_elevation_m": 155.79
+ },
+ {
+  "id": "P185",
+  "address": "30 School St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.572859,
+  "lat": 44.260572,
+  "elevation_m": 160.26,
+  "water_elevation_m": 156.71
+ },
+ {
+  "id": "P186",
+  "address": "30 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57645,
+  "lat": 44.260189,
+  "elevation_m": 158.32,
+  "water_elevation_m": 156.08
+ },
+ {
+  "id": "P187",
+  "address": "308 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.568887,
+  "lat": 44.2669,
+  "elevation_m": 163.45,
+  "water_elevation_m": 159.97
+ },
+ {
+  "id": "P188",
+  "address": "31 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.575781,
+  "lat": 44.2577,
+  "elevation_m": 161.23,
+  "water_elevation_m": 156.95
+ },
+ {
+  "id": "P189",
+  "address": "31 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569754,
+  "lat": 44.267948,
+  "elevation_m": 162.13,
+  "water_elevation_m": 159.92
+ },
+ {
+  "id": "P190",
+  "address": "32 E State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.573491,
+  "lat": 44.259656,
+  "elevation_m": 161.04,
+  "water_elevation_m": 155.68
+ },
+ {
+  "id": "P191",
+  "address": "32 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571107,
+  "lat": 44.26165,
+  "elevation_m": 160.75,
+  "water_elevation_m": 157.14
+ },
+ {
+  "id": "P192",
+  "address": "32 School St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572684,
+  "lat": 44.260502,
+  "elevation_m": 160.34,
+  "water_elevation_m": 156.61
+ },
+ {
+  "id": "P193",
+  "address": "32 State St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576477,
+  "lat": 44.260195,
+  "elevation_m": 158.16,
+  "water_elevation_m": 156.08
+ },
+ {
+  "id": "P194",
+  "address": "32 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570864,
+  "lat": 44.266606,
+  "elevation_m": 161.52,
+  "water_elevation_m": 160.27
+ },
+ {
+  "id": "P195",
+  "address": "320 Elm St",
+  "kind": "flats",
+  "units": 3,
+  "lon": -72.569036,
+  "lat": 44.267325,
+  "elevation_m": 164.93,
+  "water_elevation_m": 160.56
+ },
+ {
+  "id": "P196",
+  "address": "33 Court St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.5779,
+  "lat": 44.262162,
+  "elevation_m": 165.92,
+  "water_elevation_m": 155.39
+ },
+ {
+  "id": "P197",
+  "address": "33 Hill St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573545,
+  "lat": 44.253294,
+  "elevation_m": 166.52,
+  "water_elevation_m": 158.14
+ },
+ {
+  "id": "P198",
+  "address": "33 Saint Paul St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570832,
+  "lat": 44.261488,
+  "elevation_m": 161.33,
+  "water_elevation_m": 156.8
+ },
+ {
+  "id": "P199",
+  "address": "336 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569472,
+  "lat": 44.267643,
+  "elevation_m": 162.71,
+  "water_elevation_m": 161.23
+ },
+ {
+  "id": "P200",
+  "address": "34 Barre St",
+  "kind": "retail",
+  "units": 1,
+  "lon": -72.575114,
+  "lat": 44.257889,
+  "elevation_m": 161.91,
+  "water_elevation_m": 158.15
+ },
+ {
+  "id": "P201",
+  "address": "34 Main St",
+  "kind": "mixed use",
+  "units": 18,
+  "lon": -72.576383,
+  "lat": 44.259214,
+  "elevation_m": 159.5,
+  "water_elevation_m": 156.53
+ },
+ {
+  "id": "P202",
+  "address": "34 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570946,
+  "lat": 44.261705,
+  "elevation_m": 161.02,
+  "water_elevation_m": 158.21
+ },
+ {
+  "id": "P203",
+  "address": "34 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576563,
+  "lat": 44.260221,
+  "elevation_m": 155.4,
+  "water_elevation_m": 155.4
+ },
+ {
+  "id": "P204",
+  "address": "346 Elm St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569585,
+  "lat": 44.267805,
+  "elevation_m": 162.18,
+  "water_elevation_m": 160.1
+ },
+ {
+  "id": "P205",
+  "address": "35 Court St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.578106,
+  "lat": 44.26217,
+  "elevation_m": 166.15,
+  "water_elevation_m": 158.71
+ },
+ {
+  "id": "P206",
+  "address": "35 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57669,
+  "lat": 44.25562,
+  "elevation_m": 174.43,
+  "water_elevation_m": 158.55
+ },
+ {
+  "id": "P207",
+  "address": "35 School St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572669,
+  "lat": 44.259975,
+  "elevation_m": 161.3,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P208",
+  "address": "37 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575928,
+  "lat": 44.261213,
+  "elevation_m": 157.5,
+  "water_elevation_m": 155.33
+ },
+ {
+  "id": "P209",
+  "address": "38 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57594,
+  "lat": 44.261526,
+  "elevation_m": 159.95,
+  "water_elevation_m": 155.49
+ },
+ {
+  "id": "P210",
+  "address": "38 Summer St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570183,
+  "lat": 44.267017,
+  "elevation_m": 162.95,
+  "water_elevation_m": 159.99
+ },
+ {
+  "id": "P211",
+  "address": "4 Baird St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571997,
+  "lat": 44.261827,
+  "elevation_m": 159.78,
+  "water_elevation_m": 157.85
+ },
+ {
+  "id": "P212",
+  "address": "4 Cedar St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573034,
+  "lat": 44.259688,
+  "elevation_m": 163.02,
+  "water_elevation_m": 155.53
+ },
+ {
+  "id": "P213",
+  "address": "4 Court St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576195,
+  "lat": 44.261743,
+  "elevation_m": 161.19,
+  "water_elevation_m": 155.49
+ },
+ {
+  "id": "P214",
+  "address": "4 Franklin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.570466,
+  "lat": 44.263378,
+  "elevation_m": 161.71,
+  "water_elevation_m": 157.61
+ },
+ {
+  "id": "P215",
+  "address": "4 Granite St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.569793,
+  "lat": 44.252086,
+  "elevation_m": 162.16,
+  "water_elevation_m": 157.07
+ },
+ {
+  "id": "P216",
+  "address": "4 Langdon St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576214,
+  "lat": 44.261026,
+  "elevation_m": 157.47,
+  "water_elevation_m": 155.29
+ },
+ {
+  "id": "P217",
+  "address": "4 Loomis St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571605,
+  "lat": 44.260508,
+  "elevation_m": 160.97,
+  "water_elevation_m": 155.93
+ },
+ {
+  "id": "P218",
+  "address": "4 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572204,
+  "lat": 44.266717,
+  "elevation_m": 166.73,
+  "water_elevation_m": 156.96
+ },
+ {
+  "id": "P219",
+  "address": "4 Putnam St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572267,
+  "lat": 44.254877,
+  "elevation_m": 165.23,
+  "water_elevation_m": 157.69
+ },
+ {
+  "id": "P220",
+  "address": "4 Saint Paul St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572789,
+  "lat": 44.260885,
+  "elevation_m": 160.5,
+  "water_elevation_m": 155.58
+ },
+ {
+  "id": "P221",
+  "address": "4 Spring St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.572497,
+  "lat": 44.263512,
+  "elevation_m": 159.94,
+  "water_elevation_m": 155.7
+ },
+ {
+  "id": "P222",
+  "address": "40 Barre St",
+  "kind": "flats",
+  "units": 10,
+  "lon": -72.575065,
+  "lat": 44.257722,
+  "elevation_m": 161.87,
+  "water_elevation_m": 159.14
+ },
+ {
+  "id": "P223",
+  "address": "40 Main St",
+  "kind": "retail",
+  "units": 1,
+  "lon": -72.576301,
+  "lat": 44.259325,
+  "elevation_m": 159.4,
+  "water_elevation_m": 155.28
+ },
+ {
+  "id": "P224",
+  "address": "41 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575646,
+  "lat": 44.261374,
+  "elevation_m": 158.96,
+  "water_elevation_m": 155.38
+ },
+ {
+  "id": "P225",
+  "address": "41 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576502,
+  "lat": 44.255436,
+  "elevation_m": 175.15,
+  "water_elevation_m": 158.41
+ },
+ {
+  "id": "P226",
+  "address": "43 Summer St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.56943,
+  "lat": 44.267016,
+  "elevation_m": 167.01,
+  "water_elevation_m": 159.97
+ },
+ {
+  "id": "P227",
+  "address": "44 E State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.573176,
+  "lat": 44.259494,
+  "elevation_m": 165.43,
+  "water_elevation_m": 155.63
+ },
+ {
+  "id": "P228",
+  "address": "45 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575317,
+  "lat": 44.25736,
+  "elevation_m": 161.39,
+  "water_elevation_m": 157.45
+ },
+ {
+  "id": "P229",
+  "address": "45 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576337,
+  "lat": 44.255301,
+  "elevation_m": 176.88,
+  "water_elevation_m": 159.27
+ },
+ {
+  "id": "P230",
+  "address": "46 E State St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572999,
+  "lat": 44.259407,
+  "elevation_m": 167.07,
+  "water_elevation_m": 155.44
+ },
+ {
+  "id": "P231",
+  "address": "46 Prospect St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.575934,
+  "lat": 44.255405,
+  "elevation_m": 171.49,
+  "water_elevation_m": 158.62
+ },
+ {
+  "id": "P232",
+  "address": "47 Court St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.578839,
+  "lat": 44.262184,
+  "elevation_m": 165.54,
+  "water_elevation_m": 158.31
+ },
+ {
+  "id": "P233",
+  "address": "48 E State St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572733,
+  "lat": 44.259325,
+  "elevation_m": 168.93,
+  "water_elevation_m": 155.6
+ },
+ {
+  "id": "P234",
+  "address": "49 Memorial Dr",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.578962,
+  "lat": 44.259043,
+  "elevation_m": 160.82,
+  "water_elevation_m": 155.26
+ },
+ {
+  "id": "P235",
+  "address": "5 Cliff St",
+  "kind": "flats",
+  "units": 5,
+  "lon": -72.575055,
+  "lat": 44.262347,
+  "elevation_m": 178.04,
+  "water_elevation_m": 155.41
+ },
+ {
+  "id": "P236",
+  "address": "5 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.57176,
+  "lat": 44.266581,
+  "elevation_m": 164.17,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P237",
+  "address": "5 Peck Pl",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569525,
+  "lat": 44.263612,
+  "elevation_m": 161.5,
+  "water_elevation_m": 155.87
+ },
+ {
+  "id": "P238",
+  "address": "5 Spring St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571801,
+  "lat": 44.263842,
+  "elevation_m": 159.76,
+  "water_elevation_m": 157.3
+ },
+ {
+  "id": "P239",
+  "address": "5 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.57566,
+  "lat": 44.260328,
+  "elevation_m": 159.54,
+  "water_elevation_m": 155.34
+ },
+ {
+  "id": "P240",
+  "address": "51 Berlin St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.576092,
+  "lat": 44.255793,
+  "elevation_m": 161.64,
+  "water_elevation_m": 158.39
+ },
+ {
+  "id": "P241",
+  "address": "51 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.576065,
+  "lat": 44.255075,
+  "elevation_m": 177.28,
+  "water_elevation_m": 158.46
+ },
+ {
+  "id": "P242",
+  "address": "54 E State St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.572507,
+  "lat": 44.259166,
+  "elevation_m": 173.01,
+  "water_elevation_m": 155.3
+ },
+ {
+  "id": "P243",
+  "address": "54 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575717,
+  "lat": 44.261675,
+  "elevation_m": 160.5,
+  "water_elevation_m": 155.39
+ },
+ {
+  "id": "P244",
+  "address": "54 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576128,
+  "lat": 44.259499,
+  "elevation_m": 159.3,
+  "water_elevation_m": 156.75
+ },
+ {
+  "id": "P245",
+  "address": "55 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575858,
+  "lat": 44.254837,
+  "elevation_m": 180.5,
+  "water_elevation_m": 158.34
+ },
+ {
+  "id": "P246",
+  "address": "56 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575495,
+  "lat": 44.254997,
+  "elevation_m": 172.81,
+  "water_elevation_m": 158.08
+ },
+ {
+  "id": "P247",
+  "address": "56 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.577032,
+  "lat": 44.260317,
+  "elevation_m": 159.3,
+  "water_elevation_m": 155.27
+ },
+ {
+  "id": "P248",
+  "address": "57 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575206,
+  "lat": 44.261675,
+  "elevation_m": 159.67,
+  "water_elevation_m": 155.7
+ },
+ {
+  "id": "P249",
+  "address": "575 Stone Cutters Way",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.57268,
+  "lat": 44.254258,
+  "elevation_m": 162.38,
+  "water_elevation_m": 156.81
+ },
+ {
+  "id": "P250",
+  "address": "6 Cedar St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572799,
+  "lat": 44.259728,
+  "elevation_m": 162.4,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P251",
+  "address": "6 Cliff St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574933,
+  "lat": 44.262572,
+  "elevation_m": 185.76,
+  "water_elevation_m": 155.87
+ },
+ {
+  "id": "P252",
+  "address": "6 Hillside Ave",
+  "kind": "flats",
+  "units": 5,
+  "lon": -72.576072,
+  "lat": 44.262245,
+  "elevation_m": 168.69,
+  "water_elevation_m": 155.55
+ },
+ {
+  "id": "P253",
+  "address": "6 Mechanic St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.568334,
+  "lat": 44.265075,
+  "elevation_m": 163.53,
+  "water_elevation_m": 158.79
+ },
+ {
+  "id": "P254",
+  "address": "6 Monsignor Crosby Ave",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.574682,
+  "lat": 44.257992,
+  "elevation_m": 162.58,
+  "water_elevation_m": 158.89
+ },
+ {
+  "id": "P255",
+  "address": "60 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576045,
+  "lat": 44.259592,
+  "elevation_m": 159.35,
+  "water_elevation_m": 156.95
+ },
+ {
+  "id": "P256",
+  "address": "61 Berlin St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575395,
+  "lat": 44.25522,
+  "elevation_m": 164.71,
+  "water_elevation_m": 157.32
+ },
+ {
+  "id": "P257",
+  "address": "61 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575617,
+  "lat": 44.2546,
+  "elevation_m": 179.46,
+  "water_elevation_m": 158.59
+ },
+ {
+  "id": "P258",
+  "address": "63 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574729,
+  "lat": 44.256849,
+  "elevation_m": 161.5,
+  "water_elevation_m": 157.69
+ },
+ {
+  "id": "P259",
+  "address": "63 Elm St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575121,
+  "lat": 44.261729,
+  "elevation_m": 159.29,
+  "water_elevation_m": 155.92
+ },
+ {
+  "id": "P260",
+  "address": "65 Berlin St",
+  "kind": "flats",
+  "units": 2,
+  "lon": -72.575124,
+  "lat": 44.255008,
+  "elevation_m": 161.92,
+  "water_elevation_m": 158.81
+ },
+ {
+  "id": "P261",
+  "address": "67 Prospect St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575409,
+  "lat": 44.254372,
+  "elevation_m": 177.21,
+  "water_elevation_m": 158.58
+ },
+ {
+  "id": "P262",
+  "address": "68 Hill St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573071,
+  "lat": 44.252823,
+  "elevation_m": 166.47,
+  "water_elevation_m": 158.35
+ },
+ {
+  "id": "P263",
+  "address": "69 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.575476,
+  "lat": 44.259694,
+  "elevation_m": 159.33,
+  "water_elevation_m": 155.29
+ },
+ {
+  "id": "P264",
+  "address": "7 Baird St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571923,
+  "lat": 44.261339,
+  "elevation_m": 160.11,
+  "water_elevation_m": 158.09
+ },
+ {
+  "id": "P265",
+  "address": "7 Court St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576204,
+  "lat": 44.26203,
+  "elevation_m": 164.8,
+  "water_elevation_m": 155.61
+ },
+ {
+  "id": "P266",
+  "address": "7 E State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.574913,
+  "lat": 44.259879,
+  "elevation_m": 159.88,
+  "water_elevation_m": 159.76
+ },
+ {
+  "id": "P267",
+  "address": "7 Langdon St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.576053,
+  "lat": 44.260703,
+  "elevation_m": 159.12,
+  "water_elevation_m": 157.16
+ },
+ {
+  "id": "P268",
+  "address": "7 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571083,
+  "lat": 44.26026,
+  "elevation_m": 162.09,
+  "water_elevation_m": 155.93
+ },
+ {
+  "id": "P269",
+  "address": "7 Pearl St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571661,
+  "lat": 44.266655,
+  "elevation_m": 163.56,
+  "water_elevation_m": 161.32
+ },
+ {
+  "id": "P270",
+  "address": "707 Stone Cutters Way",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.570694,
+  "lat": 44.252289,
+  "elevation_m": 161.76,
+  "water_elevation_m": 158.73
+ },
+ {
+  "id": "P271",
+  "address": "72 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574115,
+  "lat": 44.256988,
+  "elevation_m": 162.36,
+  "water_elevation_m": 157.56
+ },
+ {
+  "id": "P272",
+  "address": "72 Main St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.575705,
+  "lat": 44.259955,
+  "elevation_m": 159.39,
+  "water_elevation_m": 156.08
+ },
+ {
+  "id": "P273",
+  "address": "73 Main St",
+  "kind": "mixed use",
+  "units": 46,
+  "lon": -72.575382,
+  "lat": 44.259788,
+  "elevation_m": 159.32,
+  "water_elevation_m": 155.37
+ },
+ {
+  "id": "P274",
+  "address": "75 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.575332,
+  "lat": 44.25984,
+  "elevation_m": 159.48,
+  "water_elevation_m": 156.08
+ },
+ {
+  "id": "P275",
+  "address": "77 Main St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.575305,
+  "lat": 44.259882,
+  "elevation_m": 159.46,
+  "water_elevation_m": 156.99
+ },
+ {
+  "id": "P276",
+  "address": "78 Barre St",
+  "kind": "mixed use",
+  "units": 1,
+  "lon": -72.57387,
+  "lat": 44.25674,
+  "elevation_m": 162.46,
+  "water_elevation_m": 158.76
+ },
+ {
+  "id": "P277",
+  "address": "8 Court St",
+  "kind": "flats",
+  "units": 3,
+  "lon": -72.576378,
+  "lat": 44.26175,
+  "elevation_m": 161.66,
+  "water_elevation_m": 155.46
+ },
+ {
+  "id": "P278",
+  "address": "8 Downing St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.575063,
+  "lat": 44.258217,
+  "elevation_m": 164.96,
+  "water_elevation_m": 157.37
+ },
+ {
+  "id": "P279",
+  "address": "8 Loomis St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.571229,
+  "lat": 44.260904,
+  "elevation_m": 161.47,
+  "water_elevation_m": 157.45
+ },
+ {
+  "id": "P280",
+  "address": "8 Putnam St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.571826,
+  "lat": 44.254416,
+  "elevation_m": 163.06,
+  "water_elevation_m": 156.72
+ },
+ {
+  "id": "P281",
+  "address": "8 Spring St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573169,
+  "lat": 44.264137,
+  "elevation_m": 160.31,
+  "water_elevation_m": 155.52
+ },
+ {
+  "id": "P282",
+  "address": "81 Main St",
+  "kind": "restaurant",
+  "units": 1,
+  "lon": -72.575166,
+  "lat": 44.26002,
+  "elevation_m": 159.51,
+  "water_elevation_m": 157.49
+ },
+ {
+  "id": "P283",
+  "address": "82 Barre St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573642,
+  "lat": 44.256693,
+  "elevation_m": 163.7,
+  "water_elevation_m": 158.1
+ },
+ {
+  "id": "P284",
+  "address": "83 Berlin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.574389,
+  "lat": 44.254271,
+  "elevation_m": 163.05,
+  "water_elevation_m": 157.53
+ },
+ {
+  "id": "P285",
+  "address": "83 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.575097,
+  "lat": 44.259971,
+  "elevation_m": 159.59,
+  "water_elevation_m": 158.74
+ },
+ {
+  "id": "P286",
+  "address": "89 Berlin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.574067,
+  "lat": 44.25398,
+  "elevation_m": 163.31,
+  "water_elevation_m": 158.33
+ },
+ {
+  "id": "P287",
+  "address": "89 Elm St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.574148,
+  "lat": 44.26247,
+  "elevation_m": 157.85,
+  "water_elevation_m": 156.98
+ },
+ {
+  "id": "P288",
+  "address": "89 State St",
+  "kind": "office",
+  "units": 1,
+  "lon": -72.578058,
+  "lat": 44.260963,
+  "elevation_m": 159.09,
+  "water_elevation_m": 155.28
+ },
+ {
+  "id": "P289",
+  "address": "9 Bailey Ave",
+  "kind": "office",
+  "units": 2,
+  "lon": -72.584023,
+  "lat": 44.2631,
+  "elevation_m": 163.55,
+  "water_elevation_m": 154.16
+ },
+ {
+  "id": "P290",
+  "address": "9 Cedar St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.572299,
+  "lat": 44.259775,
+  "elevation_m": 162.57,
+  "water_elevation_m": 157.66
+ },
+ {
+  "id": "P291",
+  "address": "9 Franklin St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.56999,
+  "lat": 44.263515,
+  "elevation_m": 160.74,
+  "water_elevation_m": 157.96
+ },
+ {
+  "id": "P292",
+  "address": "9 Loomis St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.570888,
+  "lat": 44.260316,
+  "elevation_m": 162.13,
+  "water_elevation_m": 156.75
+ },
+ {
+  "id": "P293",
+  "address": "9 Main St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.576538,
+  "lat": 44.258366,
+  "elevation_m": 160.75,
+  "water_elevation_m": 157.0
+ },
+ {
+  "id": "P294",
+  "address": "9 Vine St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.569744,
+  "lat": 44.266356,
+  "elevation_m": 161.61,
+  "water_elevation_m": 160.15
+ },
+ {
+  "id": "P295",
+  "address": "9 Winter St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.571405,
+  "lat": 44.265657,
+  "elevation_m": 160.92,
+  "water_elevation_m": 155.84
+ },
+ {
+  "id": "P296",
+  "address": "90 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573399,
+  "lat": 44.256501,
+  "elevation_m": 169.34,
+  "water_elevation_m": 157.39
+ },
+ {
+  "id": "P297",
+  "address": "93 Barre St",
+  "kind": "flats",
+  "units": 1,
+  "lon": -72.573648,
+  "lat": 44.256111,
+  "elevation_m": 167.08,
+  "water_elevation_m": 157.0
+ },
+ {
+  "id": "P298",
+  "address": "93 Berlin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573879,
+  "lat": 44.253801,
+  "elevation_m": 163.6,
+  "water_elevation_m": 157.03
+ },
+ {
+  "id": "P299",
+  "address": "97 Berlin St",
+  "kind": "house",
+  "units": 1,
+  "lon": -72.573739,
+  "lat": 44.25357,
+  "elevation_m": 165.13,
+  "water_elevation_m": 157.5
+ },
+ {
+  "id": "P300",
+  "address": "97 State St",
+  "kind": "commercial",
+  "units": 1,
+  "lon": -72.578642,
+  "lat": 44.261011,
+  "elevation_m": 159.3,
+  "water_elevation_m": 157.58
+ }
+]
