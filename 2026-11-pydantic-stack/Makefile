@@ -29,29 +29,39 @@ pdf: html ## Build the deck to deck-v$(VERSION).pdf
 build-data: ## Download and preprocess the open data (one-off; the output is committed)
 	uv run -m geo_service.build_data
 
+# Loads the keys from .env if it exists (the Logfire API key is also the write token and the Gateway key,
+# and has to override any LOGFIRE_TOKEN already in the shell, which may point at another project), then starts the geo risk API in the background for the life of the command that follows, and stops it
+# afterwards. If `make serve` is already running, the second copy fails to bind and the first is used.
+WITH_GEO_SERVICE = if [ -f .env ]; then . ./.env; export LOGFIRE_TOKEN=$$LOGFIRE_API_KEY PYDANTIC_AI_GATEWAY_API_KEY=$$LOGFIRE_API_KEY; fi; \
+	uv run uvicorn geo_service.app:app --port 8001 --log-level warning & \
+	GEO_PID=$$!; trap "kill $$GEO_PID 2>/dev/null" EXIT INT TERM; sleep 2;
+
 .PHONY: serve
-serve: ## Run the geo risk API on port 8001; every demo needs it
+serve: ## Run the geo risk API on its own on port 8001
 	uv run uvicorn geo_service.app:app --port 8001
 
-.PHONY: app
-app: ## Demo 1: the web UI on port 8000, code running in a local Monty process
-	uv run uvicorn flood_risk_example.app:app --port 8000
+.PHONY: run
+run: app ## Run the whole demo: the geo risk API and the web UI on http://localhost:8000
 
-.PHONY: app-sandbox
-app-sandbox: ## Demo 2: the web UI, code running in Logfire Agent Sandboxes
-	FLOOD_SANDBOX=1 uv run uvicorn flood_risk_example.app:app --port 8000
+.PHONY: app
+app: ## Demos 1 and 2: the geo risk API and the web UI on http://localhost:8000
+	@$(WITH_GEO_SERVICE) uv run uvicorn flood_risk_example.app:app --port 8000
+
+.PHONY: agent
+agent: ## Ask the agent one question in the terminal, e.g. make agent Q="Which street has the most referrals?"
+	@$(WITH_GEO_SERVICE) uv run -m flood_risk_example.agent $(Q)
 
 .PHONY: evals
 evals: ## Demo 3: offline evals of the decision model against a language model
-	uv run -m flood_risk_example.evals_offline decisions
+	@$(WITH_GEO_SERVICE) uv run -m flood_risk_example.evals_offline decisions
 
 .PHONY: evals-portfolio
 evals-portfolio: ## Offline evals of the main agent on portfolio questions
-	uv run -m flood_risk_example.evals_offline portfolio
+	@$(WITH_GEO_SERVICE) uv run -m flood_risk_example.evals_offline portfolio
 
 .PHONY: app-online-evals
-app-online-evals: ## Demo 4: the web UI on Agent Sandboxes with online evals on every run
-	FLOOD_SANDBOX=1 FLOOD_ONLINE_EVALS=1 uv run uvicorn flood_risk_example.app:app --port 8000
+app-online-evals: ## Demo 4: the same, with online evals on every run
+	@$(WITH_GEO_SERVICE) FLOOD_ONLINE_EVALS=1 uv run uvicorn flood_risk_example.app:app --port 8000
 
 .PHONY: test
 test: ## Test the geo risk API

@@ -25,18 +25,20 @@ An underwriter's assistant for a portfolio of 300 properties in central Montpeli
 | Web UI | `flood_risk_example/app.py`, `static/index.html` | Chat on the left, map on the right. The map draws only our own data, so it needs no basemap tiles. |
 | Evals | `flood_risk_example/evals_offline.py`, `evals_online.py` | A labelled decision dataset run on two models, and evaluators on every live run. |
 
-It needs `PYDANTIC_AI_GATEWAY_API_KEY`, `LOGFIRE_TOKEN`, `TYPESAFE_API_KEY` and, for Agent Sandboxes, `LOGFIRE_API_KEY` with the `project:execute_agent_sandboxes` scope. Without a TypeSafe key, set `DECISION_MODEL` and `JUDGE_MODEL` to a language model such as `gateway/anthropic:claude-sonnet-5-5`.
+It needs two keys in `.env`, which the `make` targets below load for you: `TYPESAFE_API_KEY`, and a Logfire API key as `LOGFIRE_API_KEY`. The targets also use it as `LOGFIRE_TOKEN` and `PYDANTIC_AI_GATEWAY_API_KEY`, so the one key covers tracing, Agent Sandboxes and the Gateway, so everything lands in one Logfire project. Without a TypeSafe key, set `DECISION_MODEL` and `JUDGE_MODEL` to a language model such as `gateway/anthropic:claude-sonnet-5-5`.
 
 ### Running order
 
-Keep `make serve` running in one terminal throughout. The web UI is at http://localhost:8000.
+`make run` starts everything: the geo risk API on port 8001 and the web UI. Each `make` target below starts the geo risk API on port 8001 alongside it and stops it afterwards, so one terminal is enough. The web UI is at http://localhost:8000.
 
 | # | Minutes | Command | Show |
 |---|---|---|---|
 | 1 | 8 | `make app` | Ask about one property. Walk through `agent.py`, `decision.py` and `vision.py`, then the trace in Logfire: the HTTP request, the agent, the vision call, the decision with its confidence, and the calls to the geo risk API. |
-| 2 | 6 | `make app-sandbox` | Agent Sandboxes. Triage the whole portfolio, then ask the what-if. The page counts the API requests as they happen; the trace has one `run_code` with hundreds of calls under it. |
+| 2 | 6 | (same app) | Agent Sandboxes, where the agent's code always runs. Triage the whole portfolio, then ask the what-if. The page counts the API requests as they happen; the trace has one `run_code` with hundreds of calls under it. |
 | 3 | 5 | `make evals` | Offline evals. 30 properties with a known correct outcome, on the decision model and then on a language model. Compare accuracy, time and cost in the terminal and in Logfire. |
 | 4 | 6 | `make app-online-evals` | Online evals. Ask a question, then find the three evaluator results on the live trace. |
+
+For a quick run without the web UI, `make agent` asks the agent one question in the terminal and prints the answer, and `make agent Q="Which street has the most referrals?"` asks your own. It runs `flood_risk_example/agent.py` as a module (`uv run -m flood_risk_example.agent`).
 
 ### Questions
 

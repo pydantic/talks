@@ -18,14 +18,14 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
-import httpx
+import httpx2
 import logfire
 from pydantic import BaseModel
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext, LLMJudge
 
 from . import decision
-from .agent import build_agent
+from .agent import agent
 from .policy import Facts, OutcomeName, expected_flood_excess, expected_outcome
 from .tools import Deps, http_client
 
@@ -37,7 +37,7 @@ class Expected(BaseModel):
     flood_excess: bool
 
 
-async def all_facts(http: httpx.AsyncClient, buffer_m: float = 0) -> list[Facts]:
+async def all_facts(http: httpx2.AsyncClient, buffer_m: float = 0) -> list[Facts]:
     """The facts for every property, straight from the geo risk service."""
 
     async def get(path: str, **params: Any) -> Any:
@@ -105,7 +105,7 @@ def decisions_dataset(facts: list[Facts]) -> Dataset[Facts, Any, None]:
     )
 
 
-async def evaluate_decisions(http: httpx.AsyncClient) -> None:
+async def evaluate_decisions(http: httpx2.AsyncClient) -> None:
     dataset = decisions_dataset(await all_facts(http))
     for model_name in dict.fromkeys([decision.DECISION_MODEL, decision.LANGUAGE_MODEL]):
         report = await dataset.evaluate(decide_with(model_name), name=model_name, max_concurrency=10)
@@ -136,7 +136,7 @@ class MentionsNumbers(Evaluator[str, str, list[float]]):
         return EvaluationReason(value=not missing, reason=f'Missing {missing}' if missing else None)
 
 
-async def portfolio_dataset(http: httpx.AsyncClient) -> Dataset[str, str, list[float]]:
+async def portfolio_dataset(http: httpx2.AsyncClient) -> Dataset[str, str, list[float]]:
     now, grown = await asyncio.gather(all_facts(http), all_facts(http, buffer_m=50))
     high_risk = ('floodway', '1_percent')
     in_one_percent = sum(f.zone == '1_percent' for f in now)
@@ -184,9 +184,8 @@ async def portfolio_dataset(http: httpx.AsyncClient) -> Dataset[str, str, list[f
     )
 
 
-async def evaluate_portfolio(http: httpx.AsyncClient) -> None:
+async def evaluate_portfolio(http: httpx2.AsyncClient) -> None:
     dataset = await portfolio_dataset(http)
-    agent = build_agent()
 
     async def task(question: str) -> str:
         result = await agent.run(question, deps=Deps(http=http))
@@ -200,8 +199,6 @@ async def main() -> None:
     # console=False keeps the span log out of the terminal so the reports are readable.
     logfire.configure(service_name='flood_risk_example', console=False)
     logfire.instrument_pydantic_ai()
-    logfire.instrument_monty()
-    logfire.instrument_httpx()
 
     which = sys.argv[1] if len(sys.argv) > 1 else 'decisions'
     async with http_client() as http:

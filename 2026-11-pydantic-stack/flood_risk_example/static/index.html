@@ -266,7 +266,7 @@ for (const text of SUGGESTIONS) {
 }
 
 fetch('/api/config').then(r => r.json()).then(c => {
-  $('mode').textContent = [c.sandbox ? 'agent sandboxes' : 'local monty', c.online_evals ? 'online evals' : ''].filter(Boolean).join(' · ')
+  $('mode').textContent = ['agent sandboxes', c.online_evals ? 'online evals' : ''].filter(Boolean).join(' · ')
 })
 </script>
 </body>

@@ -9,7 +9,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
-import httpx
+import httpx2
+import logfire
 from pydantic_ai import RunContext
 
 from . import decision, vision
@@ -20,7 +21,7 @@ GEO_SERVICE_URL = os.getenv('GEO_SERVICE_URL', 'http://localhost:8001')
 
 @dataclass
 class Deps:
-    http: httpx.AsyncClient
+    http: httpx2.AsyncClient
     events: asyncio.Queue[dict[str, Any]] | None = None
     """Where `show_map` sends map updates for the web UI; None when there is no UI."""
     model_limit: asyncio.Semaphore = field(default_factory=lambda: asyncio.Semaphore(16))
@@ -30,8 +31,15 @@ class Deps:
     )
 
 
-def http_client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(base_url=GEO_SERVICE_URL, timeout=30)
+def http_client() -> httpx2.AsyncClient:
+    """A client for the geo risk API.
+
+    Only this client is instrumented. `logfire.instrument_httpx()` with no client would also add a span
+    for every HTTP request the model providers make, under each model request span.
+    """
+    client = httpx2.AsyncClient(base_url=GEO_SERVICE_URL, timeout=30)
+    logfire.instrument_httpx(client)
+    return client
 
 
 class Property(TypedDict):

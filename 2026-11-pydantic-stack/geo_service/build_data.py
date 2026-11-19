@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-import httpx
+import httpx2
 from shapely.geometry import Point, box, mapping, shape
 from shapely.ops import nearest_points, unary_union
 
@@ -67,7 +67,7 @@ SITE_TYPES = {
 }
 
 
-async def cached_json(client: httpx.AsyncClient, name: str, url: str, params: dict[str, Any]) -> Any:
+async def cached_json(client: httpx2.AsyncClient, name: str, url: str, params: dict[str, Any]) -> Any:
     path = RAW_DIR / f'{name}.json'
     if not path.exists():
         response = await client.post(url, data=params)
@@ -90,7 +90,7 @@ def flood_class(properties: dict[str, Any]) -> str | None:
     return None
 
 
-async def fetch_image(client: httpx.AsyncClient, limit: asyncio.Semaphore, property_id: str, x: float, y: float):
+async def fetch_image(client: httpx2.AsyncClient, limit: asyncio.Semaphore, property_id: str, x: float, y: float):
     path = IMAGE_DIR / f'{property_id}.jpg'
     if path.exists():
         return
@@ -112,7 +112,7 @@ async def fetch_image(client: httpx.AsyncClient, limit: asyncio.Semaphore, prope
     path.write_bytes(response.content)
 
 
-async def sample_elevations(client: httpx.AsyncClient, name: str, points: list[tuple[float, float]]) -> list[float]:
+async def sample_elevations(client: httpx2.AsyncClient, name: str, points: list[tuple[float, float]]) -> list[float]:
     """Ground elevation in metres at each lon/lat point."""
     elevations: list[float] = []
     for start in range(0, len(points), 100):
@@ -137,7 +137,7 @@ async def main() -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
     headers = {'User-Agent': 'pydantic-demo-data-build/0.1'}
-    async with httpx.AsyncClient(timeout=120, headers=headers) as client:
+    async with httpx2.AsyncClient(timeout=120, headers=headers) as client:
         addresses = await cached_json(client, 'addresses', ADDRESSES_URL, {**BBOX_QUERY, 'outFields': '*'})
         flood = await cached_json(
             client, 'flood_zones', FLOOD_URL, {**BBOX_QUERY, 'outFields': 'FLD_ZONE,ZONE_SUBTY,SFHA_TF'}

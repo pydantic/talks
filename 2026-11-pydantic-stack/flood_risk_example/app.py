@@ -1,19 +1,17 @@
 """The web UI: a chat on the left and a map on the right.
 
 Run with `make app` (`uv run uvicorn flood_risk_example.app:app --port 8000`), with the geo risk service
-already running (`make serve`). Set `FLOOD_SANDBOX=1` to run the agent's code in Logfire Agent Sandboxes
-and `FLOOD_ONLINE_EVALS=1` to evaluate every run.
+already running (`make serve`). Set `FLOOD_ONLINE_EVALS=1` to evaluate every run.
 """
 
 import asyncio
 import json
-import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
-import httpx
+import httpx2
 import logfire
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, Response, StreamingResponse
@@ -22,19 +20,13 @@ from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage
 
-from .agent import build_agent
-from .tools import Deps, http_client
+from .agent import ONLINE_EVALS, agent
+from .tools import GEO_SERVICE_URL, Deps, http_client
 
 STATIC_DIR = Path(__file__).parent / 'static'
-SANDBOX = os.getenv('FLOOD_SANDBOX') == '1'
-ONLINE_EVALS = os.getenv('FLOOD_ONLINE_EVALS') == '1'
 
 logfire.configure(service_name='flood-risk-app')
 logfire.instrument_pydantic_ai()
-logfire.instrument_monty()
-logfire.instrument_httpx()
-
-agent = build_agent(sandbox=SANDBOX, online_evals=ONLINE_EVALS)
 
 
 @asynccontextmanager
@@ -62,7 +54,7 @@ async def index() -> FileResponse:
 
 @app.get('/api/config')
 async def config() -> dict[str, bool]:
-    return {'sandbox': SANDBOX, 'online_evals': ONLINE_EVALS}
+    return {'online_evals': ONLINE_EVALS}
 
 
 @app.get('/api/properties')
@@ -100,7 +92,7 @@ async def chat(request: Request, body: ChatRequest) -> StreamingResponse:
     # Count requests to the geo risk service, so the page can show the fan-out as it happens.
     api_requests = 0
 
-    async def count_request(_: httpx.Response) -> None:
+    async def count_request(_: httpx2.Response) -> None:
         nonlocal api_requests
         api_requests += 1
         if api_requests % 20 == 0:
@@ -109,6 +101,13 @@ async def chat(request: Request, body: ChatRequest) -> StreamingResponse:
     async def run() -> None:
         try:
             async with http_client() as http:
+                try:
+                    await http.get('/properties/P001')
+                except httpx2.ConnectError:
+                    # Without this the agent retries each tool, then apologises at length.
+                    message = f'The geo risk API is not reachable at {GEO_SERVICE_URL}. Start it with `make serve`.'
+                    await events.put({'type': 'error', 'message': message})
+                    return
                 http.event_hooks['response'].append(count_request)
                 deps = Deps(http=http, events=events)
                 state.messages = await _run_agent(agent, body.message, state.messages, deps, events)

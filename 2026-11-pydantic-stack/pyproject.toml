@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.115.0",
-    "httpx>=0.28.0",
+    "httpx2>=2.16.0",
     "logfire[agent-sandboxes,fastapi,httpx]>=5.4.0",
     "numpy>=2.0",
     "pydantic-ai-harness[codemode]>=0.62.0",
