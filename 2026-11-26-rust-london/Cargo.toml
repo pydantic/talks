@@ -1,0 +1,18 @@
+[package]
+name = "rust-london"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+monty = "=1.7.0"
+monty-types = { version = "=1.7.0", features = ["tzdb"] }
+monty-pool = "=1.7.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+rodio = { version = "0.23", default-features = false, features = ["playback"] }
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
