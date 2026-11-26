@@ -55,8 +55,7 @@ LLMs are better at writing code than at calling tools one at a time.
 
 So every agent needs somewhere to run code it just made up.
 
-That means a new sandbox on every step of every agent.
-
+That means a new sandbox for every *agent run.
 
 | Sandbox              | New sandbox |
 |----------------------|-------------|
@@ -66,7 +65,7 @@ That means a new sandbox on every step of every agent.
 | CPython in wasmtime  | 16 ms       |
 | **Monty**            | **0.8 ms**  |
 
-
+* Don't confuse agents with software development agents.
 
 
 
