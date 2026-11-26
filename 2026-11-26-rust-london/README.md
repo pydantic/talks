@@ -572,10 +572,14 @@ use rust_london::{Band, logfire_api_key};
 
 // this is the code that runs in the sandbox
 const CODE: &str = "
+# one chord per bar: the intro, the fill, the drums, and a last chord to finish
 chords = 'Dm C Bb C Dm C  Dm C Bb C  Dm'.split()
 
+# every call below is a function on the laptop: the sandbox stops, and waits for it to return
+# a pattern is one bar of 16th notes: '.' is a rest, 'x' a hit, 'X' a loud one
 for n, chord in enumerate(chords):
     print(f'bar {n + 1:>2}  {chord}')
+    # the synth holds the chord for the whole bar
     pad(chord)
 
     if n < 5:
@@ -584,25 +588,35 @@ for n, chord in enumerate(chords):
         snare('.... x... .... x...')
         hat('x.x. x.x. x.x. x.xx')
         if n >= 2:
+            # the guitar joins in, one power chord left to ring
             guitar(chord, 'x... .... .... ....')
     elif n == 5:
-        # you know the one
+        # you know the one: toms are numbered, 1 is the highest and 5 the floor tom
         tom('11.2 2.33 .44. 5.5.')
-        kick('.... .... .... X.X.')
+        kick('.... .... .... x.x.')
     elif n < 10:
-        if n == 6:
-            crash('x')
-        kick('X... .... X.X. ....')
+        # the gorilla
+        kick('X... ..X. X.X. ....')
         snare('.... X... .... X...')
-        hat('x.x. x.x. x.x. x.x.')
-        bass(chord, 'x... ..x. x.x. ..x.')
-        guitar(chord, 'x... oo.o x.oo o.o.')
+        hat('X.x. X.x. X.x. X.x.')
+        bass(chord, 'x... ..x. x.x. ....')
+        guitar(chord, 'x... .... x... ....')
+        if n % 2 == 0:
+            crash('x')
+        elif n == 7:
+            # a short fill into the next bar
+            tom('.... .... .... 3.45')
+        else:
+            # and a long one down the toms, into the last chord
+            tom('.... .... 11.2 2.34')
     else:
+        # everything at once, then let it ring
         crash('x')
         kick('X')
         guitar('Dm', 'x')
         bass('Dm', 'x')
 
+    # send the bar to the speakers, and wait until it is about to play
     bar()
 ";
 

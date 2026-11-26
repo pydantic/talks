@@ -70,11 +70,11 @@ impl Band {
             let loud = c.is_ascii_uppercase();
             let (sound, gain) = match (name, c) {
                 (_, '.') => continue,
-                ("kick", _) => (kick(), if loud { 1.0 } else { 0.8 }),
-                ("snare", _) => (snare(&mut self.noise, loud), if loud { 0.9 } else { 0.35 }),
-                ("hat", _) => (hat(&mut self.noise), if loud { 0.22 } else { 0.12 }),
-                ("crash", _) => (crash(&mut self.noise), 0.3),
-                ("tom", '1'..='5') => (tom(&mut self.noise, c as usize - '1' as usize), 0.6),
+                ("kick", _) => (kick(), if loud { 0.9 } else { 0.8 }),
+                ("snare", _) => (snare(&mut self.noise, loud), if loud { 0.6 } else { 0.35 }),
+                ("hat", _) => (hat(&mut self.noise), if loud { 0.5 } else { 0.3 }),
+                ("crash", _) => (crash(&mut self.noise), 0.6),
+                ("tom", '1'..='5') => (tom(&mut self.noise, c as usize - '1' as usize), 0.5),
                 _ => continue,
             };
             self.add(i * self.step, &sound, gain);
@@ -131,7 +131,7 @@ impl Band {
             }
             lowpass(&mut sound, 3200.0);
             fade_out(&mut sound, RATE / 20);
-            self.add(i * self.step, &sound, 0.17);
+            self.add(i * self.step, &sound, 0.13);
         }
     }
 
@@ -185,8 +185,8 @@ impl Band {
 
     fn send(&mut self, len: usize) {
         self.mix.resize(self.mix.len().max(len), 0.0);
-        // tanh is a soft limiter: loud bars saturate instead of clipping
-        let samples: Vec<f32> = self.mix.drain(..len).map(|s| (s * 1.4).tanh() * 0.9).collect();
+        // tanh is a soft limiter, for the odd peak: the mix itself should stay below full scale
+        let samples: Vec<f32> = self.mix.drain(..len).map(|s| (s * 0.8).tanh()).collect();
         self.sent += samples.len();
         match &mut self.output {
             Output::Speakers { player, .. } => {
@@ -256,18 +256,26 @@ fn kick() -> Vec<f32> {
         .collect()
 }
 
-/// Noise over a drum-skin tone. The `big` one is the 1981 trick: a huge room, cut off dead by a gate.
+/// The drum-machine snare of the intro: a short tone with a little noise for the wires.
+/// The `big` one is the 1981 trick: a drum in a huge room, cut off dead by a gate.
 fn snare(noise: &mut Noise, big: bool) -> Vec<f32> {
-    let (len, ring, gate) = if big { (0.42, 0.5, 0.3) } else { (0.16, 0.05, 0.14) };
-    let mut sound: Vec<f32> = (0..(len * RATE as f32) as usize)
+    let (len, gate) = if big { (0.4, 0.26) } else { (0.16, 0.14) };
+    let len = (len * RATE as f32) as usize;
+    // the room is noise with the top taken off: a boom, where unfiltered noise would be a hiss
+    let mut room: Vec<f32> = (0..len).map(|_| noise.next()).collect();
+    let mut wires = room.clone();
+    lowpass(&mut room, 1500.0);
+    lowpass(&mut room, 1500.0);
+    highpass(&mut room, 250.0);
+    lowpass(&mut wires, if big { 4500.0 } else { 7000.0 });
+    let mut sound: Vec<f32> = (0..len)
         .map(|n| {
             let t = n as f32 / RATE as f32;
             let skin = (TAU * 185.0 * t).sin() + 0.6 * (TAU * 330.0 * t).sin();
-            let room = if big { 0.45 } else { 0.0 };
-            noise.next() * ((-t / ring).exp() * (1.0 - room) + room) + skin * (-t / 0.07).exp()
+            let hit = skin * (-t / 0.07).exp() + wires[n] * (-t / 0.05).exp();
+            if big { hit + room[n] * 2.2 * (0.6 * (-t / 0.12).exp() + 0.4) } else { hit }
         })
         .collect();
-    lowpass(&mut sound, if big { 5500.0 } else { 7000.0 });
     gated(&mut sound, gate);
     sound
 }
@@ -285,34 +293,45 @@ fn tom(noise: &mut Noise, which: usize) -> Vec<f32> {
             let t = n as f32 / RATE as f32;
             phase += TAU * freq * (1.0 + 0.7 * (-t / 0.03).exp()) / RATE as f32;
             let body = phase.sin() + 0.35 * (2.0 * phase).sin();
-            body * (0.55 * (-t / 0.22).exp() + 0.45) + room * 1.6 * (0.5 * (-t / 0.1).exp() + 0.5)
+            body * (0.55 * (-t / 0.22).exp() + 0.45) + room * 1.0 * (0.5 * (-t / 0.1).exp() + 0.5)
         })
         .collect();
     gated(&mut sound, 0.34);
     sound
 }
 
+/// A closed hi-hat: a short tick of [`metal`], with only a trace of noise.
 fn hat(noise: &mut Noise) -> Vec<f32> {
-    let mut last = 0.0;
-    (0..RATE / 12)
-        .map(|n| {
-            // the difference between neighbouring samples keeps only the top end
-            let white = noise.next();
-            let bright = white - last;
-            last = white;
-            bright * (-(n as f32) / RATE as f32 / 0.018).exp()
-        })
-        .collect()
+    let mut sound = metal(noise, RATE / 14, 0.15);
+    highpass(&mut sound, 7000.0);
+    for (n, s) in sound.iter_mut().enumerate() {
+        *s *= (-(n as f32) / RATE as f32 / 0.022).exp();
+    }
+    sound
 }
 
+/// A crash cymbal: the same metal, lower, noisier and left to ring.
 fn crash(noise: &mut Noise) -> Vec<f32> {
-    let mut last = 0.0;
-    (0..RATE * 5 / 2)
+    let mut sound = metal(noise, RATE * 2, 0.3);
+    highpass(&mut sound, 3500.0);
+    for (n, s) in sound.iter_mut().enumerate() {
+        let t = n as f32 / RATE as f32;
+        *s *= 0.7 * (-t / 0.45).exp() + 0.3 * (-t / 0.05).exp();
+    }
+    fade_out(&mut sound, RATE / 10);
+    sound
+}
+
+/// What a cymbal is made of: six square waves at frequencies that share no harmonics, so they
+/// clang rather than sing. This is how the drum machines of the time did it. Plain white noise
+/// has no pitch at all and just sounds like hiss.
+fn metal(noise: &mut Noise, len: usize, noisiness: f32) -> Vec<f32> {
+    const PARTIALS: [f32; 6] = [205.3, 304.4, 369.6, 522.7, 540.0, 800.0];
+    (0..len)
         .map(|n| {
-            let white = noise.next();
-            let bright = white - 0.8 * last;
-            last = white;
-            bright * (-(n as f32) / RATE as f32 / 0.55).exp()
+            let t = n as f32 / RATE as f32;
+            let squares: f32 = PARTIALS.iter().map(|f| if (t * f * 8.0).fract() < 0.5 { 1.0 } else { -1.0 }).sum();
+            squares / 6.0 * (1.0 - noisiness) + noise.next() * noisiness
         })
         .collect()
 }
@@ -339,6 +358,15 @@ fn lowpass(sound: &mut [f32], cutoff: f32) {
     for s in sound {
         y += k * (*s - y);
         *s = y;
+    }
+}
+
+/// One-pole high-pass filter, in place: whatever the low-pass leaves out.
+fn highpass(sound: &mut [f32], cutoff: f32) {
+    let mut low = sound.to_vec();
+    lowpass(&mut low, cutoff);
+    for (s, l) in sound.iter_mut().zip(low) {
+        *s -= l;
     }
 }
 
