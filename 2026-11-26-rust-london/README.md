@@ -119,6 +119,46 @@ The only thing sandboxed code can do is stop, and ask the host to do something.
 ## Hello world
 
 ```bash
+uv add pydantic-monty
+```
+
+```python title="hello.py"
+from pydantic_monty import Monty
+
+
+def get_weather(city: str) -> str:
+    return f'raining in {city}'
+
+
+code = """
+weather = get_weather('London')
+f'Hello Rust London, it is {weather}'
+"""
+
+with Monty() as monty:
+    with monty.checkout() as session:
+        output = session.feed_run(code, external_lookup={'get_weather': get_weather})
+        print(output)
+```
+
+The sandbox can call `get_weather`, and nothing else.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Hello world, in Rust
+
+```bash
 cargo add monty monty-types
 ```
 
