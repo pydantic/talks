@@ -67,9 +67,6 @@ That means a new sandbox on every step of every agent.
 | **Monty**            | **0.8 ms**  |
 
 
-![The sandbox continuum](sandbox-continuum.png)
-
-
 
 
 
@@ -247,6 +244,70 @@ pub enum RunProgress {
     Complete(MontyObject),
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Mounting a directory
+
+```bash
+cargo add monty-fs
+```
+
+```rust title="mount.rs"
+use monty::{MontyRun, RunProgress};
+use monty_fs::{MountCallOutcome, MountMode, MountTable};
+use monty_types::{CompileOptions, PrintWriter, ResourceTracker};
+
+const CODE: &str = "
+from pathlib import Path
+
+Path('/talk/Cargo.toml').read_text()
+";
+
+fn main() {
+    // the sandbox sees this directory at /talk, and nothing else
+    let mut mounts = MountTable::new();
+    mounts.mount("/talk", env!("CARGO_MANIFEST_DIR"), MountMode::ReadOnly, None).unwrap();
+
+    let run = MontyRun::new(CODE.to_owned(), "main.py", vec![], CompileOptions::default()).unwrap();
+    let mut progress = run.start(vec![], ResourceTracker::default(), PrintWriter::Stdout).unwrap();
+
+    loop {
+        progress = match progress {
+            // still just a request to stop and ask, the mount table answers it
+            RunProgress::OsCall(call) => {
+                println!("sandbox wants: {:?}", call.function_call);
+                call.resume_with(PrintWriter::Stdout, |call| match mounts.handle_os_call(call) {
+                    MountCallOutcome::Handled(Ok(value)) => value.into(),
+                    MountCallOutcome::Handled(Err(e)) => e.into_exception().into(),
+                    MountCallOutcome::NotHandled(call) => call.on_no_handler().into(),
+                })
+                .unwrap()
+            }
+            RunProgress::Complete(result) => break println!("sandbox got:   {result}"),
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+}
+```
+
+```
+sandbox wants: ReadText(MontyPath("/talk/Cargo.toml"))
+sandbox got:   name = "rust-london"
+```
+
+Still an `OsCall`: the sandbox stops and asks, and `MountTable` answers it from a directory opened with `cap-std`.
 
 
 
