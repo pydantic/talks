@@ -33,9 +33,8 @@ pub struct Band {
     mix: Vec<f32>,
     output: Output,
     noise: Noise,
-    /// When the first bar reached the speakers, and how many samples have been sent since.
-    started: Option<Instant>,
-    sent: usize,
+    /// When the music already sent to the speakers runs out.
+    queued_until: Option<Instant>,
 }
 
 impl Band {
@@ -55,8 +54,7 @@ impl Band {
             mix: Vec::new(),
             output,
             noise: Noise(0x2545_f491),
-            started: None,
-            sent: 0,
+            queued_until: None,
         }
     }
 
@@ -187,10 +185,10 @@ impl Band {
         self.mix.resize(self.mix.len().max(len), 0.0);
         // tanh is a soft limiter, for the odd peak: the mix itself should stay below full scale
         let samples: Vec<f32> = self.mix.drain(..len).map(|s| (s * 0.8).tanh()).collect();
-        self.sent += samples.len();
         match &mut self.output {
             Output::Speakers { player, .. } => {
-                self.started.get_or_insert_with(Instant::now);
+                let len = Duration::from_secs_f32(samples.len() as f32 / RATE as f32);
+                self.queued_until = Some(queue_end(self.queued_until, Instant::now(), len));
                 let (mono, rate) = (NonZero::new(1).unwrap(), NonZero::new(RATE as u32).unwrap());
                 player.append(SamplesBuffer::new(mono, rate, samples));
             }
@@ -200,13 +198,17 @@ impl Band {
 
     /// Sleeps until only `keep` of music is left in the queue.
     async fn wait(&self, keep: Duration) {
-        if let Some(started) = self.started {
-            let queued_until = started + Duration::from_secs_f32(self.sent as f32 / RATE as f32);
-            if let Some(sleep) = queued_until.checked_duration_since(Instant::now() + keep) {
-                tokio::time::sleep(sleep).await;
-            }
+        if let Some(sleep) = self.queued_until.and_then(|q| q.checked_duration_since(Instant::now() + keep)) {
+            tokio::time::sleep(sleep).await;
         }
     }
+}
+
+/// When the queue runs out after `len` more music is appended to it at `now`.
+///
+/// If the queue already ran dry (a slow call), the new music starts now, not where the old ran out.
+fn queue_end(queued_until: Option<Instant>, now: Instant, len: Duration) -> Instant {
+    queued_until.filter(|q| *q > now).unwrap_or(now) + len
 }
 
 /// The 16 steps of a pattern, with their positions.
@@ -428,4 +430,25 @@ pub fn logfire_api_key() -> String {
             Some(line.trim_matches(['"', '\'']).to_owned())
         })
         .expect("set LOGFIRE_API_KEY, or put it in .env")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn queue_end_appends_to_a_busy_queue() {
+        let now = Instant::now();
+        let bar = Duration::from_secs(2);
+        assert_eq!(queue_end(Some(now + bar), now, bar), now + bar * 2);
+    }
+
+    #[test]
+    fn queue_end_restarts_a_drained_queue() {
+        let now = Instant::now() + Duration::from_secs(60);
+        let bar = Duration::from_secs(2);
+        // the queue ran out 30s ago: the next bar plays now, it doesn't count the silence as music
+        assert_eq!(queue_end(Some(now - Duration::from_secs(30)), now, bar), now + bar);
+        assert_eq!(queue_end(None, now, bar), now + bar);
+    }
 }
